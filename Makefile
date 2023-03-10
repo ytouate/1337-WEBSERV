@@ -1,12 +1,13 @@
 NAME = webserv
 
 FILES = \
-	./lexer.cpp	\
-	./token.cpp
+	./Lexer.cpp	\
+	./Token.cpp	\
+	./Server.cpp\
 
 CC = C++
 O_FILE = $(FILES:.cpp=.o)
-# CPPFLAGS = -Wall -Wextra -Werror
+CPPFLAGS =  -fsanitize=address -g
 
 all: $(O_FILE)
 	$(CC) $(CPPFLAGS) main.cpp $(O_FILE) -o $(NAME)

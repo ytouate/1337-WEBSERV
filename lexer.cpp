@@ -1,13 +1,12 @@
-#include "lexer.hpp"
+#include "Lexer.hpp"
 
-lexer::lexer(const std::string &_content)
+Lexer::Lexer(const std::string &_content)
 {
     this->i = 0;
     this->content = _content;
     this->c = this->content[this->i];
-
 }
-void lexer::lexer_advance()
+void Lexer::lexer_advance()
 {
     if (this->c && this->i < this->content.size())
     {
@@ -15,12 +14,12 @@ void lexer::lexer_advance()
         this->c = this->content[this->i];
     }
 }
-void lexer::lexer_skip_whitespace()
+void Lexer::lexer_skip_whitespace()
 {
     while (this->c == ' ' or this->c == '\n' or this->c == '\t')
         this->lexer_advance();
 }
-token *lexer::lexer_get_next_token()
+Token *Lexer::lexer_get_next_token()
 {
     while (this->c and this->i < this->content.size())
     {
@@ -31,43 +30,43 @@ token *lexer::lexer_get_next_token()
         else if (this->c == '"')
             return lexer_collect_string();
         else if (this->c == '=')
-            return lexer_advance_with_token((new token(TOKEN_EQUALS,
-                lexer_get_current_char_as_string())));
+            return lexer_advance_with_token((new Token(TOKEN_EQUALS,
+                                                       lexer_get_current_char_as_string())));
         else if (this->c == '{')
-            return lexer_advance_with_token((new token(TOKEN_LCURLYPAREN,
-                lexer_get_current_char_as_string())));
+            return lexer_advance_with_token((new Token(TOKEN_LCURLYPAREN,
+                                                       lexer_get_current_char_as_string())));
         else if (this->c == '}')
-            return lexer_advance_with_token((new token(TOKEN_RCURLYPARENT,
-                lexer_get_current_char_as_string())));
+            return lexer_advance_with_token((new Token(TOKEN_RCURLYPARENT,
+                                                       lexer_get_current_char_as_string())));
         else if (this->c == ';')
-            return lexer_advance_with_token((new token(TOKEN_SEMI,
-                lexer_get_current_char_as_string())));
-        else if (this->c == '(' )
-            return lexer_advance_with_token((new token(TOKEN_LPAREN,
-                lexer_get_current_char_as_string())));
-        else if (this->c == ')' )
-            return lexer_advance_with_token((new token(TOKEN_RPAREN,
-                lexer_get_current_char_as_string())));
+            return lexer_advance_with_token((new Token(TOKEN_SEMI,
+                                                       lexer_get_current_char_as_string())));
+        else if (this->c == '(')
+            return lexer_advance_with_token((new Token(TOKEN_LPAREN,
+                                                       lexer_get_current_char_as_string())));
+        else if (this->c == ')')
+            return lexer_advance_with_token((new Token(TOKEN_RPAREN,
+                                                       lexer_get_current_char_as_string())));
         else
             return NULL;
     }
-    
+
     return NULL;
 }
 
-token * lexer::lexer_collect_id()
+Token *Lexer::lexer_collect_id()
 {
     std::string value;
     while (isalnum(this->c) or this->c == '/' or this->c == '_' or this->c == '.')
     {
-        
+
         std::string s = lexer_get_current_char_as_string();
         value += s;
         lexer_advance();
     }
-    return new token(TOKEN_STRING, value);
+    return new Token(TOKEN_STRING, value);
 }
-token *lexer::lexer_collect_string()
+Token *Lexer::lexer_collect_string()
 {
     lexer_advance();
     std::string value;
@@ -78,17 +77,16 @@ token *lexer::lexer_collect_string()
         lexer_advance();
     }
     lexer_advance();
-    return new token(TOKEN_STRING, value);
+    return new Token(TOKEN_STRING, value);
 }
-std::string lexer::lexer_get_current_char_as_string()
+std::string Lexer::lexer_get_current_char_as_string()
 {
     std::string str;
     str += this->c;
     str += '\0';
     return str;
-
 }
-token *lexer::lexer_advance_with_token(token *_token)
+Token *Lexer::lexer_advance_with_token(Token *_token)
 {
     lexer_advance();
     return _token;

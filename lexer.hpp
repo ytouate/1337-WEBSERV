@@ -2,22 +2,22 @@
 #define LEXER_HPP
 
 #include <iostream>
-#include "token.hpp"
+#include "Token.hpp"
 
-struct lexer
+struct Lexer
 {
     char c;
     size_t i;
     std::string content;
 
-    lexer(const std::string &content);
+    Lexer(const std::string &content);
     void lexer_advance();
     void lexer_skip_whitespace();
-    token *lexer_get_next_token();
-    token *lexer_collect_string(); 
+    Token *lexer_get_next_token();
+    Token *lexer_collect_string();
     std::string lexer_get_current_char_as_string();
-    token *lexer_advance_with_token(token *_token);
-    token *lexer_collect_id();
+    Token *lexer_advance_with_token(Token *_token);
+    Token *lexer_collect_id();
 };
 
 #endif // LEXER_HPP
