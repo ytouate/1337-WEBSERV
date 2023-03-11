@@ -1,5 +1,0 @@
-make --dry-run --keep-going --print-directory
-make: Entering directory `/Users/ytouate/Desktop/1337-WebServ'
-c++ -Wall -Wextra -Werror -fsanitize=address -g *.cpp
-make: Leaving directory `/Users/ytouate/Desktop/1337-WebServ'
- 

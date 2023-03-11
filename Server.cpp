@@ -13,8 +13,9 @@ Server::Server(std::string s)
     if (fileBuff.size() <= 2)
         error("Invalid Config File");
     configFile.close();
-    location.fileBuff = fileBuff;
-    location.parseLocation();
+    locations.reserve(10);
+    // location.fileBuff = fileBuff;
+    // location.parseLocation();
     parseDirective();
     serverIsOpened = false;
     locationIsOpened = false;
@@ -25,10 +26,12 @@ void Server::error(const std::string &s) const
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
+
 bool isCurlyBracket(const std::string &s)
 {
     return (s == "{" or s == "}");
 }
+
 void Server::parseDirective()
 {
     size_t i = 0;
@@ -36,6 +39,7 @@ void Server::parseDirective()
     i = 0;
     std::string key;
     std::string val;
+    int locationsCount = 0;
     std::vector<std::string> values;
     while (i < fileBuff.size())
     {
@@ -70,6 +74,12 @@ void Server::parseDirective()
         if ((key == "server" && fileBuff[i + 1] != "{") ||
             (key == "location" && fileBuff[i + 1] != "{"))
             error("Server/Location Block not opened");
+        if (key == "location")
+        {
+            locations.push_back(Location(this->fileBuff, i));
+            locations[locationsCount].parseLocation();
+            locationsCount++;
+        }
         while (fileBuff[i][j])
         {
             while (isWhiteSpace(fileBuff[i][j]))
@@ -88,6 +98,7 @@ void Server::parseDirective()
     if (serverIsOpened or locationIsOpened)
         error("Block not closed\n");
 }
+
 void Server::fillDirective(const std::string &key,
     const std::vector<std::string> &values)
 {

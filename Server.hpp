@@ -25,7 +25,7 @@ class Server
         typedef std::pair<std::string, std::vector<std::string> > directive;
 
     public:
-    Location location;
+    std::vector<Location> locations;
     directive _port;
     directive _root;
     directive _index;

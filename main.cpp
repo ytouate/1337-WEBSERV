@@ -11,14 +11,20 @@ void printDirective(const directive &d)
         std::cout << " " << d.second[i];
     std::cout << "\n";
 }
+#include <unistd.h>
+
 int main(int ac, char **av)
 {
+
     if (ac != 2)
         return 1;
     Server server(av[1]);
-    // std::cout << server.location.path << std::endl;
-    // printDirective(server.location._index);
-    // printDirective(server.location._root);
+    std::cout << server.locations[0].path << std::endl;
+    printDirective(server.locations[0]._index);
+    // printDirective(server.locations[0]._root);
+    std::cout << server.locations[1].path << std::endl;
+    printDirective(server.locations[1]._index);
+    // printDirective(server.locations[1]._root);
     // printDirective(server._index);
     // printDirective(server._port);
     // printDirective(server._root);

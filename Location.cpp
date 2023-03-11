@@ -17,7 +17,11 @@ void Location::collectPath(const std::string &s)
         path += s[i++];
     
 }
-
+Location::Location(const std::vector<std::string> &a, int i)
+{
+    start = i;
+    fileBuff = a;
+}
 void Location::error(const std::string &s)
 {
     std::cerr << s << std::endl;
@@ -28,6 +32,7 @@ void Location::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
     std::string val;
+    std::cout << s << std::endl;
     while (s[i] && !isWhiteSpace(s[i]))
         i++;
     while (s[i] && isWhiteSpace(s[i]))
@@ -41,9 +46,15 @@ void Location::fillDirective(const std::string &s, const std::string &key)
         if (!s[i] or isWhiteSpace(s[i]))
         {
             if (key == "root")
+            {
+                this->_root.first = key;
                 this->_root.second.push_back(val);
+            }
             else if (key == "index")
+            {
+                this->_index.first = key;
                 this->_index.second.push_back(val);
+            }
             else
                 error("Invalid Directive");
             val = "";
@@ -51,14 +62,15 @@ void Location::fillDirective(const std::string &s, const std::string &key)
     }
 }
 
-void Location::trimFile()
+
+void Location::parseLocation()
 {
-    size_t i = 0;
+    size_t i = start;
     size_t j = 0;
     std::string key;
     bool isInsideLocation = false;
     std::vector<std::string> newBuff;
-    while (i < fileBuff.size())
+    while (i < fileBuff.size() && fileBuff[i] != "}")
     {
         j = 0;
         key.clear();
@@ -73,7 +85,6 @@ void Location::trimFile()
         }
         else
         {
-            
             if (isInsideLocation)
             {
                 fillDirective(fileBuff[i], key);
@@ -83,9 +94,4 @@ void Location::trimFile()
             isInsideLocation = false;
         i++;
     }
-}
-
-void Location::parseLocation()
-{
-    trimFile();
 }
