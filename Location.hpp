@@ -13,6 +13,7 @@ struct Location
     std::vector<std::string> fileBuff;
     std::pair<std::string, std::vector<std::string> > _root;
     std::pair<std::string, std::vector<std::string> > _index;
+    std::map<std::string, std::vector<std::string> > data;
     Location();
     Location(const std::vector<std::string> &, int);
     void parseLocation();

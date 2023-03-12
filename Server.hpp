@@ -23,12 +23,13 @@ class Server
         void fillDirective(const std::string &, const std::vector<std::string> &);
         void error(const std::string &) const;
         typedef std::pair<std::string, std::vector<std::string> > directive;
+        directive _port;
+        directive _root;
+        directive _index;
 
     public:
     std::vector<Location> locations;
-    directive _port;
-    directive _root;
-    directive _index;
+    std::map<std::string, std::vector<std::string> > data;
     Server(std::string s);
     ~Server();
 };

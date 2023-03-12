@@ -32,7 +32,6 @@ void Location::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
     std::string val;
-    std::cout << s << std::endl;
     while (s[i] && !isWhiteSpace(s[i]))
         i++;
     while (s[i] && isWhiteSpace(s[i]))

@@ -13,10 +13,10 @@ Server::Server(std::string s)
     if (fileBuff.size() <= 2)
         error("Invalid Config File");
     configFile.close();
-    locations.reserve(10);
-    // location.fileBuff = fileBuff;
-    // location.parseLocation();
     parseDirective();
+    data.insert(_index);
+    data.insert(_root);
+    data.insert(_port); 
     serverIsOpened = false;
     locationIsOpened = false;
 }
@@ -48,7 +48,7 @@ void Server::parseDirective()
         val.clear();
         lastKey = key;
         key.clear();
-        if (isCurlyBracket(fileBuff[i]))
+        if (isCurlyBracket(fileBuff[i]) or fileBuff[i] == "server")
         {
             if (fileBuff[i] == "{")
             {
@@ -59,7 +59,7 @@ void Server::parseDirective()
                 else
                     error("Invalid config file check braces");
             }
-            else
+            else if (fileBuff[i] == "}")
             {
                 if (locationIsOpened)
                     locationIsOpened = false;
@@ -78,6 +78,8 @@ void Server::parseDirective()
         {
             locations.push_back(Location(this->fileBuff, i));
             locations[locationsCount].parseLocation();
+            locations[locationsCount].data.insert(locations[locationsCount]._root);
+            locations[locationsCount].data.insert(locations[locationsCount]._index);
             locationsCount++;
         }
         while (fileBuff[i][j])
@@ -108,6 +110,7 @@ void Server::fillDirective(const std::string &key,
         _root = std::make_pair(key, values);
     else if (key == "index")
         _index = std::make_pair(key, values);
+        
 }
 
 bool Server::isWhiteSpace(char c)

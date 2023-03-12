@@ -2,16 +2,23 @@
 
 #include "Server.hpp"
 
-typedef std::pair<std::string, std::vector<std::string> > directive;
+typedef std::map<std::string, std::vector<std::string> > directive;
 
-void printDirective(const directive &d)
+void printDrective(directive &a)
 {
-    std::cout << "key: " << d.first<< " --- values: ";
-    for (size_t i = 0; i < d.second.size(); i++)
-        std::cout << " " << d.second[i];
+    std::cout << "root:\t";
+    for (size_t i = 0; i < a["root"].size(); ++i)
+        std::cout << " " << a["root"][i];
+    std::cout << "\n";
+    std::cout << "index:\t";
+    for (size_t i = 0; i < a["index"].size(); ++i)
+        std::cout << " " << a["index"][i];
+    std::cout << "\n";
+    std::cout << "listen:\t";
+    for (size_t i = 0; i < a["listen"].size(); ++i)
+        std::cout << " " << a["listen"][i];
     std::cout << "\n";
 }
-#include <unistd.h>
 
 int main(int ac, char **av)
 {
@@ -19,14 +26,14 @@ int main(int ac, char **av)
     if (ac != 2)
         return 1;
     Server server(av[1]);
+    std::cout << "=== Server Block data === " << std::endl;
+    printDrective(server.data);
+    std::cout << "=== Location[0] data === " << std::endl;
     std::cout << server.locations[0].path << std::endl;
-    printDirective(server.locations[0]._index);
-    // printDirective(server.locations[0]._root);
+    printDrective(server.locations[0].data);
+    std::cout << "=== Location[1] data === " << std::endl;
     std::cout << server.locations[1].path << std::endl;
-    printDirective(server.locations[1]._index);
-    // printDirective(server.locations[1]._root);
-    // printDirective(server._index);
-    // printDirective(server._port);
-    // printDirective(server._root);
-    
+    printDrective(server.locations[1].data);
+
+    return 0;
 }
