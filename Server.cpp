@@ -13,26 +13,21 @@ Server::Server(std::string s)
     if (fileBuff.size() <= 2)
         error("Invalid Config File");
     configFile.close();
-    parseDirective();
+    parseBlock();
     data.insert(_index);
     data.insert(_root);
-    data.insert(_port); 
+    data.insert(_port);
     serverIsOpened = false;
     locationIsOpened = false;
 }
 
-void Server::error(const std::string &s) const
-{
-    std::cerr << s << std::endl;
-    exit(EXIT_FAILURE);
-}
 
 bool isCurlyBracket(const std::string &s)
 {
     return (s == "{" or s == "}");
 }
 
-void Server::parseDirective()
+void Server::parseBlock()
 {
     size_t i = 0;
     int j = 0;
@@ -76,10 +71,10 @@ void Server::parseDirective()
             error("Server/Location Block not opened");
         if (key == "location")
         {
+            if (locationIsOpened)
+                error("unclosed location block");
             locations.push_back(Location(this->fileBuff, i));
-            locations[locationsCount].parseLocation();
-            locations[locationsCount].data.insert(locations[locationsCount]._root);
-            locations[locationsCount].data.insert(locations[locationsCount]._index);
+            locations[locationsCount].parseBlock();
             locationsCount++;
         }
         while (fileBuff[i][j])
@@ -98,11 +93,11 @@ void Server::parseDirective()
         fillDirective(key, values);
     }
     if (serverIsOpened or locationIsOpened)
-        error("Block not closed\n");
+        error("Block not closed");
 }
 
 void Server::fillDirective(const std::string &key,
-    const std::vector<std::string> &values)
+                           const std::vector<std::string> &values)
 {
     if (key == "listen")
         _port = std::make_pair(key, values);
@@ -113,17 +108,8 @@ void Server::fillDirective(const std::string &key,
     else
     {
         if (key != "location" && key != "server" && !isCurlyBracket(key))
-        {
-            std::cout << key << std::endl;
             error("Invalid Directive");
-        }
     }
-        
-}
-
-bool Server::isWhiteSpace(char c)
-{
-    return (c == ' ' or c == '\n' or c == '\t');
 }
 
 std::string Server::trim(const std::string &s)
@@ -142,6 +128,4 @@ std::string Server::trim(const std::string &s)
     return trimmed;
 }
 
-Server::~Server()
-{
-}
+Server::~Server() {}

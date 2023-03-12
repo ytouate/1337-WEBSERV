@@ -1,6 +1,7 @@
 NAME = webserv
 
 FILES = \
+	./AConfig.cpp	\
 	./Server.cpp	\
 	./main.cpp		\
 	./Location.cpp	\

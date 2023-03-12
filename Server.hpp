@@ -6,9 +6,10 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include "AConfig.hpp"
 
 
-class Server
+class Server : public AConfig
 {
     private:
         std::fstream configFile;
@@ -18,15 +19,8 @@ class Server
         std::vector<std::string> fileBuff;
         std::vector<std::string> locationBuff;
         std::string trim(const std::string &s);
-        bool isWhiteSpace(char c);
-        void parseDirective();
+        void parseBlock();
         void fillDirective(const std::string &, const std::vector<std::string> &);
-        void error(const std::string &) const;
-        typedef std::pair<std::string, std::vector<std::string> > directive;
-        directive _port;
-        directive _root;
-        directive _index;
-
     public:
     std::vector<Location> locations;
     std::map<std::string, std::vector<std::string> > data;
