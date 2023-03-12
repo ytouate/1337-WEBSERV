@@ -110,6 +110,14 @@ void Server::fillDirective(const std::string &key,
         _root = std::make_pair(key, values);
     else if (key == "index")
         _index = std::make_pair(key, values);
+    else
+    {
+        if (key != "location" && key != "server" && !isCurlyBracket(key))
+        {
+            std::cout << key << std::endl;
+            error("Invalid Directive");
+        }
+    }
         
 }
 
