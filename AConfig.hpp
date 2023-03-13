@@ -13,7 +13,7 @@ protected:
     std::pair<std::string, std::vector<std::string> > _port;
     bool isWhiteSpace(char c);
     void error(const std::string &a) const;
-    
+
 public:
     std::map<std::string, std::vector<std::string> > data;
     AConfig();

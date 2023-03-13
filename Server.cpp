@@ -21,10 +21,62 @@ Server::Server(std::string s)
     locationIsOpened = false;
 }
 
-
 bool isCurlyBracket(const std::string &s)
 {
     return (s == "{" or s == "}");
+}
+
+void Server::handleErrors(const std::string &fileBuff)
+{
+    if (isCurlyBracket(fileBuff) or fileBuff == "server")
+    {
+        if (fileBuff == "{")
+        {
+            if (lastKey == "server")
+                serverIsOpened = true;
+            else if (lastKey == "location")
+                locationIsOpened = true;
+            else
+                error("invalid config file");
+        }
+        else if (fileBuff == "}")
+        {
+            if (locationIsOpened)
+                locationIsOpened = false;
+            else if (serverIsOpened)
+                serverIsOpened = false;
+            else
+                error("invalid config file");
+        }
+    }
+}
+
+std::string Server::getKey(const std::string &fileBuff, int &j)
+{
+    std::string key;
+    while (fileBuff[j] && !isWhiteSpace(fileBuff[j]))
+    {
+        key += fileBuff[j++];
+    }
+    return key;
+}
+
+void Server::getValues(std::vector<std::string> &values,
+    const std::string &fileBuff, int &j)
+{
+    std::string val;
+    while (fileBuff[j])
+    {
+        while (fileBuff[j] && isWhiteSpace(fileBuff[j]))
+            j++;
+        val += fileBuff[j];
+        j++;
+        if (!fileBuff[j] or isWhiteSpace(fileBuff[j]))
+        {
+            values.push_back(val);
+            val = "";
+        }
+    }
 }
 
 void Server::parseBlock()
@@ -36,61 +88,31 @@ void Server::parseBlock()
     std::string val;
     int locationsCount = 0;
     std::vector<std::string> values;
+    isInsideServer = true;
     while (i < fileBuff.size())
     {
+        isInsideServer = (fileBuff[i] == "location") ? false : true;
+        isInsideServer = !locationIsOpened;
         j = 0;
         values.clear();
-        val.clear();
         lastKey = key;
-        key.clear();
-        if (isCurlyBracket(fileBuff[i]) or fileBuff[i] == "server")
-        {
-            if (fileBuff[i] == "{")
-            {
-                if (lastKey == "server")
-                    serverIsOpened = true;
-                else if (lastKey == "location")
-                    locationIsOpened = true;
-                else
-                    error("Invalid config file check braces");
-            }
-            else if (fileBuff[i] == "}")
-            {
-                if (locationIsOpened)
-                    locationIsOpened = false;
-                else if (serverIsOpened)
-                    serverIsOpened = false;
-                else
-                    error("Invalid config file check braces");
-            }
-        }
-        while (fileBuff[i][j] && !isWhiteSpace(fileBuff[i][j]))
-            key += fileBuff[i][j++];
+        val = key = "";
+        handleErrors(fileBuff[i]);
+        key = getKey(fileBuff[i], j);
         if ((key == "server" && fileBuff[i + 1] != "{") ||
             (key == "location" && fileBuff[i + 1] != "{"))
-            error("Server/Location Block not opened");
+            error("block not opened");
         if (key == "location")
         {
             if (locationIsOpened)
-                error("unclosed location block");
+                error("unclosed block");
             locations.push_back(Location(this->fileBuff, i));
             locations[locationsCount].parseBlock();
             locationsCount++;
         }
-        while (fileBuff[i][j])
-        {
-            while (isWhiteSpace(fileBuff[i][j]))
-                j++;
-            val += fileBuff[i][j];
-            j++;
-            if (!fileBuff[i][j] or isWhiteSpace(fileBuff[i][j]))
-            {
-                values.push_back(val);
-                val = "";
-            }
-        }
-        i++;
+        getValues(values, fileBuff[i], j);
         fillDirective(key, values);
+        i++;
     }
     for (size_t i = 0; i < locations.size(); i++)
     {
@@ -98,7 +120,7 @@ void Server::parseBlock()
             locations[i].data["root"] = this->serverRoot.second;
     }
     if (serverIsOpened or locationIsOpened)
-        error("Block not closed");
+        error("block not closed");
 }
 
 void Server::fillDirective(const std::string &key,
@@ -108,7 +130,13 @@ void Server::fillDirective(const std::string &key,
         _port = std::make_pair(key, values);
     else if (key == "root")
     {
-        this->serverRoot =  std::make_pair(key, values);
+        if (isInsideServer)
+        {
+            this->serverRoot = std::make_pair(key, values);
+
+            // std::cout << values.at(0) << std::endl;
+        }
+        // if (this->serverRoot == std::pair<std::string, std::vector<std::string> >())
         _root = std::make_pair(key, values);
     }
     else if (key == "index")
@@ -116,7 +144,7 @@ void Server::fillDirective(const std::string &key,
     else
     {
         if (key != "location" && key != "server" && !isCurlyBracket(key))
-            error("Invalid Directive");
+            error("invalid directive");
     }
 }
 

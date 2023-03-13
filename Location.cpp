@@ -1,6 +1,5 @@
 #include "Location.hpp"
 
-
 void Location::collectPath(const std::string &s)
 {
     size_t i = 0;
@@ -10,10 +9,10 @@ void Location::collectPath(const std::string &s)
         i++;
     while (s[i])
         path += s[i++];
-    
 }
-Location::Location(const std::vector<std::string> &a, int i):
-    start(i), fileBuff(a) {}
+
+Location::Location(const std::vector<std::string> &a, int i)
+    : start(i), fileBuff(a) {}
 void Location::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
@@ -46,7 +45,6 @@ void Location::fillDirective(const std::string &s, const std::string &key)
         }
     }
 }
-
 
 void Location::parseBlock()
 {
