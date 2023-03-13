@@ -18,7 +18,6 @@ class Location : public AConfig
         friend class Server;
     public:
     std::string path;
-    Location();
     Location(const std::vector<std::string> &, int);
 };
 

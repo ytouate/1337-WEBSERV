@@ -20,6 +20,7 @@ class Server : public AConfig
         std::vector<std::string> locationBuff;
         std::string trim(const std::string &s);
         void parseBlock();
+        std::pair<std::string, std::vector<std::string> >  serverRoot;
         void fillDirective(const std::string &, const std::vector<std::string> &);
     public:
     std::vector<Location> locations;

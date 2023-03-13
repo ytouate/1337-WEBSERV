@@ -13,7 +13,7 @@ Server::Server(std::string s)
     if (fileBuff.size() <= 2)
         error("Invalid Config File");
     configFile.close();
-    parseBlock();
+    this->parseBlock();
     data.insert(_index);
     data.insert(_root);
     data.insert(_port);
@@ -92,6 +92,11 @@ void Server::parseBlock()
         i++;
         fillDirective(key, values);
     }
+    for (size_t i = 0; i < locations.size(); i++)
+    {
+        if (locations[i].data["root"].size() == 0)
+            locations[i].data["root"] = this->serverRoot.second;
+    }
     if (serverIsOpened or locationIsOpened)
         error("Block not closed");
 }
@@ -102,7 +107,10 @@ void Server::fillDirective(const std::string &key,
     if (key == "listen")
         _port = std::make_pair(key, values);
     else if (key == "root")
+    {
+        this->serverRoot =  std::make_pair(key, values);
         _root = std::make_pair(key, values);
+    }
     else if (key == "index")
         _index = std::make_pair(key, values);
     else

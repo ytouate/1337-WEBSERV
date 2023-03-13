@@ -10,7 +10,9 @@ CC = c++
 O_FILE = $(FILES:.cpp=.o)
 CPPFLAGS = -Wall -Wextra -Werror  -fsanitize=address -g
 
-all: $(O_FILE)
+all: $(NAME)
+
+$(NAME): $(O_FILE)
 	$(CC) $(CPPFLAGS) $(O_FILE) -o $(NAME)
 
 clean:

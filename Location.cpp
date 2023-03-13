@@ -1,10 +1,5 @@
 #include "Location.hpp"
 
-Location::Location() {}
-// bool Location::isWhiteSpace(char c)
-// {
-//     return (c == ' ' or c == '\n' or c == '\t');
-// }
 
 void Location::collectPath(const std::string &s)
 {
@@ -17,17 +12,8 @@ void Location::collectPath(const std::string &s)
         path += s[i++];
     
 }
-Location::Location(const std::vector<std::string> &a, int i)
-{
-    start = i;
-    fileBuff = a;
-}
-// void Location::error(const std::string &s)
-// {
-//     std::cerr << s << std::endl;
-//     exit(EXIT_FAILURE);
-// }
-
+Location::Location(const std::vector<std::string> &a, int i):
+    start(i), fileBuff(a) {}
 void Location::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
@@ -75,7 +61,7 @@ void Location::parseBlock()
         key.clear();
         while (fileBuff[i][j] && !isWhiteSpace(fileBuff[i][j]))
             key += fileBuff[i][j++];
-        while (isWhiteSpace(fileBuff[i][j]))
+        while (fileBuff[i][j] && isWhiteSpace(fileBuff[i][j]))
             j++;
         if (key == "location")
         {
@@ -85,9 +71,7 @@ void Location::parseBlock()
         else
         {
             if (isInsideLocation)
-            {
                 fillDirective(fileBuff[i], key);
-            }
         }
         if (fileBuff[i] == "}")
             isInsideLocation = false;

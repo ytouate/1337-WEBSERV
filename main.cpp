@@ -22,11 +22,9 @@ void printDrective(directive &a)
 
 int main(int ac, char **av)
 {
-    Server server(av[1]);
-    // return 0;
     if (ac != 2)
         return 1;
-    // Server server(av[1]);
+    Server server(av[1]);
     std::cout << "=== Server Block data === " << std::endl;
     printDrective(server.data);
     std::cout << "=== Location[0] data === " << std::endl;
