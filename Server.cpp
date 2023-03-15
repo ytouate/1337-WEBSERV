@@ -91,7 +91,6 @@ void Server::parseBlock()
     isInsideServer = true;
     while (i < fileBuff.size())
     {
-        isInsideServer = (fileBuff[i] == "location") ? false : true;
         isInsideServer = !locationIsOpened;
         j = 0;
         values.clear();
@@ -131,12 +130,7 @@ void Server::fillDirective(const std::string &key,
     else if (key == "root")
     {
         if (isInsideServer)
-        {
             this->serverRoot = std::make_pair(key, values);
-
-            // std::cout << values.at(0) << std::endl;
-        }
-        // if (this->serverRoot == std::pair<std::string, std::vector<std::string> >())
         _root = std::make_pair(key, values);
     }
     else if (key == "index")
