@@ -29,24 +29,24 @@ void printDrective(directive &a)
     std::cout << "\n";
 }
 
-// int main(int ac, char **av)
-// {
-//     if (ac != 2)
-//         return 1;
-//     Server server(av[1]);
-//     std::cout << "=== Server Block data === " << std::endl;
-//     printDrective(server.data);
-//     std::cout << "=== Location[0] data === " << std::endl;
-//     std::cout << server.locations[0].path << std::endl;
-//     printDrective(server.locations[0].data);
-//     std::cout << "=== Location[1] data === " << std::endl;
-//     std::cout << server.locations[1].path << std::endl;
-//     printDrective(server.locations[1].data);
-//     std::cout << "=== Location[2] data === " << std::endl;
-//     std::cout << server.locations[2].path << std::endl;
-//     printDrective(server.locations[2].data);
-//     return 0;
-// }
+int main(int ac, char **av)
+{
+    if (ac != 2)
+        return 1;
+    Server server(av[1]);
+    std::cout << "=== Server Block data === " << std::endl;
+    printDrective(server.data);
+    std::cout << "=== Location[0] data === " << std::endl;
+    std::cout << server.locations[0].path << std::endl;
+    printDrective(server.locations[0].data);
+    std::cout << "=== Location[1] data === " << std::endl;
+    std::cout << server.locations[1].path << std::endl;
+    printDrective(server.locations[1].data);
+    std::cout << "=== Location[2] data === " << std::endl;
+    std::cout << server.locations[2].path << std::endl;
+    printDrective(server.locations[2].data);
+    return 0;
+}
 
 void error(const char *s)
 {

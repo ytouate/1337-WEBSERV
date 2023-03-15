@@ -16,7 +16,7 @@ private:
     bool serverIsOpened;
     bool locationIsOpened;
     bool isInsideServer;
-
+    std::pair<std::string, std::vector<std::string> > serverIndex;
     std::vector<std::string> fileBuff;
     std::vector<std::string> locationBuff;
     std::string trim(const std::string &s);
