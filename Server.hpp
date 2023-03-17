@@ -21,6 +21,7 @@ private:
     std::pair<std::string, std::vector<std::string> > _allowed_methods;
     std::pair<std::string, std::vector<std::string> > _port;
     void error(const std::string &a) const;
+    std::pair<std::string, std::vector<std::string> > serverIndex;
     std::vector<std::string> fileBuff;
     std::vector<std::string> locationBuff;
     bool isWhiteSpace(char c);

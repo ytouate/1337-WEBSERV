@@ -111,6 +111,8 @@ int Server::parseBlock()
     {
         if (locations[i].data["root"].size() == 0)
             locations[i].data["root"] = this->serverRoot.second;
+        else if (locations[i].data["index"].size() == 0)
+            locations[i].data["index"] = this->serverIndex.second;
     }
     if (serverIsOpened or locationIsOpened)
         error("block not closed");
@@ -143,7 +145,11 @@ void Server::fillDirective(const std::string &key,
         _root = std::make_pair(key, values);
     }
     else if (key == "index")
+    {
+        if (isInsideServer)
+            this->serverIndex = std::make_pair(key, values);
         _index = std::make_pair(key, values);
+    }
     else
     {
         if (key != "location" && key != "server" && !isCurlyBracket(key))
