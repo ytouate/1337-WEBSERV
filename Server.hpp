@@ -1,35 +1,43 @@
 #if !defined(SERVER_HPP)
 #define SERVER_HPP
 
-#include "Location.hpp"
 #include <map>
 #include <fstream>
 #include <vector>
 #include <iostream>
-#include "AConfig.hpp"
+#include "Location.hpp"
 
-class Server : public AConfig
+class Location;
+class Server
 {
 private:
-    std::fstream configFile;
     std::string lastKey;
     bool serverIsOpened;
     bool locationIsOpened;
+    int start;
     bool isInsideServer;
-
+    std::pair<std::string, std::vector<std::string> > _root;
+    std::pair<std::string, std::vector<std::string> > _index;
+    std::pair<std::string, std::vector<std::string> > _allowed_methods;
+    std::pair<std::string, std::vector<std::string> > _port;
+    void error(const std::string &a) const;
     std::vector<std::string> fileBuff;
     std::vector<std::string> locationBuff;
+    bool isWhiteSpace(char c);
     std::string trim(const std::string &s);
-    void parseBlock();
+    int parseBlock();
     std::pair<std::string, std::vector<std::string> > serverRoot;
     void fillDirective(const std::string &, const std::vector<std::string> &);
     void handleErrors(const std::string &);
     std::string getKey(const std::string &fileBuff, int &j);
+    friend class AConfig;
+    void setFileBuff(const std::vector<std::string> &);
     void getValues(std::vector<std::string > &values, const std::string &fileBuff, int &j);
 public:
+    Server();
     std::vector<Location> locations;
     std::map<std::string, std::vector<std::string> > data;
-    Server(std::string s);
+    Server(const std::vector<std::string> &_fileBuff, int);
     ~Server();
 };
 

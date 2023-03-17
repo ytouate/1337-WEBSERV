@@ -1,24 +1,17 @@
 #include "Server.hpp"
 
-Server::Server(std::string s)
+Server::Server(const std::vector<std::string> &_fileBuff, int _start)
 {
-    configFile.open(s, std::fstream::in);
-    std::string buff;
-    while (std::getline(configFile, buff))
-    {
-        buff = trim(buff);
-        if (buff != "")
-            fileBuff.push_back(buff);
-    }
-    if (fileBuff.size() <= 2)
-        error("Invalid Config File");
-    configFile.close();
-    this->parseBlock();
-    data.insert(_index);
-    data.insert(_root);
-    data.insert(_port);
-    serverIsOpened = false;
-    locationIsOpened = false;
+    lastKey = "";
+    serverIsOpened = locationIsOpened = false;
+    isInsideServer = false;
+    fileBuff = _fileBuff;
+    start = _start;
+}
+
+Server::Server()
+{
+
 }
 
 bool isCurlyBracket(const std::string &s)
@@ -55,14 +48,12 @@ std::string Server::getKey(const std::string &fileBuff, int &j)
 {
     std::string key;
     while (fileBuff[j] && !isWhiteSpace(fileBuff[j]))
-    {
         key += fileBuff[j++];
-    }
     return key;
 }
 
 void Server::getValues(std::vector<std::string> &values,
-    const std::string &fileBuff, int &j)
+                       const std::string &fileBuff, int &j)
 {
     std::string val;
     while (fileBuff[j])
@@ -79,16 +70,17 @@ void Server::getValues(std::vector<std::string> &values,
     }
 }
 
-void Server::parseBlock()
+int Server::parseBlock()
 {
-    size_t i = 0;
+    size_t i = start;
+
     int j = 0;
-    i = 0;
     std::string key;
     std::string val;
     int locationsCount = 0;
     std::vector<std::string> values;
-    isInsideServer = true;
+    isInsideServer = false;
+    // std::cout << fileBuff.size() << std::endl;
     while (i < fileBuff.size())
     {
         isInsideServer = !locationIsOpened;
@@ -112,6 +104,8 @@ void Server::parseBlock()
         getValues(values, fileBuff[i], j);
         fillDirective(key, values);
         i++;
+        if (key == "}" and lastKey == "}")
+            break;
     }
     for (size_t i = 0; i < locations.size(); i++)
     {
@@ -120,8 +114,23 @@ void Server::parseBlock()
     }
     if (serverIsOpened or locationIsOpened)
         error("block not closed");
+    data.insert(_index);
+    data.insert(_root);
+    data.insert(_port);
+    // std::cout << "dkhel " << i << std::endl;
+    return i;
 }
 
+bool Server::isWhiteSpace(char c)
+{
+    return (c == ' ' or c == '\t');
+}
+
+void Server::error(const std::string &s) const
+{
+    std::cerr << s << std::endl;
+    exit(EXIT_FAILURE);
+}
 void Server::fillDirective(const std::string &key,
                            const std::vector<std::string> &values)
 {
@@ -138,7 +147,7 @@ void Server::fillDirective(const std::string &key,
     else
     {
         if (key != "location" && key != "server" && !isCurlyBracket(key))
-            error("invalid directive");
+            error("invalid directive"); 
     }
 }
 

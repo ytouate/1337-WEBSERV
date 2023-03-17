@@ -41,5 +41,4 @@ int main(int ac, char **av)
     }
     std::cout << buf << std::endl;
     close(sockfd);
-
 }

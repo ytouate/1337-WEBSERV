@@ -11,6 +11,17 @@ void Location::collectPath(const std::string &s)
         path += s[i++];
 }
 
+
+bool Location::isWhiteSpace(char c)
+{
+    return (c == ' ' or c == '\t');
+}
+
+void Location::error(const std::string &s) const
+{
+    std::cerr << s << std::endl;
+    exit(EXIT_FAILURE);
+}
 Location::Location(const std::vector<std::string> &a, int i)
     : start(i), fileBuff(a) {}
 void Location::fillDirective(const std::string &s, const std::string &key)

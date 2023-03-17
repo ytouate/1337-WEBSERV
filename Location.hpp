@@ -7,9 +7,15 @@
 #include <vector>
 #include "AConfig.hpp"
 
-class Location : public AConfig
+class Location
 {
 private:
+    std::pair<std::string, std::vector<std::string> > _root;
+    std::pair<std::string, std::vector<std::string> > _index;
+    std::pair<std::string, std::vector<std::string> > _allowed_methods;
+    std::pair<std::string, std::vector<std::string> > _port;
+    bool isWhiteSpace(char c);
+    void error(const std::string &a) const;
     int start;
     std::vector<std::string> fileBuff;
     void collectPath(const std::string &s);
@@ -19,6 +25,7 @@ private:
 
 public:
     std::string path;
+    std::map<std::string, std::vector<std::string> > data;
     Location(const std::vector<std::string> &, int);
 };
 

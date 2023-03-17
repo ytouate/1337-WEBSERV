@@ -3,22 +3,28 @@
 #include <iostream>
 #include <map>
 #include <vector>
-
+#include "Server.hpp"
+#include <fstream>
+class Server;
 class AConfig
-{
+{ 
 protected:
     std::pair<std::string, std::vector<std::string> > _root;
     std::pair<std::string, std::vector<std::string> > _index;
     std::pair<std::string, std::vector<std::string> > _allowed_methods;
     std::pair<std::string, std::vector<std::string> > _port;
+    std::fstream configFile;
+    std::vector<std::string> fileBuff;
+    void readFileIntoBuff(const std::string &s);
     bool isWhiteSpace(char c);
     void error(const std::string &a) const;
+    std::string trim(const std::string &s); 
 
 public:
+    std::vector<Server> servers;
     std::map<std::string, std::vector<std::string> > data;
-    AConfig();
+    AConfig(std::string s);
     virtual ~AConfig();
-    virtual void parseBlock() = 0;
 };
 
 #endif // ACONFIG_HPP
