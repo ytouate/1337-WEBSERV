@@ -30,12 +30,18 @@ int main()
     }
 
     if (bind(sockfd, data->ai_addr, data->ai_addrlen) == -1)
+    {
         perror("bind()");
+        exit(1);
+    }
 
     if (listen(sockfd, 10) == -1)
         perror("listen()");
+    
+    struct sockaddr_in *ip = (struct sockaddr_in *)&data->ai_addr;
+    struct in_addr ipAddr = ip->sin_addr;
 
-    std::cout << "Server is waiting for connection" << std::endl;
+    std::cout << "Server is waiting for connection at: " << std::endl;
 
     while (1)
     {
