@@ -1,12 +1,12 @@
 #if !defined(SERVER_HPP)
 #define SERVER_HPP
 
-#include "inc.hpp"
-#include "Location.hpp"
+#include "../inc.hpp"
+#include "locationParse.hpp"
 
 
-class Location;
-class Server
+class locationParse;
+class serverParse
 {
 private:
     typedef std::pair<std::string, std::vector<std::string> >  directive;
@@ -38,11 +38,11 @@ private:
 
     friend class Config;
 public:
-    std::vector<Location>                               locations;
-    std::map<std::string, std::vector<std::string> >    data;
+    std::vector<locationParse>                                  locations;
+    std::map<std::string, std::vector<std::string> >            data;
 
-    Server(const std::vector<std::string> &, int);
-    ~Server();
+    serverParse(const std::vector<std::string> &, int);
+    ~serverParse();
 };
 
 #endif // SERVER_HPP

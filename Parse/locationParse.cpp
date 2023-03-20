@@ -1,6 +1,6 @@
-#include "Location.hpp"
+#include "locationParse.hpp"
 
-void Location::collectPath(const std::string &s)
+void locationParse::collectPath(const std::string &s)
 {
     size_t i = 0;
     while (s[i] && !isWhiteSpace(s[i]))
@@ -11,19 +11,19 @@ void Location::collectPath(const std::string &s)
         path += s[i++];
 }
 
-bool Location::isWhiteSpace(char c)
+bool locationParse::isWhiteSpace(char c)
 {
     return (c == ' ' or c == '\t');
 }
 
-void Location::error(const std::string &s) const
+void locationParse::error(const std::string &s) const
 {
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
-Location::Location(const std::vector<std::string> &a, int i)
+locationParse::locationParse(const std::vector<std::string> &a, int i)
     : _start(i), _fileBuff(a) {}
-void Location::fillDirective(const std::string &s, const std::string &key)
+void locationParse::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
     std::string val;
@@ -56,11 +56,11 @@ void Location::fillDirective(const std::string &s, const std::string &key)
     }
 }
 
-Location::~Location()
+locationParse::~locationParse()
 {
     this->data.clear();
 }
-void Location::parseBlock()
+void locationParse::parseBlock()
 {
     size_t i = _start;
     size_t j = 0;
@@ -75,7 +75,7 @@ void Location::parseBlock()
             key += _fileBuff[i][j++];
         while (_fileBuff[i][j] && isWhiteSpace(_fileBuff[i][j]))
             j++;
-        if (key == "location")
+        if (key == "locationParse")
         {
             collectPath(_fileBuff[i]);
             isInsideLocation = true;

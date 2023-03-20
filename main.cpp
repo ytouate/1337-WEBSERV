@@ -2,7 +2,7 @@
 #include <map>
 #include <iostream>
 #include <vector>
-#include "Config.hpp"
+#include "Parse/Config.hpp"
 
 typedef std::map<std::string, std::vector<std::string> > directive;
 

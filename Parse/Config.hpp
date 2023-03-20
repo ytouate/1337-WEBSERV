@@ -1,10 +1,10 @@
 #if !defined(ACONFIG_HPP)
 #define ACONFIG_HPP
 
-#include "inc.hpp"
-#include "Server.hpp"
+#include "../inc.hpp"
+#include "serverParse.hpp"
 
-class Server;
+class serverParse;
 class Config
 {
 protected:
@@ -17,7 +17,7 @@ protected:
     std::string     trim(const std::string &s);
 
 public:
-    std::vector<Server>             servers;
+    std::vector<serverParse>             servers;
 
     Config(std::string s);
     ~Config();

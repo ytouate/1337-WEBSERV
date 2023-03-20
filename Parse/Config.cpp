@@ -6,7 +6,7 @@ Config::Config(std::string s)
     size_t end = 0;
     while (end < _fileBuff.size())
     {
-        Server server = Server(_fileBuff, end);
+        serverParse server = serverParse(_fileBuff, end);
         end = server.parseBlock();
         this->servers.push_back(server);
     }

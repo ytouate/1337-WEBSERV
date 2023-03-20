@@ -1,10 +1,10 @@
-#if !defined(REQUEST_HPP)
-#define REQUEST_HPP
+#if !defined(requestParse_HPP)
+#define requestParse_HPP
 
 #include <iostream>
 #include <map>
 
-class Request
+class requestParse
 {
 private:
     void    parseRequestLine(std::string &s, const std::string &delimiter);
@@ -12,8 +12,8 @@ private:
 public:
     std::map<std::string, std::string>      data;
 
-    Request(std::string);
-    ~Request();
+    requestParse(std::string);
+    ~requestParse();
 };
 
-#endif // REQUEST_HPP
+#endif // requestParse_HPP

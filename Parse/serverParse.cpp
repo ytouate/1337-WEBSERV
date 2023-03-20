@@ -1,6 +1,6 @@
-#include "Server.hpp"
+#include "serverParse.hpp"
 
-Server::Server(const std::vector<std::string> &__fileBuff, int __start)
+serverParse::serverParse(const std::vector<std::string> &__fileBuff, int __start)
 {
     _lastKey = "";
     _serverIsOpened = _locationIsOpened = false;
@@ -14,7 +14,7 @@ bool isCurlyBracket(const std::string &s)
     return (s == "{" or s == "}");
 }
 
-void Server::handleErrors(const std::string &_fileBuff)
+void serverParse::handleErrors(const std::string &_fileBuff)
 {
     if (isCurlyBracket(_fileBuff) or _fileBuff == "server")
     {
@@ -39,7 +39,7 @@ void Server::handleErrors(const std::string &_fileBuff)
     }
 }
 
-std::string Server::getKey(const std::string &_fileBuff, int &j)
+std::string serverParse::getKey(const std::string &_fileBuff, int &j)
 {
     std::string key;
     while (_fileBuff[j] && !isWhiteSpace(_fileBuff[j]))
@@ -47,7 +47,7 @@ std::string Server::getKey(const std::string &_fileBuff, int &j)
     return key;
 }
 
-void Server::getValues(std::vector<std::string> &values,
+void serverParse::getValues(std::vector<std::string> &values,
                        const std::string &_fileBuff, int &j)
 {
     std::string val;
@@ -65,7 +65,7 @@ void Server::getValues(std::vector<std::string> &values,
     }
 }
 
-int Server::parseBlock()
+int serverParse::parseBlock()
 {
     size_t i = _start;
 
@@ -91,7 +91,7 @@ int Server::parseBlock()
         {
             if (_locationIsOpened)
                 error("unclosed block");
-            locations.push_back(Location(this->_fileBuff, i));
+            locations.push_back(locationParse(this->_fileBuff, i));
             locations[locationsCount].parseBlock();
             locationsCount++;
         }
@@ -117,17 +117,17 @@ int Server::parseBlock()
     return i;
 }
 
-bool Server::isWhiteSpace(char c)
+bool serverParse::isWhiteSpace(char c)
 {
     return (c == ' ' or c == '\t');
 }
 
-void Server::error(const std::string &s) const
+void serverParse::error(const std::string &s) const
 {
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
-void Server::fillDirective(const std::string &key,
+void serverParse::fillDirective(const std::string &key,
                            const std::vector<std::string> &values)
 {
     if (key == "listen")
@@ -155,7 +155,7 @@ void Server::fillDirective(const std::string &key,
     }
 }
 
-std::string Server::trim(const std::string &s)
+std::string serverParse::trim(const std::string &s)
 {
     std::string trimmed;
     int _start = 0;
@@ -171,4 +171,4 @@ std::string Server::trim(const std::string &s)
     return trimmed;
 }
 
-Server::~Server() {}
+serverParse::~serverParse() {}

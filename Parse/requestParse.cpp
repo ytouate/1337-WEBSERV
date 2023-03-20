@@ -1,8 +1,8 @@
-#include "Request.hpp"
+#include "requestParse.hpp"
 #include <fstream>
 #include <sstream>
 
-void Request::parseRequestLine(std::string &s, const std::string &delimiter)
+void requestParse::parseRequestLine(std::string &s, const std::string &delimiter)
 {
     size_t pos = 0;
     std::string token;
@@ -20,7 +20,7 @@ void Request::parseRequestLine(std::string &s, const std::string &delimiter)
     this->data.insert(std::make_pair("version", s));
 }
 
-void Request::getHost(std::string &s)
+void requestParse::getHost(std::string &s)
 {
     size_t pos = 0;
     pos = s.find(":");
@@ -35,25 +35,25 @@ void Request::getHost(std::string &s)
         this->data.insert(std::make_pair("host", s));
     }
 }
-Request::Request(std::string _request)
+requestParse::requestParse(std::string _requestParse)
 {
     size_t pos = 0;
     std::string buff;
     std::string token;
-    bool isRequestLine = true;
-    while ((pos = _request.find("\n")) != std::string::npos)
+    bool isrequestParseLine = true;
+    while ((pos = _requestParse.find("\n")) != std::string::npos)
     {
-        token = _request.substr(0, pos);
-        if (isRequestLine)
+        token = _requestParse.substr(0, pos);
+        if (isrequestParseLine)
         {
-            isRequestLine = false;
+            isrequestParseLine = false;
             parseRequestLine(token, " ");
             continue;
         }
         this->getHost(token);
 
-        _request.erase(0, pos + 1);
+        _requestParse.erase(0, pos + 1);
     }
 }
 
-Request::~Request() {}
+requestParse::~requestParse() {}

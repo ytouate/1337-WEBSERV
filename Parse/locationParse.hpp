@@ -1,10 +1,10 @@
-#if !defined(LOCATION_HPP)
-#define LOCATION_HPP
+#if !defined(locationParse_HPP)
+#define locationParse_HPP
 
-#include "inc.hpp"
+#include "../inc.hpp"
 #include "Config.hpp"
 
-class Location
+class locationParse
 {
 private:
     typedef std::pair<std::string, std::vector<std::string> > directive;
@@ -22,12 +22,12 @@ private:
     void        parseBlock();
     void        fillDirective(const std::string &s, const std::string &key);
 
-    friend class Server;
+    friend class serverParse;
 public:
     std::string                                         path;
     std::map<std::string, std::vector<std::string> >    data;
-    Location(const std::vector<std::string> &, int);
-    ~Location();
+    locationParse(const std::vector<std::string> &, int);
+    ~locationParse();
 };
 
-#endif // LOCATION_HPP
+#endif // locationParse_HPP
