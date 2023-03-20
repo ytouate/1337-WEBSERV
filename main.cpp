@@ -31,9 +31,12 @@ void error(const char *s)
     perror(s);
     exit(1);
 }
+#include "Response/Response.hpp"
 
 int main(int ac, char **av)
 {
+
+    Response response;
     if (ac != 2)
         return 1;
     Config config(av[1]);

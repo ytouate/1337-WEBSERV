@@ -5,7 +5,8 @@ FILES = \
 	./Parse/serverParse.cpp		\
 	./main.cpp					\
 	./Parse/locationParse.cpp	\
-	./Parse/requestParse.cpp
+	./Parse/requestParse.cpp \
+	./Response/Response.cpp
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
