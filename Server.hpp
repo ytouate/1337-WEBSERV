@@ -21,6 +21,7 @@ private:
     std::pair<std::string, std::vector<std::string> > _index;
     std::pair<std::string, std::vector<std::string> > _allowed_methods;
     std::pair<std::string, std::vector<std::string> > _port;
+    std::pair<std::string, std::vector<std::string> > _server_name;
     void error(const std::string &a) const;
     std::pair<std::string, std::vector<std::string> > serverIndex;
     std::vector<std::string> fileBuff;

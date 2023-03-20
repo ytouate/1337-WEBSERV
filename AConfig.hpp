@@ -1,5 +1,6 @@
 #if !defined(ACONFIG_HPP)
 #define ACONFIG_HPP
+
 #include <iostream>
 #include <map>
 #include <vector>

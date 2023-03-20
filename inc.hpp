@@ -1,7 +1,6 @@
 #if !defined(INC_HPP)
 #define INC_HPP
 
-#include <iostream>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <ifaddrs.h>
@@ -13,7 +12,6 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#include "AConfig.hpp"
 
 
 #endif // INC_HPP

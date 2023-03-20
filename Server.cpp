@@ -119,6 +119,7 @@ int Server::parseBlock()
     data.insert(_index);
     data.insert(_root);
     data.insert(_port);
+    data.insert(_server_name);
     // std::cout << "dkhel " << i << std::endl;
     return i;
 }
@@ -149,6 +150,10 @@ void Server::fillDirective(const std::string &key,
         if (isInsideServer)
             this->serverIndex = std::make_pair(key, values);
         _index = std::make_pair(key, values);
+    }
+    else if (key == "server_name")
+    {
+        _server_name = std::make_pair(key, values);
     }
     else
     {
