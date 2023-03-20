@@ -32,10 +32,10 @@ void error(const char *s)
     exit(1);
 }
 
-
 int main(int ac, char **av)
 {
-    if (ac != 2) return 1;
+    if (ac != 2)
+        return 1;
     Config config(av[1]);
     for (size_t i = 0; i < config.servers.size(); ++i)
     {
@@ -43,7 +43,8 @@ int main(int ac, char **av)
         std::cout << config.servers[i].data["server_name"][0] << std::endl;
         for (size_t j = 0; j < config.servers[i].locations.size(); ++j)
         {
-            std::cout << "Server[" << i << "]" << "location[" << j << "]\n";
+            std::cout << "Server[" << i << "]"
+                      << "location[" << j << "]\n";
             std::cout << "PATH: " << config.servers[i].locations[j].path << std::endl;
         }
         std::cout << "\n";

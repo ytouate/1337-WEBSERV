@@ -11,7 +11,6 @@ void Location::collectPath(const std::string &s)
         path += s[i++];
 }
 
-
 bool Location::isWhiteSpace(char c)
 {
     return (c == ' ' or c == '\t');
@@ -23,7 +22,7 @@ void Location::error(const std::string &s) const
     exit(EXIT_FAILURE);
 }
 Location::Location(const std::vector<std::string> &a, int i)
-    : start(i), fileBuff(a) {}
+    : _start(i), _fileBuff(a) {}
 void Location::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
@@ -57,32 +56,36 @@ void Location::fillDirective(const std::string &s, const std::string &key)
     }
 }
 
+Location::~Location()
+{
+    this->data.clear();
+}
 void Location::parseBlock()
 {
-    size_t i = start;
+    size_t i = _start;
     size_t j = 0;
     std::string key;
     bool isInsideLocation = false;
     std::vector<std::string> newBuff;
-    while (i < fileBuff.size() && fileBuff[i] != "}")
+    while (i < _fileBuff.size() && _fileBuff[i] != "}")
     {
         j = 0;
         key.clear();
-        while (fileBuff[i][j] && !isWhiteSpace(fileBuff[i][j]))
-            key += fileBuff[i][j++];
-        while (fileBuff[i][j] && isWhiteSpace(fileBuff[i][j]))
+        while (_fileBuff[i][j] && !isWhiteSpace(_fileBuff[i][j]))
+            key += _fileBuff[i][j++];
+        while (_fileBuff[i][j] && isWhiteSpace(_fileBuff[i][j]))
             j++;
         if (key == "location")
         {
-            collectPath(fileBuff[i]);
+            collectPath(_fileBuff[i]);
             isInsideLocation = true;
         }
         else
         {
             if (isInsideLocation)
-                fillDirective(fileBuff[i], key);
+                fillDirective(_fileBuff[i], key);
         }
-        if (fileBuff[i] == "}")
+        if (_fileBuff[i] == "}")
             isInsideLocation = false;
         i++;
     }

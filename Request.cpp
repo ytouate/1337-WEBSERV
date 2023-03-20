@@ -34,7 +34,6 @@ void Request::getHost(std::string &s)
         s.erase(0, pos + 1);
         this->data.insert(std::make_pair("host", s));
     }
-    // s = token;
 }
 Request::Request(std::string _request)
 {

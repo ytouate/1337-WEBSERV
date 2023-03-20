@@ -11,7 +11,10 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
-
+#include <iostream>
+#include <map>
+#include <vector>
+#include <fstream>
 
 
 #endif // INC_HPP

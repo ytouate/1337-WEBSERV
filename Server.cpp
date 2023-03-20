@@ -1,64 +1,63 @@
 #include "Server.hpp"
 
-Server::Server(const std::vector<std::string> &_fileBuff, int _start)
+Server::Server(const std::vector<std::string> &__fileBuff, int __start)
 {
-    lastKey = "";
-    serverIsOpened = locationIsOpened = false;
-    isInsideServer = false;
-    fileBuff = _fileBuff;
-    start = _start;
+    _lastKey = "";
+    _serverIsOpened = _locationIsOpened = false;
+    _isInsideServer = false;
+    _fileBuff = __fileBuff;
+    _start = __start;
 }
-
 
 bool isCurlyBracket(const std::string &s)
 {
     return (s == "{" or s == "}");
 }
 
-void Server::handleErrors(const std::string &fileBuff)
+void Server::handleErrors(const std::string &_fileBuff)
 {
-    if (isCurlyBracket(fileBuff) or fileBuff == "server")
+    if (isCurlyBracket(_fileBuff) or _fileBuff == "server")
     {
-        if (fileBuff == "{")
+        if (_fileBuff == "{")
         {
-            if (lastKey == "server")
-                serverIsOpened = true;
-            else if (lastKey == "location")
-                locationIsOpened = true;
+            if (_lastKey == "server")
+                _serverIsOpened = true;
+            else if (_lastKey == "location")
+                _locationIsOpened = true;
             else
                 error("invalid config file");
         }
-        else if (fileBuff == "}")
+        else if (_fileBuff == "}")
         {
-            if (locationIsOpened)
-                locationIsOpened = false;
-            else if (serverIsOpened)
-                serverIsOpened = false;
+            if (_locationIsOpened)
+                _locationIsOpened = false;
+            else if (_serverIsOpened)
+                _serverIsOpened = false;
             else
                 error("invalid config file");
         }
     }
 }
 
-std::string Server::getKey(const std::string &fileBuff, int &j)
+std::string Server::getKey(const std::string &_fileBuff, int &j)
 {
     std::string key;
-    while (fileBuff[j] && !isWhiteSpace(fileBuff[j]))
-        key += fileBuff[j++];
+    while (_fileBuff[j] && !isWhiteSpace(_fileBuff[j]))
+        key += _fileBuff[j++];
     return key;
 }
 
 void Server::getValues(std::vector<std::string> &values,
-                       const std::string &fileBuff, int &j)
+                       const std::string &_fileBuff, int &j)
 {
     std::string val;
-    while (fileBuff[j])
+    while (_fileBuff[j])
     {
-        while (fileBuff[j] && isWhiteSpace(fileBuff[j]))
+        while (_fileBuff[j] && isWhiteSpace(_fileBuff[j]))
             j++;
-        val += fileBuff[j];
+        val += _fileBuff[j];
         j++;
-        if (!fileBuff[j] or isWhiteSpace(fileBuff[j]))
+        if (!_fileBuff[j] or isWhiteSpace(_fileBuff[j]))
         {
             values.push_back(val);
             val = "";
@@ -68,55 +67,53 @@ void Server::getValues(std::vector<std::string> &values,
 
 int Server::parseBlock()
 {
-    size_t i = start;
+    size_t i = _start;
 
     int j = 0;
     std::string key;
     std::string val;
     int locationsCount = 0;
     std::vector<std::string> values;
-    isInsideServer = false;
-    // std::cout << fileBuff.size() << std::endl;
-    while (i < fileBuff.size())
+    _isInsideServer = false;
+    while (i < _fileBuff.size())
     {
-        isInsideServer = !locationIsOpened;
+        _isInsideServer = !_locationIsOpened;
         j = 0;
         values.clear();
-        lastKey = key;
+        _lastKey = key;
         val = key = "";
-        handleErrors(fileBuff[i]);
-        key = getKey(fileBuff[i], j);
-        if ((key == "server" && fileBuff[i + 1] != "{") ||
-            (key == "location" && fileBuff[i + 1] != "{"))
+        handleErrors(_fileBuff[i]);
+        key = getKey(_fileBuff[i], j);
+        if ((key == "server" && _fileBuff[i + 1] != "{") ||
+            (key == "location" && _fileBuff[i + 1] != "{"))
             error("block not opened");
         if (key == "location")
         {
-            if (locationIsOpened)
+            if (_locationIsOpened)
                 error("unclosed block");
-            locations.push_back(Location(this->fileBuff, i));
+            locations.push_back(Location(this->_fileBuff, i));
             locations[locationsCount].parseBlock();
             locationsCount++;
         }
-        getValues(values, fileBuff[i], j);
+        getValues(values, _fileBuff[i], j);
         fillDirective(key, values);
         i++;
-        if (key == "}" and lastKey == "}")
+        if (key == "}" and _lastKey == "}")
             break;
     }
     for (size_t i = 0; i < locations.size(); i++)
     {
         if (locations[i].data["root"].size() == 0)
-            locations[i].data["root"] = this->serverRoot.second;
+            locations[i].data["root"] = this->_serverRoot.second;
         else if (locations[i].data["index"].size() == 0)
-            locations[i].data["index"] = this->serverIndex.second;
+            locations[i].data["index"] = this->_serverIndex.second;
     }
-    if (serverIsOpened or locationIsOpened)
+    if (_serverIsOpened or _locationIsOpened)
         error("block not closed");
     data.insert(_index);
     data.insert(_root);
     data.insert(_port);
-    data.insert(_server_name);
-    // std::cout << "dkhel " << i << std::endl;
+    data.insert(_serverName);
     return i;
 }
 
@@ -137,40 +134,40 @@ void Server::fillDirective(const std::string &key,
         _port = std::make_pair(key, values);
     else if (key == "root")
     {
-        if (isInsideServer)
-            this->serverRoot = std::make_pair(key, values);
+        if (_isInsideServer)
+            this->_serverRoot = std::make_pair(key, values);
         _root = std::make_pair(key, values);
     }
     else if (key == "index")
     {
-        if (isInsideServer)
-            this->serverIndex = std::make_pair(key, values);
+        if (_isInsideServer)
+            this->_serverIndex = std::make_pair(key, values);
         _index = std::make_pair(key, values);
     }
     else if (key == "server_name")
     {
-        _server_name = std::make_pair(key, values);
+        _serverName = std::make_pair(key, values);
     }
     else
     {
         if (key != "location" && key != "server" && !isCurlyBracket(key))
-            error("invalid directive"); 
+            error("invalid directive");
     }
 }
 
 std::string Server::trim(const std::string &s)
 {
     std::string trimmed;
-    int start = 0;
+    int _start = 0;
     int end = s.size() - 1;
     if (end < 0)
         return "";
-    while (s[start] && isWhiteSpace(s[start]))
-        start++;
+    while (s[_start] && isWhiteSpace(s[_start]))
+        _start++;
     while (end > 0 && isWhiteSpace(s[end]))
         end--;
-    while (start <= end)
-        trimmed += s[start++];
+    while (_start <= end)
+        trimmed += s[_start++];
     return trimmed;
 }
 

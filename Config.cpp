@@ -4,9 +4,9 @@ Config::Config(std::string s)
 {
     readFileIntoBuff(s);
     size_t end = 0;
-    while (end < fileBuff.size())
+    while (end < _fileBuff.size())
     {
-        Server server = Server(fileBuff, end);
+        Server server = Server(_fileBuff, end);
         end = server.parseBlock();
         this->servers.push_back(server);
     }
@@ -30,20 +30,17 @@ std::string Config::trim(const std::string &s)
 
 void Config::readFileIntoBuff(const std::string &s)
 {
-    configFile.open(s, std::fstream::in);
+    _configFile.open(s, std::fstream::in);
     std::string tmp;
-    while (std::getline(configFile, tmp))
+    while (std::getline(_configFile, tmp))
     {
         tmp = trim(tmp);
         if (!tmp.empty())
-            fileBuff.push_back(tmp);
+            _fileBuff.push_back(tmp);
     }
-    configFile.close();
+    _configFile.close();
 }
-Config::~Config()
-{
-    data.clear();
-}
+Config::~Config() {}
 
 bool Config::isWhiteSpace(char c)
 {
