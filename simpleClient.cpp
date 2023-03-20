@@ -32,13 +32,20 @@ int main(int ac, char **av)
     }
 
     std::cout << "client: connected\n";
-    char buf[101];
-    int numBytes = recv(sockfd, buf, 100, 0);
-    if (numBytes == -1)
-    {
-        perror("recv()");
-        return 1;
-    }
-    std::cout << buf << std::endl;
-    close(sockfd);
+        int bytes ;
+        std::string buff;
+        getline(std::cin, buff);
+        if ( (bytes = send(sockfd, buff.c_str(), buff.size(), 0)) == -1)
+        {
+            perror("send()");
+        }
+        std::cout << "sending " << bytes << " byte\n";
+        char buf[101];
+        int numBytes = recv(sockfd, buf, 100, 0);
+        if (numBytes == -1)
+        {
+            perror("recv()");
+            return 1;
+        }
+        std::cout << buf << std::endl;
 }

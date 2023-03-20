@@ -1,7 +1,3 @@
-config parse
-request parse
-networking
-response / cgi
-
-tokenization
-tree construction
+understand HTTP in details
+read the 6th chapter of the book
+build a functional web client

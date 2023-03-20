@@ -41,7 +41,7 @@ int main()
     struct sockaddr_in *ip = (struct sockaddr_in *)&data->ai_addr;
     struct in_addr ipAddr = ip->sin_addr;
 
-    std::cout << "Server is waiting for connection at: " << std::endl;
+    std::cout << "Server is waiting for connection " << std::endl;
 
     while (1)
     {

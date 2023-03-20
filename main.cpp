@@ -1,42 +1,28 @@
 #include "inc.hpp"
 
-
 typedef std::map<std::string, std::vector<std::string> > directive;
 
 void printDrective(directive &a)
 {
-	std::cout << "root:\t";
-	for (size_t i = 0; i < a["root"].size(); ++i)
-		std::cout << " " << a["root"][i];
-	std::cout << "\n";
-	std::cout << "index:\t";
-	for (size_t i = 0; i < a["index"].size(); ++i)
-		std::cout << " " << a["index"][i];
-	std::cout << "\n";
-	std::cout << "listen:\t";
-	for (size_t i = 0; i < a["listen"].size(); ++i)
-		std::cout << " " << a["listen"][i];
-	std::cout << "\n";
+    std::cout << "root:\t";
+    for (size_t i = 0; i < a["root"].size(); ++i)
+        std::cout << " " << a["root"][i];
+    std::cout << "\n";
+    std::cout << "index:\t";
+    for (size_t i = 0; i < a["index"].size(); ++i)
+        std::cout << " " << a["index"][i];
+    std::cout << "\n";
+    std::cout << "listen:\t";
+    for (size_t i = 0; i < a["listen"].size(); ++i)
+        std::cout << " " << a["listen"][i];
+    std::cout << "\n";
 }
 
 void error(const char *s)
 {
-	perror(s);
-	exit(1);
+    perror(s);
+    exit(1);
 }
-
-// int main(int ac, char **av)
-// {
-
-//     if (ac != 2)
-//         return 1;
-//     fd_set our_fds;
-//     int fd = STDIN_FILENO;
-//     FD_ZERO(&our_fds);
-//     FD_SET(fd, &our_fds);
-//     struct timeval time;
-//     time.tv_sec = 2;
-//     time.tv_usec = 0;
 
 //     if ( select(2, 0, &our_fds,0,&time) <= 0)
 //         perror("select()");
@@ -83,24 +69,43 @@ void error(const char *s)
 //     return 0;
 // }
 
+#include "Request.hpp"
+
 int main(int ac, char **av)
 {
+    std::string requestBuffer(
+        "GET /page1.htm HTTP/1.1\n\
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
+        Accept-Language: en-US\n\
+        Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
+        Accept-Encoding: gzip, deflate\n\
+        Host: example.com\n\
+        Connection: Keep-Alive\n"
+    );
+    Request request(requestBuffer);
+
+    std::cout << "Request method:\t\t" << request.data["method"] << std::endl;
+    std::cout << "Request HTTP version:\t" << request.data["version"] << std::endl;
+    std::cout << "Request path:\t\t" << request.data["path"] << std::endl;
+    std::cout << "Request host:\t\t" << request.data["host"] << std::endl;
+    return 0;
 	struct addrinfo hints, *data;
 	fd_set fds;
 	FD_ZERO(&fds);
+	memset(&hints, 0, sizeof (hints));
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_family = AF_INET;
 	int errorCode;
-	if ((errorCode = getaddrinfo(av[1], av[2], &hints, &data)) == -1)
+	if ((errorCode = getaddrinfo(av[1], av[2], &hints, &data)) != 0)
 	{
-		gai_strerror(errorCode);
+		std::cerr << gai_strerror(errorCode) << std::endl;
 		return 1;
 	}
-
 	char address_buffer[100];
 	char service_buffer[100];
 	getnameinfo(data->ai_addr, data->ai_addrlen, address_buffer, 100, service_buffer, 100, NI_NUMERICHOST);
 	std::cout << "remote server is running on: " << address_buffer << ":" << service_buffer << std::endl;
+
 	// domain : type of ip address
 	// type: socket type 
 	// protocol tcp or udp
@@ -109,38 +114,40 @@ int main(int ac, char **av)
 		error("socket()");
 	if (connect(sockfd, data->ai_addr, data->ai_addrlen) == -1)
 		error("connect()");
+	else
+		std::cout << "Connected\n";
+ 	std::cout << "To send data, enter text followed by enter.\n";
 	char read[4096];
 	int bytes_recieved;
-	while (1)
-	{
+	// while (1)
+	// {
 		fd_set reads;
 		FD_ZERO(&reads);
 		FD_SET(sockfd, &reads);
+		FD_SET(0, &reads);
 		struct timeval time;
 		time.tv_sec = 0;
 		time.tv_usec = 100000;
-		if (select(sockfd + 1, &reads, 0, 0, &time) < 0)
+
+		if (select(sockfd + 1, &reads, 0,0, &time) <  0)
 			error("select()");
+		if (FD_ISSET(0, &reads))
+		{
+		    int _bytes_recieved;
+		    char read[4096];
+		    if (!fgets(read, sizeof read, stdin))
+				error("fgets()");
+			std::cout << "Sending: " << read;
+		    _bytes_recieved = send(sockfd, read, sizeof(read), 0);
+		    std::cout << "Sent " << _bytes_recieved << " bytes\n";
+		}
 		if (FD_ISSET(sockfd, &reads))
 		{
 			int bytes_recieved;
-			char read[14];
-			bytes_recieved = recv(sockfd, read, 14, 0);
+			char read[4096];
+			bytes_recieved = recv(sockfd, read, sizeof read, 0);
 			if (bytes_recieved < 0)
 				error("recv()");
-			if (bytes_recieved == 0)
-				std::cout << "Recieved " << bytes_recieved << " bytes: " << read;
-			
+			std::cout << "Recieved " << bytes_recieved << " bytes: " << read;
 		}
-		// if (FD_ISSET(0, &reads))
-		// {
-		//     int _bytes_recieved;
-		//     char read[4096];
-		//     if (!fgets(read, sizeof read, stdin)) break;
-		//     std::cout << "Sending: " << read << std::endl;
-		//     _bytes_recieved = send(sockfd, read, sizeof(read), 0);
-		//     std::cout << "Sent " << _bytes_recieved << " bytes\n";
-		// }
-	}
-	
 }

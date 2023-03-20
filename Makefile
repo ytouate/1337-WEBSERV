@@ -5,6 +5,7 @@ FILES = \
 	./Server.cpp	\
 	./main.cpp		\
 	./Location.cpp	\
+	./Request.cpp
 
 CC = c++
 O_FILE = $(FILES:.cpp=.o)
