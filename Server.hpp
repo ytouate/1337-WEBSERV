@@ -33,11 +33,10 @@ private:
     void fillDirective(const std::string &, const std::vector<std::string> &);
     void handleErrors(const std::string &);
     std::string getKey(const std::string &fileBuff, int &j);
-    friend class AConfig;
+    friend class Config;
     void setFileBuff(const std::vector<std::string> &);
     void getValues(std::vector<std::string > &values, const std::string &fileBuff, int &j);
 public:
-    Server();
     std::vector<Location> locations;
     std::map<std::string, std::vector<std::string> > data;
     Server(const std::vector<std::string> &_fileBuff, int);

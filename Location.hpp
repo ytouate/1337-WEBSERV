@@ -5,7 +5,7 @@
 #include <set>
 #include <map>
 #include <vector>
-#include "AConfig.hpp"
+#include "Config.hpp"
 
 class Location
 {

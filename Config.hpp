@@ -7,7 +7,7 @@
 #include "Server.hpp"
 #include <fstream>
 class Server;
-class AConfig
+class Config
 { 
 protected:
     std::pair<std::string, std::vector<std::string> > _root;
@@ -24,8 +24,8 @@ protected:
 public:
     std::vector<Server> servers;
     std::map<std::string, std::vector<std::string> > data;
-    AConfig(std::string s);
-    virtual ~AConfig();
+    Config(std::string s);
+    virtual ~Config();
 };
 
 #endif // ACONFIG_HPP

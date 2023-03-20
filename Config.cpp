@@ -1,9 +1,9 @@
-#include "AConfig.hpp"
+#include "Config.hpp"
 
-AConfig::AConfig(std::string s)
+Config::Config(std::string s)
 {
     readFileIntoBuff(s);
-    int end = 0;
+    size_t end = 0;
     while (end < fileBuff.size())
     {
         Server server = Server(fileBuff, end);
@@ -12,7 +12,7 @@ AConfig::AConfig(std::string s)
     }
 }
 
-std::string AConfig::trim(const std::string &s)
+std::string Config::trim(const std::string &s)
 {
     std::string trimmed;
     int start = 0;
@@ -28,7 +28,7 @@ std::string AConfig::trim(const std::string &s)
     return trimmed;
 }
 
-void AConfig::readFileIntoBuff(const std::string &s)
+void Config::readFileIntoBuff(const std::string &s)
 {
     configFile.open(s, std::fstream::in);
     std::string tmp;
@@ -40,17 +40,17 @@ void AConfig::readFileIntoBuff(const std::string &s)
     }
     configFile.close();
 }
-AConfig::~AConfig()
+Config::~Config()
 {
     data.clear();
 }
 
-bool AConfig::isWhiteSpace(char c)
+bool Config::isWhiteSpace(char c)
 {
     return (c == ' ' or c == '\t');
 }
 
-void AConfig::error(const std::string &s) const
+void Config::error(const std::string &s) const
 {
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);

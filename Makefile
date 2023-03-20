@@ -1,15 +1,15 @@
 NAME = webserv
 
 FILES = \
-	./AConfig.cpp	\
+	./Config.cpp	\
 	./Server.cpp	\
 	./main.cpp		\
 	./Location.cpp	\
 	./Request.cpp
 
-CC = c++
+CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
-CPPFLAGS = -fsanitize=address -g
+CPPFLAGS = -Wall -Wextra -Werror -fsanitize=address -g
 
 all: $(NAME)
 

@@ -9,10 +9,6 @@ Server::Server(const std::vector<std::string> &_fileBuff, int _start)
     start = _start;
 }
 
-Server::Server()
-{
-
-}
 
 bool isCurlyBracket(const std::string &s)
 {

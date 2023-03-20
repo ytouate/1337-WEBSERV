@@ -2,7 +2,7 @@
 #include <map>
 #include <iostream>
 #include <vector>
-#include "AConfig.hpp"
+#include "Config.hpp"
 
 typedef std::map<std::string, std::vector<std::string> > directive;
 
@@ -35,12 +35,13 @@ void error(const char *s)
 
 int main(int ac, char **av)
 {
-    AConfig config(av[1]);
-    for (int i = 0; i < config.servers.size(); ++i)
+    if (ac != 2) return 1;
+    Config config(av[1]);
+    for (size_t i = 0; i < config.servers.size(); ++i)
     {
         std::cout << "Server[" << i << "]" << std::endl;
         std::cout << config.servers[i].data["server_name"][0] << std::endl;
-        for (int j = 0; j < config.servers[i].locations.size(); ++j)
+        for (size_t j = 0; j < config.servers[i].locations.size(); ++j)
         {
             std::cout << "Server[" << i << "]" << "location[" << j << "]\n";
             std::cout << "PATH: " << config.servers[i].locations[j].path << std::endl;
