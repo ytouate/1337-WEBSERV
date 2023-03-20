@@ -104,7 +104,10 @@ int serverParse::parseBlock()
     for (size_t i = 0; i < locations.size(); i++)
     {
         if (locations[i].data["root"].size() == 0)
+        {
+            std::cout<< "hna\n";
             locations[i].data["root"] = this->_serverRoot.second;
+        }
         else if (locations[i].data["index"].size() == 0)
             locations[i].data["index"] = this->_serverIndex.second;
     }

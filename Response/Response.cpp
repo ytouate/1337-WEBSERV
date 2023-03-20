@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   response.cpp                                       :+:      :+:    :+:   */
+/*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/20 19:55:06 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/20 21:23:02 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ int     Response::getIndexOfServerBlock(Config &config, requestParse &request)
         {
             for (size_t j = 0; j < config.servers[i].data["server_name"].size(); j++)
             {
-                puts("hana");
                 if (host == config.servers[i].data["server_name"].at(j))
                     return i;
             }
@@ -94,7 +93,7 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
 {
     std::string path = server.locations[index].data["root"][0] + line;
     DIR *dir = opendir(path.c_str());
-    std::cout << path << std::endl;
+    std::cout << "test = "<< path << std::endl;
     if (!dir)
     {
         std::ifstream file;

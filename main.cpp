@@ -35,21 +35,21 @@ void error(const char *s)
 
 int main(int ac, char **av)
 {
-
-    Response response;
     if (ac != 2)
         return 1;
+    Response response;
+    requestParse request(
+        "GET /index.html HTTP/1.1\n\
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
+        Accept-Language: en-US\n\
+        Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
+        Accept-Encoding: gzip, deflate\n\
+        Host: example.com\n\
+        Connection: Keep-Alive\n\
+        "
+    );
     Config config(av[1]);
-    for (size_t i = 0; i < config.servers.size(); ++i)
-    {
-        std::cout << "Server[" << i << "]" << std::endl;
-        std::cout << config.servers[i].data["server_name"][0] << std::endl;
-        for (size_t j = 0; j < config.servers[i].locations.size(); ++j)
-        {
-            std::cout << "Server[" << i << "]"
-                      << "location[" << j << "]\n";
-            std::cout << "PATH: " << config.servers[i].locations[j].path << std::endl;
-        }
-        std::cout << "\n";
-    }
+    std::cout << config.servers[0].locations[0].data["root"].size() << std::endl;
+    // response.getMethod(config, request);
+    
 }
