@@ -21,8 +21,9 @@ void locationParse::error(const std::string &s) const
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
+
 locationParse::locationParse(const std::vector<std::string> &a, int i)
-    : _start(i), _fileBuff(a) {}
+    : _start(i), _fileBuff(a), autoIndex(OFF) {}
 
 void locationParse::fillDirective(const std::string &s, const std::string &key)
 {
@@ -52,9 +53,16 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
         _index = std::make_pair(key, values);
     else if (key == "error_page")
     {
+        if (values.size() < 2) error("Invalid Arguments");
+        if (!isNumber(values.front())) error("Invalid Arguments");
         this->errorPages.insert(std::make_pair(atoi(values.front().c_str()),
                                          values.back()));
-        
+    }
+    else if (key == "auto_index")
+    {
+        if (values.size() != 1)
+            error("Invalid arguments");
+        autoIndex = values.front() == "on" ? ON : OFF;
     }
 }
 
@@ -67,6 +75,16 @@ locationParse::~locationParse()
         ++it;
     }
     this->data.clear();
+}
+
+bool locationParse::isNumber(const std::string &s)
+{
+    for (size_t i = 0; i < s.size(); i++)
+    {
+        if (!isnumber(s[i]))
+            return false;
+    }
+    return true;
 }
 
 void locationParse::parseBlock()
@@ -100,5 +118,4 @@ void locationParse::parseBlock()
     }
     data.insert(this->_root);
     data.insert(this->_index);
-    
 }
