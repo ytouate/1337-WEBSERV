@@ -4,6 +4,9 @@
 #include "../inc.hpp"
 #include "Config.hpp"
 
+#define  ON 1
+#define  OFF 0
+
 class locationParse
 {
 private:
@@ -12,7 +15,6 @@ private:
     directive                           _root;
     directive                           _index;
     directive                           _allowed_methods;
-    directive                           _port;
     int                                 _start;
     std::vector<std::string>            _fileBuff;
 
@@ -21,11 +23,13 @@ private:
     void        collectPath(const std::string &s);
     void        parseBlock();
     void        fillDirective(const std::string &s, const std::string &key);
-
+    bool        isNumber(const std::string &s);
     friend class serverParse;
 public:
     std::string                                         path;
     std::map<std::string, std::vector<std::string> >    data;
+    std::map<int, std::string>                          errorPages;
+    bool                                                autoIndex;
     locationParse(const std::vector<std::string> &, int);
     ~locationParse();
 };

@@ -9,8 +9,7 @@ class locationParse;
 class serverParse
 {
 private:
-    typedef std::pair<std::string, std::vector<std::string> >  directive;
-
+    typedef std::pair<std::string, std::vector<std::string> >   directive;
     int                         _start;
     std::string                 _lastKey;
     bool                        _serverIsOpened;
@@ -26,6 +25,7 @@ private:
     std::vector<std::string>    _fileBuff;
     std::vector<std::string>    _locationBuff;
 
+    bool            isNumber(const std::string &s);
     void            insertDirectives(void);
     void            fillEmptyRequiredDirectives(void);
     void            error(const std::string &a) const;
@@ -40,8 +40,10 @@ private:
 
     friend class Config;
 public:
+    bool                                                        autoIndex;
     std::vector<locationParse>                                  locations;
     std::map<std::string, std::vector<std::string> >            data;
+    std::map<int, std::string>                                  errorPages;
 
     serverParse(const std::vector<std::string> &, int);
     ~serverParse();

@@ -21,12 +21,16 @@ void locationParse::error(const std::string &s) const
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
+
 locationParse::locationParse(const std::vector<std::string> &a, int i)
-    : _start(i), _fileBuff(a) {}
+    : _start(i), _fileBuff(a), autoIndex(OFF) {}
+
 void locationParse::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
     std::string val;
+    std::vector<std::string> values;
+
     while (s[i] && !isWhiteSpace(s[i]))
         i++;
     while (s[i] && isWhiteSpace(s[i]))
@@ -39,20 +43,26 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
         i++;
         if (!s[i] or isWhiteSpace(s[i]))
         {
-            if (key == "root")
-            {
-                this->_root.first = key;
-                this->_root.second.push_back(val);
-            }
-            else if (key == "index")
-            {
-                this->_index.first = key;
-                this->_index.second.push_back(val);
-            }
-            else
-                error("Invalid Directive");
+            values.push_back(val);
             val = "";
         }
+    }
+    if (key == "root")
+        _root = std::make_pair(key, values);
+    else if (key == "index")
+        _index = std::make_pair(key, values);
+    else if (key == "error_page")
+    {
+        if (values.size() < 2) error("Invalid Arguments");
+        if (!isNumber(values.front())) error("Invalid Arguments");
+        this->errorPages.insert(std::make_pair(atoi(values.front().c_str()),
+                                         values.back()));
+    }
+    else if (key == "auto_index")
+    {
+        if (values.size() != 1)
+            error("Invalid arguments");
+        autoIndex = values.front() == "on" ? ON : OFF;
     }
 }
 
@@ -65,6 +75,16 @@ locationParse::~locationParse()
         ++it;
     }
     this->data.clear();
+}
+
+bool locationParse::isNumber(const std::string &s)
+{
+    for (size_t i = 0; i < s.size(); i++)
+    {
+        if (!isnumber(s[i]))
+            return false;
+    }
+    return true;
 }
 
 void locationParse::parseBlock()

@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/21 12:06:02 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/21 17:34:50 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,13 +84,35 @@ bool    Response::getMatchedLocation(Config& config, requestParse& request)
         counterNoMatch = 0;
     }
     // std::cout << server.locations[finalPath].path << std::endl;
-    if (!checkPathIfValid(config.servers[indexServer] , finalPath, line))
+    if (!checkPathIfValid(config.servers[indexServer] , request, finalPath, line))
         return 1;
     return 0;
 }
 
-bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
+void    Response::errorPages(serverParse& server, int id)
 {
+    std::string path = "./index/";
+    std::ifstream infile;
+    std::string line;
+    if (server.locations[id].errorPages[404].size() > 0 )
+    {
+        path += server.locations[id].errorPages[404];
+        infile.open(path);
+        while (getline(infile, line))
+            _body += line;
+        _statusCode = 404;
+    }
+}
+
+// bool    Response::methodAllowed(serverParse& server, requestParse& request, int index)
+// {
+    
+// }
+
+
+bool    Response::checkPathIfValid(serverParse& server,  requestParse& request, int index , std::string line)
+{
+    (void)request;
     std::string path = server.locations[index].data["root"][0] + line;
 
     DIR *dir = opendir(path.c_str());
@@ -101,7 +123,10 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
         if(file)
             this->_requestPath = path;
         else
+        {
+            errorPages(server, index);
             return false;
+        }
     }
     else
     {
@@ -149,16 +174,11 @@ void   Response::getContentType()
 void    Response::faildResponse()
 {
     char buffer[100];
-    this->_statusCode = 404;
     sprintf(buffer, "GET HTTP/1.1 %d not found\r\n", this->_statusCode);
     this->_response += buffer;
     sprintf(buffer, "Connection: closed\r\n\r\n");
     this->_response += buffer;
-    std::ifstream infile;
-    infile.open("/Users/otmallah/Desktop/1337-WebServ/index1.html");
-    std::string line;
-    while (getline(infile, line))
-        this->_response += line;
+    this->_response += _body;
     std::cout << _response << std::endl;
 }
 
@@ -173,26 +193,23 @@ int    Response::getMethod(Config &config, requestParse& request)
     else
     {
         getContentType();
-        std::ifstream infile;
-        infile.open(this->_requestPath);
-        if (!infile)
-        {
-            faildResponse();
-            return 1;
-        }
-        else
-        {
-            this->_statusCode = 200;
-            char buffer[100];
-            sprintf(buffer, "GET %s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
-            this->_response += buffer;
-            sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
-            this->_response += buffer;
-            std::string line1;
-            while (getline(infile, line1))
-                this->_response += line1;
-        }
+        this->_statusCode = 200;
+        char buffer[100];
+        sprintf(buffer, "GET %s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
+        this->_response += buffer;
+        sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
+        this->_response += buffer;
     }
     std::cout << _response << std::endl;
    return 0; 
 }
+
+// bool    Response::validationRequestPath(Config& config, requestParse& request)
+// {
+//     if (getMatchedLocation(config, request) == false)
+//         std::cout << "404 not found" << std::endl;
+//     else
+//     {
+    
+//     }
+// }
