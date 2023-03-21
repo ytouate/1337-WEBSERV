@@ -39,7 +39,7 @@ int main(int ac, char **av)
         return 1;
     Response response;
     requestParse request(
-        "GET /index.html HTTP/1.1\n\
+        "GET /index/index.html HTTP/1.1\n\
         User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
         Accept-Language: en-US\n\
         Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
@@ -49,7 +49,5 @@ int main(int ac, char **av)
         "
     );
     Config config(av[1]);
-    std::cout << config.servers[0].locations[0].data["root"].size() << std::endl;
-    // response.getMethod(config, request);
-    
+    response.getMethod(config, request);
 }

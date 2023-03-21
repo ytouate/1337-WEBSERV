@@ -75,7 +75,7 @@ void locationParse::parseBlock()
             key += _fileBuff[i][j++];
         while (_fileBuff[i][j] && isWhiteSpace(_fileBuff[i][j]))
             j++;
-        if (key == "locationParse")
+        if (key == "location")
         {
             collectPath(_fileBuff[i]);
             isInsideLocation = true;
