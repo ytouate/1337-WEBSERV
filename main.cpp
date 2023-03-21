@@ -49,5 +49,22 @@ int main(int ac, char **av)
         "
     );
     Config config(av[1]);
-    response.getMethod(config, request);
+    for (size_t i = 0; i < config.servers.size(); ++i)
+    {
+        std::cout << "Server[" << i << "]" << std::endl;
+        std::cout << "server_name: " << config.servers[i].data["server_name"][0] << std::endl;
+        std::cout << "root: " << config.servers[i].data["root"][0] << std::endl;
+        std::cout << "index: " << config.servers[i].data["index"][0] << std::endl;
+        std::cout << "listen: " << config.servers[i].data["listen"][0] << std::endl;
+        for (size_t j = 0; j < config.servers[i].locations.size(); ++j)
+        {
+            std::cout << "\nServer[" << i << "]"
+                      << "location[" << j << "]\n";
+            std::cout << "PATH: " << config.servers[i].locations[j].path << std::endl;
+            std::cout << "root: " << config.servers[i].locations[j].data["root"][0] << std::endl;
+            if (config.servers[i].locations[j].data["index"].size() > 0)
+                std::cout << "index: " << config.servers[i].locations[j].data["index"][0] << std::endl;
+        }
+        std::cout << "\n";
+    }
 }

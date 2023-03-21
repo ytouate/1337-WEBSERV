@@ -58,8 +58,15 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
 
 locationParse::~locationParse()
 {
+    std::map<std::string, std::vector<std::string> >::iterator it = this->data.begin();
+    while (it != data.end())
+    {
+        it->second.clear();
+        ++it;
+    }
     this->data.clear();
 }
+
 void locationParse::parseBlock()
 {
     size_t i = _start;
