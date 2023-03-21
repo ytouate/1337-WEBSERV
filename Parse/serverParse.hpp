@@ -26,13 +26,15 @@ private:
     std::vector<std::string>    _fileBuff;
     std::vector<std::string>    _locationBuff;
 
+    void            insertDirectives(void);
+    void            fillEmptyRequiredDirectives(void);
     void            error(const std::string &a) const;
     void            fillDirective(const std::string &, const std::vector<std::string> &);
     void            handleErrors(const std::string &);
     void            setFileBuff(const std::vector<std::string> &);
     void            getValues(std::vector<std::string > &values, const std::string &fileBuff, int &j);
     bool            isWhiteSpace(char c);
-    int             parseBlock();
+    size_t          parseBlock();
     std::string     trim(const std::string &s);
     std::string     getKey(const std::string &fileBuff, int &j);
 

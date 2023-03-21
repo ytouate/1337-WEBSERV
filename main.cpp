@@ -53,7 +53,8 @@ int main(int ac, char **av)
                       << "location[" << j << "]\n";
             std::cout << "PATH: " << config.servers[i].locations[j].path << std::endl;
             std::cout << "root: " << config.servers[i].locations[j].data["root"][0] << std::endl;
-            std::cout << "index: " << config.servers[i].locations[j].data["index"][0] << std::endl;
+            if (config.servers[i].locations[j].data["index"].size() > 0)
+                std::cout << "index: " << config.servers[i].locations[j].data["index"][0] << std::endl;
         }
         std::cout << "\n";
     }

@@ -56,4 +56,7 @@ requestParse::requestParse(std::string _requestParse)
     }
 }
 
-requestParse::~requestParse() {}
+requestParse::~requestParse()
+{
+    this->data.clear();
+}

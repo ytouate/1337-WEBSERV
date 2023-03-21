@@ -48,7 +48,7 @@ std::string serverParse::getKey(const std::string &_fileBuff, int &j)
 }
 
 void serverParse::getValues(std::vector<std::string> &values,
-                       const std::string &_fileBuff, int &j)
+                            const std::string &_fileBuff, int &j)
 {
     std::string val;
     while (_fileBuff[j])
@@ -65,7 +65,7 @@ void serverParse::getValues(std::vector<std::string> &values,
     }
 }
 
-int serverParse::parseBlock()
+size_t serverParse::parseBlock()
 {
     size_t i = _start;
 
@@ -74,7 +74,7 @@ int serverParse::parseBlock()
     std::string val;
     int locationsCount = 0;
     std::vector<std::string> values;
-    _isInsideServer = false;
+
     while (i < _fileBuff.size())
     {
         _isInsideServer = !_locationIsOpened;
@@ -101,20 +101,30 @@ int serverParse::parseBlock()
         if (key == "}" and _lastKey == "}")
             break;
     }
-    for (size_t i = 0; i < locations.size(); i++)
-    {
-        if (locations[i].data["root"].size() == 0)
-            locations[i].data["root"] = this->_serverRoot.second;
-        else if (locations[i].data["index"].size() == 0)
-            locations[i].data["index"] = this->_serverIndex.second;
-    }
     if (_serverIsOpened or _locationIsOpened)
         error("block not closed");
+    fillEmptyRequiredDirectives();
+    insertDirectives();
+    return i;
+}
+
+void serverParse::insertDirectives(void)
+{
     data.insert(_index);
     data.insert(_root);
     data.insert(_port);
     data.insert(_serverName);
-    return i;
+}
+
+void serverParse::fillEmptyRequiredDirectives(void)
+{
+    for (size_t i = 0; i < locations.size(); i++)
+    {
+        if (locations[i].data["root"].size() == 0)
+            locations[i].data["root"] = this->_serverRoot.second;
+        if (locations[i].data["index"].size() == 0)
+            locations[i].data["index"] = this->_serverIndex.second;
+    }
 }
 
 bool serverParse::isWhiteSpace(char c)
@@ -127,8 +137,9 @@ void serverParse::error(const std::string &s) const
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
+
 void serverParse::fillDirective(const std::string &key,
-                           const std::vector<std::string> &values)
+                                const std::vector<std::string> &values)
 {
     if (key == "listen")
         _port = std::make_pair(key, values);
@@ -145,9 +156,7 @@ void serverParse::fillDirective(const std::string &key,
         _index = std::make_pair(key, values);
     }
     else if (key == "server_name")
-    {
         _serverName = std::make_pair(key, values);
-    }
     else
     {
         if (key != "location" && key != "server" && !isCurlyBracket(key))
@@ -171,4 +180,13 @@ std::string serverParse::trim(const std::string &s)
     return trimmed;
 }
 
-serverParse::~serverParse() {}
+serverParse::~serverParse()
+{
+    std::map<std::string, std::vector<std::string> >::iterator it = this->data.begin();
+    while (it != data.end())
+    {
+        it->second.clear();
+        ++it;
+    }
+    this->data.clear();
+}
