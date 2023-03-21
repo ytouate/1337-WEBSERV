@@ -35,6 +35,7 @@ void requestParse::getHost(std::string &s)
         this->data.insert(std::make_pair("host", s));
     }
 }
+
 requestParse::requestParse(std::string _requestParse)
 {
     size_t pos = 0;

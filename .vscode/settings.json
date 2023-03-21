@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.html": "django-html",
         "iosfwd": "cpp",
         "__bit_reference": "cpp",
         "__config": "cpp",
@@ -67,6 +68,7 @@
         "list": "cpp",
         "set": "cpp",
         "sstream": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "queue": "cpp"
     }
 }

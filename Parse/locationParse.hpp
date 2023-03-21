@@ -26,6 +26,7 @@ private:
 public:
     std::string                                         path;
     std::map<std::string, std::vector<std::string> >    data;
+    std::map<int, std::string>                          errorPages;
     locationParse(const std::vector<std::string> &, int);
     ~locationParse();
 };

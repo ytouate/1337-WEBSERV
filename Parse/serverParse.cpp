@@ -138,6 +138,15 @@ void serverParse::error(const std::string &s) const
     exit(EXIT_FAILURE);
 }
 
+bool isNumber(const std::string &s)
+{
+    for (size_t i = 0; i < s.size(); i++)
+    {
+        if (!isnumber(s[i]))
+            return false;
+    }
+    return true;
+}
 void serverParse::fillDirective(const std::string &key,
                                 const std::vector<std::string> &values)
 {
@@ -147,16 +156,23 @@ void serverParse::fillDirective(const std::string &key,
     {
         if (_isInsideServer)
             this->_serverRoot = std::make_pair(key, values);
-        _root = std::make_pair(key, values);
+            _root = std::make_pair(key, values);
     }
     else if (key == "index")
     {
         if (_isInsideServer)
-            this->_serverIndex = std::make_pair(key, values);
+            this->_serverIndex = std::make_pair(key, values);       
         _index = std::make_pair(key, values);
     }
     else if (key == "server_name")
         _serverName = std::make_pair(key, values);
+    else if (key == "error_page")
+    {
+        if (values.size() < 2) error("Invalid Arguments");
+        if (!isNumber(values.front())) error("Invalid Arguments");
+        if (!_locationIsOpened)
+        errorPages[atoi(values.front().c_str())] = values.back();
+    }
     else
     {
         if (key != "location" && key != "server" && !isCurlyBracket(key))
