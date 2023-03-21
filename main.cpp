@@ -39,7 +39,7 @@ int main(int ac, char **av)
         return 1;
     Response response;
     requestParse request(
-        "GET /index/index.html HTTP/1.1\n\
+        "GET /indexx HTTP/1.1\n\
         User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
         Accept-Language: en-US\n\
         Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
@@ -49,22 +49,5 @@ int main(int ac, char **av)
         "
     );
     Config config(av[1]);
-    for (size_t i = 0; i < config.servers.size(); ++i)
-    {
-        std::cout << "Server[" << i << "]" << std::endl;
-        std::cout << "server_name: " << config.servers[i].data["server_name"][0] << std::endl;
-        std::cout << "root: " << config.servers[i].data["root"][0] << std::endl;
-        std::cout << "index: " << config.servers[i].data["index"][0] << std::endl;
-        std::cout << "listen: " << config.servers[i].data["listen"][0] << std::endl;
-        for (size_t j = 0; j < config.servers[i].locations.size(); ++j)
-        {
-            std::cout << "\nServer[" << i << "]"
-                      << "location[" << j << "]\n";
-            std::cout << "PATH: " << config.servers[i].locations[j].path << std::endl;
-            std::cout << "root: " << config.servers[i].locations[j].data["root"][0] << std::endl;
-            if (config.servers[i].locations[j].data["index"].size() > 0)
-                std::cout << "index: " << config.servers[i].locations[j].data["index"][0] << std::endl;
-        }
-        std::cout << "\n";
-    }
+    response.getMethod(config, request);
 }

@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/21 10:03:45 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/21 12:06:02 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,7 @@ bool    Response::getMatchedLocation(Config& config, requestParse& request)
 bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
 {
     std::string path = server.locations[index].data["root"][0] + line;
+
     DIR *dir = opendir(path.c_str());
     if (!dir)
     {
@@ -104,6 +105,14 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
     }
     else
     {
+        if (path[path.size() - 1] != '/')
+        {
+            path += "/";
+            std::cout << "301 moved -> path = " << path << std::endl;
+        }
+        if (server.locations[index].data["index"].size() > 0 )
+            path += server.locations[index].data["index"][0];
+        std::cout << path << std::endl;
         this->_requestPath = path;
     }
     return true;
@@ -112,7 +121,6 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
 void   Response::getContentType()
 {
     std::string path = this->_requestPath;
-    std::cout << path.erase(0, path.rfind('.')) << std::endl;
     try
     {
         path = path.erase(0, path.rfind('.'));
@@ -157,26 +165,33 @@ void    Response::faildResponse()
 int    Response::getMethod(Config &config, requestParse& request)
 {
     std::string line = request.data["path"];
-    getMatchedLocation(config, request);
-    getContentType();
-    std::ifstream infile;
-    infile.open(this->_requestPath);
-    if (!infile)
+    if (getMatchedLocation(config, request) == 1)
     {
         faildResponse();
-        return 1;
+        return (1);
     }
     else
     {
-        this->_statusCode = 200;
-        char buffer[100];
-        sprintf(buffer, "GET %s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
-        this->_response += buffer;
-        sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
-        this->_response += buffer;
-        std::string line1;
-        while (getline(infile, line1))
-            this->_response += line1;
+        getContentType();
+        std::ifstream infile;
+        infile.open(this->_requestPath);
+        if (!infile)
+        {
+            faildResponse();
+            return 1;
+        }
+        else
+        {
+            this->_statusCode = 200;
+            char buffer[100];
+            sprintf(buffer, "GET %s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
+            this->_response += buffer;
+            sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
+            this->_response += buffer;
+            std::string line1;
+            while (getline(infile, line1))
+                this->_response += line1;
+        }
     }
     std::cout << _response << std::endl;
    return 0; 
