@@ -114,6 +114,7 @@ void serverParse::insertDirectives(void)
     data.insert(_root);
     data.insert(_port);
     data.insert(_serverName);
+    data.insert(_allowedMethods);
 }
 
 void serverParse::fillEmptyRequiredDirectives(void)
@@ -173,6 +174,11 @@ void serverParse::fillDirective(const std::string &key,
     }
     else if (key == "server_name")
         _serverName = std::make_pair(key, values);
+    else if (key == "allowed_methods")
+    {
+        if (!_locationIsOpened)
+        _allowedMethods = std::make_pair(key, values);
+    }
     else if (key == "error_page")
     {
         if (values.size() < 2)

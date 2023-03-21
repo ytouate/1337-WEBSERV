@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/21 17:34:50 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/21 21:49:42 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,56 +89,90 @@ bool    Response::getMatchedLocation(Config& config, requestParse& request)
     return 0;
 }
 
-void    Response::errorPages(serverParse& server, int id)
+void    Response::errorPages(serverParse& server, int id, int statusCode)
 {
     std::string path = "./index/";
     std::ifstream infile;
     std::string line;
-    if (server.locations[id].errorPages[404].size() > 0 )
+    size_t size = server.locations[id].errorPages[statusCode].size();
+    if (size > 0)
     {
-        path += server.locations[id].errorPages[404];
+        if (size == 0)
+            path += "404.html";
+        else
+            path += server.locations[id].errorPages[statusCode];
         infile.open(path);
         while (getline(infile, line))
             _body += line;
-        _statusCode = 404;
+        _statusCode = statusCode;
     }
 }
 
-// bool    Response::methodAllowed(serverParse& server, requestParse& request, int index)
-// {
-    
-// }
-
-
-bool    Response::checkPathIfValid(serverParse& server,  requestParse& request, int index , std::string line)
+bool    Response::methodAllowed(serverParse& server, requestParse& request, int index)
 {
-    (void)request;
-    std::string path = server.locations[index].data["root"][0] + line;
-
-    DIR *dir = opendir(path.c_str());
-    if (!dir)
+    if (server.locations[index].data["allowed_methods"].size() > 0)
     {
-        std::ifstream file;
-        file.open(path);
-        if(file)
-            this->_requestPath = path;
-        else
+        for (size_t i = 0; i < server.locations[index].data["allowed_methods"].size(); i++)
         {
-            errorPages(server, index);
-            return false;
+            if (request.data["method"] == server.locations[index].data["allowed_methods"][i])
+                return true;
         }
+        errorPages(server, index, 405);
+        return false;
+    }
+    return true;
+}
+
+bool    Response::validFile(serverParse& server, requestParse& request, int index, std::string path)
+{
+    std::ifstream file;
+    file.open(path);
+    if(file)
+    {
+        if (methodAllowed(server, request, index) == true)
+        {
+            _statusCode = 200;
+            this->_requestPath = path;
+        }
+        else
+            return false;
     }
     else
     {
+        errorPages(server, index, 404);
+        return false;
+    }
+    return true;
+}
+
+bool    Response::checkPathIfValid(serverParse& server,  requestParse& request, int index , std::string line)
+{
+    std::string path = server.locations[index].data["root"][0] + line;
+    DIR *dir = opendir(path.c_str());
+    if (!dir)
+        return validFile(server, request, index, path);
+    else
+    {
+        _statusCode = 200;
         if (path[path.size() - 1] != '/')
         {
             path += "/";
             std::cout << "301 moved -> path = " << path << std::endl;
         }
         if (server.locations[index].data["index"].size() > 0 )
+        {
             path += server.locations[index].data["index"][0];
+            this->_requestPath = path;
+            return validFile(server, request, index, path);
+        }
+        if (server.locations[index].autoIndex == true)
+            this->_requestPath = path;
+        else
+        {
+            errorPages(server, index, 404);
+            return false;
+        }
         std::cout << path << std::endl;
-        this->_requestPath = path;
     }
     return true;
 }
@@ -174,7 +208,7 @@ void   Response::getContentType()
 void    Response::faildResponse()
 {
     char buffer[100];
-    sprintf(buffer, "GET HTTP/1.1 %d not found\r\n", this->_statusCode);
+    sprintf(buffer, "GET HTTP/1.1 %d \r\n", this->_statusCode);
     this->_response += buffer;
     sprintf(buffer, "Connection: closed\r\n\r\n");
     this->_response += buffer;
@@ -185,7 +219,7 @@ void    Response::faildResponse()
 int    Response::getMethod(Config &config, requestParse& request)
 {
     std::string line = request.data["path"];
-    if (getMatchedLocation(config, request) == 1)
+    if (getMatchedLocation(config, request) == 1 && _statusCode != 200)
     {
         faildResponse();
         return (1);
