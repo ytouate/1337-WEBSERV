@@ -50,6 +50,10 @@ int main(int ac, char **av)
         std::cout << "listen: " << config.servers[i].data["listen"][0] << std::endl;
         std::cout << "error_page: " << config.servers[i].errorPages[404] << std::endl;
         std::cout << "auto_index: " << config.servers[i].autoIndex << std::endl;
+        std::cout << "allowed_methods:";
+        for (size_t k = 0; k < config.servers[i].data["allowed_methods"].size(); ++k)
+            std::cout << " " << config.servers[i].data["allowed_methods"][k];
+        std::cout << "\n";
         for (size_t j = 0; j < config.servers[i].locations.size(); ++j)
         {
             std::cout << "\nServer[" << i << "]"
@@ -59,6 +63,10 @@ int main(int ac, char **av)
             std::cout << "root: " << config.servers[i].locations[j].data["root"][0] << std::endl;
             std::cout << "error_page: " << config.servers[i].locations[j].errorPages[500] << std::endl;
             std::cout << "error_page: " << config.servers[i].locations[j].errorPages[404] << std::endl;
+            std::cout << "allowed_methods:";
+            for (size_t k = 0; k < config.servers[i].locations[j].data["allowed_methods"].size(); ++k)
+                std::cout << " " << config.servers[i].locations[j].data["allowed_methods"][k];
+            std::cout << "\n";
             if (config.servers[i].locations[j].data["index"].size() > 0)
                 std::cout << "index: " << config.servers[i].locations[j].data["index"][0] << std::endl;
         }

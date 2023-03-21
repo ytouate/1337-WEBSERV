@@ -58,6 +58,10 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
         this->errorPages.insert(std::make_pair(atoi(values.front().c_str()),
                                          values.back()));
     }
+    else if (key == "allowed_methods")
+    {
+        _allowed_methods = std::make_pair(key, values);
+    }
     else if (key == "auto_index")
     {
         if (values.size() != 1)
@@ -118,4 +122,5 @@ void locationParse::parseBlock()
     }
     data.insert(this->_root);
     data.insert(this->_index);
+    data.insert(this->_allowed_methods);
 }
