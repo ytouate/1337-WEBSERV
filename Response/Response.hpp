@@ -6,7 +6,7 @@
 /*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 15:46:12 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/24 15:49:57 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,17 +28,23 @@ class Response
     private:
         std::string _requestPath;
         std::string _contentType;
-        std::string _response;
         int         _statusCode;
+        std::string _body;
+        requestParse request;
     public:
-        bool    getMatchedLocation(Config& config, requestParse& request);
-        bool    checkPathIfValid(serverParse& server, int index, std::string line);
+        std::string _response;
+        Response(requestParse& _request);
+        bool    getMatchedLocation(Config& config);
+        bool    checkPathIfValid(serverParse& server, int index , std::string line);
         void    getContentType();
         void    faildResponse();
-        int     getMethod(Config &config, requestParse& request);
-        int     getIndexOfServerBlock(Config &config, requestParse &request);
+        int     getMethod(Config &configt);
+        int     getIndexOfServerBlock(Config &config);
         int     checkContent();
-        Response();
+        void    errorPages(serverParse& server, int id, int statusCode);
+        bool    methodAllowed(serverParse& server, int index);
+        bool    validFile(serverParse& server, int index, std::string path);
+        // bool    validationRequestPath(Config& config, requestParse& request);
         ~Response();
 };
 

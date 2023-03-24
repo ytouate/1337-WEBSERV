@@ -6,22 +6,21 @@
 /*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/23 16:51:15 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/24 15:53:13 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response()
-{
-    _requestPath = "";
-}
 
 Response::~Response()
 {
 }
 
-int     Response::getIndexOfServerBlock(Config &config, requestParse &request)
+Response::Response(requestParse& _request) : request(_request)
+{}
+
+int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
     if (host.rfind('/') == std::string::npos)
@@ -30,7 +29,6 @@ int     Response::getIndexOfServerBlock(Config &config, requestParse &request)
         {
             for (size_t j = 0; j < config.servers[i].data["server_name"].size(); j++)
             {
-                puts("hana");
                 if (host == config.servers[i].data["server_name"].at(j))
                     return i;
             }
@@ -52,7 +50,7 @@ int     Response::getIndexOfServerBlock(Config &config, requestParse &request)
 }
 
 
-bool    Response::getMatchedLocation(Config& config, requestParse& request)
+bool    Response::getMatchedLocation(Config& config)
 {
     size_t index = 0;
     int finalPath = -1;
@@ -61,7 +59,7 @@ bool    Response::getMatchedLocation(Config& config, requestParse& request)
     size_t matchPath = 0;
     size_t sec_matchPath = 0;
     char *save;
-    int indexServer = getIndexOfServerBlock(config, request);
+    int indexServer = getIndexOfServerBlock(config);
     std::string line = request.data["path"];
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
@@ -85,28 +83,116 @@ bool    Response::getMatchedLocation(Config& config, requestParse& request)
         counterNoMatch = 0;
     }
     // std::cout << server.locations[finalPath].path << std::endl;
-    if (!checkPathIfValid(config.servers[indexServer] , finalPath, line))
+    if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
+}
+
+void    Response::errorPages(serverParse& server, int id, int statusCode)
+{
+    std::string path = "./index/";
+    std::ifstream infile;
+    std::string line;
+    size_t size = server.locations[id].errorPages[statusCode].size();
+    if (size > 0)
+    {
+        if (size == 0)
+            path += "404.html";
+        else
+            path += server.locations[id].errorPages[statusCode];
+        infile.open(path);
+        while (getline(infile, line))
+            _body += line;
+        _statusCode = statusCode;
+    }
+}
+
+bool    Response::methodAllowed(serverParse& server, int index)
+{
+    if (server.locations[index].data["allowed_methods"].size() > 0)
+    {
+        for (size_t i = 0; i < server.locations[index].data["allowed_methods"].size(); i++)
+        {
+            if (request.data["method"] == server.locations[index].data["allowed_methods"][i])
+                return true;
+        }
+        errorPages(server, index, 405);
+        return false;
+    }
+    return true;
+}
+
+bool    Response::validFile(serverParse& server, int index, std::string path)
+{
+    std::ifstream file;
+    file.open(path);
+    if(file)
+    {
+        if (methodAllowed(server, index) == true)
+        {
+            std::string line;
+            while (getline(file, line))
+                _body += line;
+            _statusCode = 200;
+            this->_requestPath = path;
+        }
+        else
+            return false;
+    }
+    else
+    {
+        errorPages(server, index, 404);
+        return false;
+    }
+    return true;
 }
 
 bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
 {
     std::string path = server.locations[index].data["root"][0] + line;
     DIR *dir = opendir(path.c_str());
-    std::cout << path << std::endl;
     if (!dir)
-    {
-        std::ifstream file;
-        file.open(path);
-        if(file)
-            this->_requestPath = path;
-        else
-            return false;
-    }
+        return validFile(server, index, path);
     else
     {
-        this->_requestPath = path;
+        if (methodAllowed(server, index) == false)
+            return false;
+        _statusCode = 200;
+        if (path[path.size() - 1] != '/')
+        {
+            path += "/";
+            std::cout << "301 moved -> path = " << path << std::endl;
+        }
+        if (server.locations[index].data["index"].size() > 0 )
+        {
+            path += server.locations[index].data["index"][0];
+            this->_requestPath = path;
+            return validFile(server, index, path);
+        }
+        if (server.locations[index].autoIndex == true)
+        {
+            dirent *test ;
+            std::string content = "";
+            while ((test = readdir(dir)) != NULL)
+            {
+                content += "<a href=\"";
+                content += path + test->d_name;
+                content += "\">";
+                content += test->d_name ;
+                content += "</a>";
+                content += "\n";
+                content += "<br>";
+            }
+            FILE *file = fopen("t.html" , "w+");
+            if (file)
+                fwrite(content.data(), sizeof(char), content.size(), file);
+        }
+        else
+        {
+            
+            errorPages(server, index, 404); return false;
+        }
+        std::cout << path << std::endl;
     }
     return true;
 }
@@ -114,7 +200,6 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
 void   Response::getContentType()
 {
     std::string path = this->_requestPath;
-    std::cout << path.erase(0, path.rfind('.')) << std::endl;
     try
     {
         path = path.erase(0, path.rfind('.'));
@@ -143,43 +228,43 @@ void   Response::getContentType()
 void    Response::faildResponse()
 {
     char buffer[100];
-    this->_statusCode = 404;
-    sprintf(buffer, "GET HTTP/1.1 %d not found\r\n", this->_statusCode);
+    sprintf(buffer, "GET HTTP/1.1 %d \r\n", this->_statusCode);
     this->_response += buffer;
     sprintf(buffer, "Connection: closed\r\n\r\n");
     this->_response += buffer;
-    std::ifstream infile;
-    infile.open("/Users/otmallah/Desktop/1337-WebServ/index1.html");
-    std::string line;
-    while (getline(infile, line))
-        this->_response += line;
+    this->_response += _body;
     std::cout << _response << std::endl;
 }
 
-int    Response::getMethod(Config &config, requestParse& request)
+int    Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
-    getMatchedLocation(config, request);
-    getContentType();
-    std::ifstream infile;
-    infile.open(this->_requestPath);
-    if (!infile)
+    if (getMatchedLocation(config) == 1 && _statusCode != 200)
     {
         faildResponse();
-        return 1;
+        return (1);
     }
     else
     {
+        getContentType();
         this->_statusCode = 200;
         char buffer[100];
         sprintf(buffer, "GET %s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
         this->_response += buffer;
         sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
         this->_response += buffer;
-        std::string line1;
-        while (getline(infile, line1))
-            this->_response += line1;
+        _response += _body;
     }
     std::cout << _response << std::endl;
    return 0; 
 }
+
+// bool    Response::validationRequestPath(Config& config, requestParse& request)
+// {
+//     if (getMatchedLocation(config, request) == false)
+//         std::cout << "404 not found" << std::endl;
+//     else
+//     {
+    
+//     }
+// }

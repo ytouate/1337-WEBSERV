@@ -31,45 +31,27 @@ void error(const char *s)
     perror(s);
     exit(1);
 }
+
 #include "Response/Response.hpp"
 #include <deque>
+#include <fcntl.h>
+
 int main(int ac, char **av)
 {
-
-    Response response;
     if (ac != 2)
         return 1;
+    requestParse request(
+        "GET /index HTTP/1.1\n\
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
+        Accept-Language: en-US\n\
+        Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
+        Accept-Encoding: gzip, deflate\n\
+        Host: example.com\n\
+        Connection: Keep-Alive\n\
+        "
+    );
+    Response response(request);
     Config config(av[1]);
+    response.getMethod(config);
 
-    for (size_t i = 0; i < config.servers.size(); ++i)
-    {
-        std::cout << "Server[" << i << "]" << std::endl;
-        std::cout << "server_name: " << config.servers[i].data["server_name"][0] << std::endl;
-        std::cout << "root: " << config.servers[i].data["root"][0] << std::endl;
-        std::cout << "index: " << config.servers[i].data["index"][0] << std::endl;
-        std::cout << "listen: " << config.servers[i].data["listen"][0] << std::endl;
-        std::cout << "error_page: " << config.servers[i].errorPages[404] << std::endl;
-        std::cout << "auto_index: " << config.servers[i].autoIndex << std::endl;
-        std::cout << "allowed_methods:";
-        for (size_t k = 0; k < config.servers[i].data["allowed_methods"].size(); ++k)
-            std::cout << " " << config.servers[i].data["allowed_methods"][k];
-        std::cout << "\n";
-        for (size_t j = 0; j < config.servers[i].locations.size(); ++j)
-        {
-            std::cout << "\nServer[" << i << "]"
-                      << "location[" << j << "]\n";
-            std::cout << "auto_index: " << config.servers[i].locations[j].autoIndex << std::endl;
-            std::cout << "PATH: " << config.servers[i].locations[j].path << std::endl;
-            std::cout << "root: " << config.servers[i].locations[j].data["root"][0] << std::endl;
-            std::cout << "error_page: " << config.servers[i].locations[j].errorPages[500] << std::endl;
-            std::cout << "error_page: " << config.servers[i].locations[j].errorPages[404] << std::endl;
-            std::cout << "allowed_methods:";
-            for (size_t k = 0; k < config.servers[i].locations[j].data["allowed_methods"].size(); ++k)
-                std::cout << " " << config.servers[i].locations[j].data["allowed_methods"][k];
-            std::cout << "\n";
-            if (config.servers[i].locations[j].data["index"].size() > 0)
-                std::cout << "index: " << config.servers[i].locations[j].data["index"][0] << std::endl;
-        }
-        std::cout << "\n";
-    }
 }

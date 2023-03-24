@@ -34,3 +34,9 @@ each socket is ready to read. Another common method is to use fork() or similar 
 create separate threads/processes for each connected client. For simplicity, our server
 accepts the limitation that send() blocks on large files. Please refer to Chapter 13, Socket
 Programming Tips and Pitfalls, for more information about the blocking behavior of send().
+read the 6th chapter of the book
+build a functional web client
+
+
+-- othman
+-> auto_index
