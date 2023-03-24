@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/21 18:59:31 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/24 15:39:52 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,22 +28,23 @@ class Response
     private:
         std::string _requestPath;
         std::string _contentType;
-        std::string _response;
         int         _statusCode;
         std::string _body;
+        requestParse request;
     public:
-        bool    getMatchedLocation(Config& config, requestParse& request);
-        bool    checkPathIfValid(serverParse& server,  requestParse& request, int index , std::string line);
+        std::string _response;
+        Response(requestParse& _request);
+        bool    getMatchedLocation(Config& config);
+        bool    checkPathIfValid(serverParse& server, int index , std::string line);
         void    getContentType();
         void    faildResponse();
-        int     getMethod(Config &config, requestParse& request);
-        int     getIndexOfServerBlock(Config &config, requestParse &request);
+        int     getMethod(Config &configt);
+        int     getIndexOfServerBlock(Config &config);
         int     checkContent();
         void    errorPages(serverParse& server, int id, int statusCode);
-        bool    methodAllowed(serverParse& server, requestParse& request, int index);
-        bool    validFile(serverParse& server, requestParse& request, int index, std::string path);
+        bool    methodAllowed(serverParse& server, int index);
+        bool    validFile(serverParse& server, int index, std::string path);
         // bool    validationRequestPath(Config& config, requestParse& request);
-        Response();
         ~Response();
 };
 
