@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 20:12:38 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/24 20:22:37 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,10 @@ Response::~Response()
 {
 }
 
-Response::Response(requestParse& _request) : request(_request)
-{}
+Response::Response(Config &config, requestParse& _request) : request(_request)
+{
+    getMethod(config);
+}
 
 int     Response::getIndexOfServerBlock(Config &config)
 {
@@ -94,9 +96,12 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     std::ifstream infile;
     std::string line;
     size_t size = server.locations[id].errorPages[statusCode].size();
-    if (size > 0)
+    if (size > 0 || size == 0)
     {
-        path += server.locations[id].errorPages[statusCode];
+        if (size == 0)
+            path += "404.html";
+        else
+            path += server.locations[id].errorPages[statusCode];
         infile.open(path);
         while (getline(infile, line))
             _body += line;
@@ -169,6 +174,7 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
         if (server.locations[index].autoIndex == true)
         {
             dirent *test ;
+            std::string line;
             std::string content = "";
             while ((test = readdir(dir)) != NULL)
             {
@@ -180,15 +186,14 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
                 content += "\n";
                 content += "<br>";
             }
-            FILE *file = fopen("t.html" , "w+");
-            if (file)
-                fwrite(content.data(), sizeof(char), content.size(), file);
+            // FILE *file = fopen("t.html" , "w+");
+            // if (file)
+            //     fwrite(content.data(), sizeof(char), content.size(), file);
+            _body += content;
+            
         }
         else
-        {
-            
             errorPages(server, index, 404); return false;
-        }
         std::cout << path << std::endl;
     }
     return true;
