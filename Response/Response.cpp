@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 20:35:20 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/24 23:20:09 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
     std::ifstream file;
     file.open(path);
     if(file)
-    {
+    { 
         if (methodAllowed(server, index) == true)
         {
             std::string line;
@@ -137,6 +137,7 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
                 _body += line;
             _statusCode = 200;
             this->_requestPath = path;
+            getContentType();
         }
         else
             return false;
@@ -186,6 +187,7 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
                 content += "\n";
                 content += "<br>";
             }
+            _contentType = "text/html";
             // FILE *file = fopen("t.html" , "w+");
             // if (file)
             //     fwrite(content.data(), sizeof(char), content.size(), file);
@@ -251,7 +253,6 @@ int    Response::getMethod(Config &config)
     }
     else
     {
-        getContentType();
         this->_statusCode = 200;
         char buffer[100];
         sprintf(buffer, "%s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
