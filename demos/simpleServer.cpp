@@ -1,5 +1,4 @@
 #include <iostream>
-#include "Server.hpp"
 #include <sys/socket.h>
 #include <netdb.h>
 #include <ifaddrs.h>
@@ -10,63 +9,136 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <string.h>
+#include "simpleServer.hpp"
+#include "../Parse/requestParse.hpp"
+#include "../Response/Response.hpp"
+
+void error(const char *s)
+{
+    perror(s);
+    exit(1);
+}
+
+void Server::initServerSocket(const char *host, const char *port)
+{
+    struct addrinfo hints, *data;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_family = AF_INET;
+    int statusCode = getaddrinfo(host, port, &hints, &data);
+    if (statusCode)
+    {
+        std::cerr << gai_strerror(statusCode) << std::endl;
+        std::exit(1);
+    }
+    std::cout << "Creating the server socket\n";
+    _serverSocket = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
+    if (_serverSocket == -1)
+        error("socket()");
+    std::cout << "Binding the server socket to local address\n";
+    if (bind(_serverSocket, data->ai_addr, data->ai_addrlen))
+        error("bind()");
+    std::cout << "Listening for requests\n";
+    if (listen(_serverSocket, 10))
+        error("listen()");
+    freeaddrinfo(data);
+}
+
+void Server::getReadableClient()
+{
+    FD_ZERO(&_readyToReadFrom);
+    FD_SET(_serverSocket, &_readyToReadFrom);
+    int biggerSocket = _serverSocket;
+    std::map<int, Client>::iterator it = _clients.begin();
+    while (it != _clients.end())
+    {
+        FD_SET(it->first, &_readyToReadFrom);
+        if (it->first > biggerSocket)
+            biggerSocket = it->first;
+        ++it;
+    }
+
+    if (select(biggerSocket + 1, &_readyToReadFrom, 0, 0, 0) == -1)
+        error("select()");
+}
+
+Server::~Server()
+{
+    _clients.clear();
+}
+
+const std::string Client::getClientAddress()
+{
+    char buff[100];
+    getnameinfo((struct sockaddr *)&this->clientAddress,
+                this->addressLenght, buff, sizeof buff, 0, 0,
+                NI_NUMERICHOST);
+    const std::string save(buff);
+    return save;
+}
+
+void Server::acceptConnection()
+{
+    if (FD_ISSET(_serverSocket, &_readyToReadFrom))
+    {
+        Client _newClient;
+        _newClient.addressLenght = sizeof _newClient.clientAddress;
+        _newClient.socket = accept(_serverSocket,
+                                   (struct sockaddr *)&_newClient.clientAddress,
+                                   &_newClient.addressLenght);
+        if (_newClient.socket == -1)
+            error("accept()");
+        _clients.insert(std::make_pair(_newClient.socket,
+                                       _newClient));
+        std::cout << "New connection from: "
+                  << _newClient.getClientAddress() << "\n";
+    }
+}
+
+Server::Server()
+{
+    initServerSocket(NULL, "8080");
+    while (1)
+    {
+        getReadableClient();
+        acceptConnection();
+        std::map<int, Client>::iterator it = _clients.begin();
+        while (it != _clients.end())
+        {
+            if (FD_ISSET(it->first, &_readyToReadFrom))
+            {
+                int r;
+                char buff[1000];
+                r = recv(it->first, buff, sizeof buff, 0);
+                if (r < 1)
+                {
+                    close(it->first);
+                    it = _clients.erase(it);
+                    continue;
+                }
+                std::string response;
+                response += "HTTP/1.1 200 OK\r\n";
+                response += "Connection: close\r\n";
+                response += "Content-Length: 21\r\n";
+                response += "Content-Type: text/html\r\n";
+                response += "\r\n";
+                response += "<h1>Hello world</h1>";
+                int nBytes = send(it->first, response.c_str(),
+                                  response.size(), 0);
+                if (nBytes == -1)
+                    error("send()");
+                close(it->first);
+                it = _clients.erase(it);
+                std::cout << nBytes << " byte Sent\n";
+            }
+            it++;
+        }
+    }
+}
 
 int main()
 {
-    struct addrinfo hints, *data;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_flags = AI_PASSIVE;
-
-    getaddrinfo(NULL, "8080", &hints, &data);
-
-    int sockfd;
-    if ((sockfd = socket(data->ai_family, data->ai_socktype, data->ai_protocol)) == -1)
-    {
-        perror("socket()");
-        return 1;
-    }
-
-    if (bind(sockfd, data->ai_addr, data->ai_addrlen) == -1)
-    {
-        perror("bind()");
-        exit(1);
-    }
-
-    if (listen(sockfd, 10) == -1)
-        perror("listen()");
-    
-    struct sockaddr_in *ip = (struct sockaddr_in *)&data->ai_addr;
-    struct in_addr ipAddr = ip->sin_addr;
-
-    std::cout << "Server is waiting for connection " << std::endl;
-
-    while (1)
-    {
-        struct sockaddr theirAddr;
-        socklen_t size = sizeof(theirAddr);
-        int new_fd;
-        if ((new_fd = accept(sockfd, &theirAddr, &size)) == -1)
-        {
-            perror("accept()");
-            return 1;
-        }
-
-        std::cout << "Server got the connection\n";
-        if (!fork())
-        {
-            close(sockfd);
-            if (send(new_fd, "hello world\n", 12, 0) == -1)
-            {
-                perror("send");
-                return 1;
-            }
-            close(new_fd);
-            exit(0);
-        }
-        shutdown(new_fd, 0);
-        close(new_fd);
-    }
+    Server server;
 }
