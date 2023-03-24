@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 15:39:52 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/24 20:11:02 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,20 +31,19 @@ class Response
         int         _statusCode;
         std::string _body;
         requestParse request;
-    public:
-        std::string _response;
-        Response(requestParse& _request);
         bool    getMatchedLocation(Config& config);
         bool    checkPathIfValid(serverParse& server, int index , std::string line);
         void    getContentType();
         void    faildResponse();
-        int     getMethod(Config &configt);
         int     getIndexOfServerBlock(Config &config);
         int     checkContent();
         void    errorPages(serverParse& server, int id, int statusCode);
         bool    methodAllowed(serverParse& server, int index);
         bool    validFile(serverParse& server, int index, std::string path);
-        // bool    validationRequestPath(Config& config, requestParse& request);
+    public:
+        std::string _response;
+        Response(requestParse& _request);
+        int     getMethod(Config &configt);
         ~Response();
 };
 

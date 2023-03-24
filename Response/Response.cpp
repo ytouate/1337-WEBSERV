@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 15:40:48 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/24 20:10:19 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,10 +96,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     size_t size = server.locations[id].errorPages[statusCode].size();
     if (size > 0)
     {
-        if (size == 0)
-            path += "404.html";
-        else
-            path += server.locations[id].errorPages[statusCode];
+        path += server.locations[id].errorPages[statusCode];
         infile.open(path);
         while (getline(infile, line))
             _body += line;
@@ -225,7 +222,7 @@ void   Response::getContentType()
 void    Response::faildResponse()
 {
     char buffer[100];
-    sprintf(buffer, "GET HTTP/1.1 %d \r\n", this->_statusCode);
+    sprintf(buffer, "HTTP/1.1 %d \r\n", this->_statusCode);
     this->_response += buffer;
     sprintf(buffer, "Connection: closed\r\n\r\n");
     this->_response += buffer;
@@ -246,7 +243,7 @@ int    Response::getMethod(Config &config)
         getContentType();
         this->_statusCode = 200;
         char buffer[100];
-        sprintf(buffer, "GET %s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
+        sprintf(buffer, "%s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
         this->_response += buffer;
         sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
         this->_response += buffer;
