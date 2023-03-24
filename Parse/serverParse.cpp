@@ -143,7 +143,7 @@ bool serverParse::isNumber(const std::string &s)
 {
     for (size_t i = 0; i < s.size(); i++)
     {
-        if (!isnumber(s[i]))
+        if (!isdigit(s[i]))
             return false;
     }
     return true;
