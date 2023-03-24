@@ -41,7 +41,7 @@ int main(int ac, char **av)
     if (ac != 2)
         return 1;
     requestParse request(
-        "GET /index HTTP/1.1\n\
+        "GET /indexcdc HTTP/1.1\n\
         User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
         Accept-Language: en-US\n\
         Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
