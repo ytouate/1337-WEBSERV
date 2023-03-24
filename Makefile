@@ -19,6 +19,7 @@ $(NAME): $(O_FILE)
 
 clean:
 	rm -rf Parse/*.o
+	rm -rf Response/*.o
 	rm -rf *.o
 
 fclean: clean
