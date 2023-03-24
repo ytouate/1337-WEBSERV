@@ -1,4 +1,5 @@
 #include "Config.hpp"
+#include <iostream>
 
 Config::Config(std::string s)
 {

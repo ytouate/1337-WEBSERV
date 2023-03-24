@@ -3,6 +3,7 @@
 
 #include "../inc.hpp"
 #include "Config.hpp"
+#include <map>
 
 #define  ON 1
 #define  OFF 0

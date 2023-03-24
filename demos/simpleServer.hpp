@@ -32,12 +32,13 @@ private:
     std::map<int, Client>       _clients;
     fd_set                      _readyToReadFrom;
 
+    void dropClient(int sock);
     void checkCientCases();
     void getReadableClient();
     void acceptConnection();
     void initServerSocket(const char *host, const char *port);
 public:
-    Server();
+    Server(std::string file);
     ~Server();
 };
 

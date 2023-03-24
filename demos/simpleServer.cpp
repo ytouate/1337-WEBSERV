@@ -10,9 +10,11 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <string.h>
+#include "../inc.hpp"
 #include "simpleServer.hpp"
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
+#include <filesystem>
 
 void error(const char *s)
 {
@@ -97,7 +99,14 @@ void Server::acceptConnection()
     }
 }
 
-Server::Server()
+void Server::dropClient(int sock)
+{
+    close(sock);
+    _clients[sock].socket = 10; 
+    // _clients.erase(sock);
+}
+
+Server::Server(std::string file)
 {
     initServerSocket(NULL, "8080");
     while (1)
@@ -118,27 +127,45 @@ Server::Server()
                     it = _clients.erase(it);
                     continue;
                 }
-                std::string response;
-                response += "HTTP/1.1 200 OK\r\n";
-                response += "Connection: close\r\n";
-                response += "Content-Length: 21\r\n";
-                response += "Content-Type: text/html\r\n";
-                response += "\r\n";
-                response += "<h1>Hello world</h1>";
-                int nBytes = send(it->first, response.c_str(),
-                                  response.size(), 0);
-                if (nBytes == -1)
-                    error("send()");
-                close(it->first);
-                it = _clients.erase(it);
-                std::cout << nBytes << " byte Sent\n";
+                else
+                {
+                    requestParse request(buff);
+                    Response response(request);
+                    Config config(file);
+                    // std::string response = "";
+                    // std::fstream responseFile;
+                    // responseFile.open("./public/index.html", std::ios::in);
+                    // if (responseFile.fail())
+                    //     error("open()");
+                    
+                    // response += "HTTP/1.1 200 OK\r\n";
+                    // response += "Connection: close\r\n";
+                    // response += "Content-Length: 308\r\n";
+                    // response += "Content-Type: text/html\r\n";
+                    // response += "\r\n";
+                    // std::string line;
+                    // while (std::getline(responseFile, line))
+                    // {
+                    //     response += line;
+                    // }
+                    response.getMethod(config);
+                    std::cout << response._response << std::endl;
+                    int nBytes = send(it->first, response._response.c_str(),
+                                      response._response.size(), 0);
+                    if (nBytes == -1)
+                        error("send()");
+                    std::cout << nBytes << " byte Sent\n";
+                    close(it->first);
+                    it = _clients.erase(it);
+                    continue;
+                }
             }
             it++;
         }
     }
 }
 
-int main()
+int main(int ac, char **av)
 {
-    Server server;
+    Server server(av[1]);
 }

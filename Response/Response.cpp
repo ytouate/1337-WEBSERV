@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 20:10:19 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/24 20:12:38 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,10 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
                 fwrite(content.data(), sizeof(char), content.size(), file);
         }
         else
+        {
+            
             errorPages(server, index, 404); return false;
+        }
         std::cout << path << std::endl;
     }
     return true;

@@ -2,6 +2,9 @@
 #define ACONFIG_HPP
 
 #include "../inc.hpp"
+#include <fstream>
+#include <vector>
+
 #include "serverParse.hpp"
 
 class serverParse;
