@@ -53,17 +53,17 @@ void Server::getReadableClient()
 {
     FD_ZERO(&_readyToReadFrom);
     FD_SET(_serverSocket, &_readyToReadFrom);
-    int biggerSocket = _serverSocket;
+    int maxSocket = _serverSocket;
     std::map<int, Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
         FD_SET(it->first, &_readyToReadFrom);
-        if (it->first > biggerSocket)
-            biggerSocket = it->first;
+        if (it->first > maxSocket)
+            maxSocket = it->first;
         ++it;
     }
 
-    if (select(biggerSocket + 1, &_readyToReadFrom, 0, 0, 0) == -1)
+    if (select(maxSocket + 1, &_readyToReadFrom, 0, 0, 0) == -1)
         error("select()");
 }
 
@@ -141,6 +141,7 @@ void Server::serveContent()
         it++;
     }
 }
+
 Server::Server(std::string file) : _configFile(file)
 {
     initServerSocket(NULL, "8080");
@@ -156,5 +157,5 @@ Server::Server(std::string file) : _configFile(file)
 int main(int ac, char **av)
 {
     if (ac == 2)
-    Server server(av[1]);
+        Server server(av[1]);
 }
