@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 15:49:57 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/24 20:19:55 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,21 +31,25 @@ class Response
         int         _statusCode;
         std::string _body;
         requestParse request;
-    public:
-        std::string _response;
-        Response(requestParse& _request);
         bool    getMatchedLocation(Config& config);
         bool    checkPathIfValid(serverParse& server, int index , std::string line);
         void    getContentType();
         void    faildResponse();
-        int     getMethod(Config &configt);
         int     getIndexOfServerBlock(Config &config);
         int     checkContent();
         void    errorPages(serverParse& server, int id, int statusCode);
         bool    methodAllowed(serverParse& server, int index);
         bool    validFile(serverParse& server, int index, std::string path);
-        // bool    validationRequestPath(Config& config, requestParse& request);
+        int     getMethod(Config &configt);
+    public:
+        std::string _response;
+        Response(Config &config, requestParse& _request);
         ~Response();
 };
 
 #endif
+
+
+
+
+

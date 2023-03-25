@@ -130,8 +130,8 @@ Server::Server(std::string file)
                 else
                 {
                     requestParse request(buff);
-                    Response response(request);
                     Config config(file);
+                    Response response(config, request);
                     // std::string response = "";
                     // std::fstream responseFile;
                     // responseFile.open("./public/index.html", std::ios::in);
@@ -148,7 +148,6 @@ Server::Server(std::string file)
                     // {
                     //     response += line;
                     // }
-                    response.getMethod(config);
                     std::cout << response._response << std::endl;
                     int nBytes = send(it->first, response._response.c_str(),
                                       response._response.size(), 0);

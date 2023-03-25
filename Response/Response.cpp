@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 15:53:13 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/24 20:35:20 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,10 @@ Response::~Response()
 {
 }
 
-Response::Response(requestParse& _request) : request(_request)
-{}
+Response::Response(Config &config, requestParse& _request) : request(_request)
+{
+    getMethod(config);
+}
 
 int     Response::getIndexOfServerBlock(Config &config)
 {
@@ -94,7 +96,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     std::ifstream infile;
     std::string line;
     size_t size = server.locations[id].errorPages[statusCode].size();
-    if (size > 0)
+    if (size > 0 || size == 0)
     {
         if (size == 0)
             path += "404.html";
@@ -172,6 +174,7 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
         if (server.locations[index].autoIndex == true)
         {
             dirent *test ;
+            std::string line;
             std::string content = "";
             while ((test = readdir(dir)) != NULL)
             {
@@ -183,15 +186,14 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
                 content += "\n";
                 content += "<br>";
             }
-            FILE *file = fopen("t.html" , "w+");
-            if (file)
-                fwrite(content.data(), sizeof(char), content.size(), file);
+            // FILE *file = fopen("t.html" , "w+");
+            // if (file)
+            //     fwrite(content.data(), sizeof(char), content.size(), file);
+            _body += content;
+            
         }
         else
-        {
-            
             errorPages(server, index, 404); return false;
-        }
         std::cout << path << std::endl;
     }
     return true;
@@ -228,9 +230,11 @@ void   Response::getContentType()
 void    Response::faildResponse()
 {
     char buffer[100];
-    sprintf(buffer, "GET HTTP/1.1 %d \r\n", this->_statusCode);
+    sprintf(buffer, "HTTP/1.1 %d \r\n", this->_statusCode);
     this->_response += buffer;
-    sprintf(buffer, "Connection: closed\r\n\r\n");
+    sprintf(buffer, "Connection: closed\r\n");
+    this->_response += buffer;
+    sprintf(buffer, "Content-Type: text/html\r\n\r\n");
     this->_response += buffer;
     this->_response += _body;
     std::cout << _response << std::endl;
@@ -241,6 +245,7 @@ int    Response::getMethod(Config &config)
     std::string line = request.data["path"];
     if (getMatchedLocation(config) == 1 && _statusCode != 200)
     {
+        getContentType();
         faildResponse();
         return (1);
     }
@@ -249,7 +254,7 @@ int    Response::getMethod(Config &config)
         getContentType();
         this->_statusCode = 200;
         char buffer[100];
-        sprintf(buffer, "GET %s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
+        sprintf(buffer, "%s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
         this->_response += buffer;
         sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
         this->_response += buffer;
