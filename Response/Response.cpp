@@ -6,7 +6,7 @@
 /*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/25 12:27:36 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/25 12:35:31 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,6 @@ bool    Response::getMatchedLocation(Config& config)
         counterMatch = 0;
         counterNoMatch = 0;
     }
-    // std::cout << server.locations[finalPath].path << std::endl;
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -197,9 +196,7 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
         else
         {
             errorPages(server, index, 404); return false;
-            
         }
-        std::cout << path << std::endl;
     }
     return true;
 }
@@ -242,7 +239,6 @@ void    Response::faildResponse()
     sprintf(buffer, "Content-Type: text/html\r\n\r\n");
     this->_response += buffer;
     this->_response += _body;
-    std::cout << _response << std::endl;
 }
 
 int    Response::getMethod(Config &config)
@@ -264,7 +260,6 @@ int    Response::getMethod(Config &config)
         this->_response += buffer;
         _response += _body;
     }
-    std::cout << _response << std::endl;
    return 0; 
 }
 

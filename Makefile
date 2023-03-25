@@ -5,8 +5,9 @@ FILES = \
 	./Parse/serverParse.cpp		\
 	./main.cpp					\
 	./Parse/locationParse.cpp	\
-	./Parse/requestParse.cpp \
-	./Response/Response.cpp
+	./Parse/requestParse.cpp 	\
+	./Response/Response.cpp		\
+	./Server/Server.cpp
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
@@ -20,6 +21,7 @@ $(NAME): $(O_FILE)
 clean:
 	rm -rf Parse/*.o
 	rm -rf Response/*.o
+	rm -rf Server/*.o
 	rm -rf *.o
 
 fclean: clean

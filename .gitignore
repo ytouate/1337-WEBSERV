@@ -3,3 +3,4 @@
 *.txt
 *.out
 webserv
+demos/server.cpp
