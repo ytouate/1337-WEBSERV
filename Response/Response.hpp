@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 20:19:55 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/25 14:08:16 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 class Response
 {
     private:
+        long        _contentLength;
         std::string _requestPath;
         std::string _contentType;
         int         _statusCode;
