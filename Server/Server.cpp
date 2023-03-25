@@ -124,6 +124,8 @@ void Server::serveContent()
                 it->second.received = 0;
                 it->second.received = send(it->first, response._response.c_str(),
                                            response._response.size(), 0);
+                std::cout << response._response.size() << std::endl;
+                std::cout << it->second.received << std::endl;
                 while (it->second.received < (int)response._response.size())
                 {
                     if (it->second.received == -1)
@@ -144,7 +146,7 @@ void Server::serveContent()
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "9001");
+    initServerSocket(NULL, "8080");
     while (1)
     {
         getReadableClient();

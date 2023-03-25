@@ -11,7 +11,7 @@ FILES = \
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
-CPPFLAGS = -Wall -Wextra -Werror -fsanitize=address -g
+CPPFLAGS = -Wall -Wextra -Werror 
 
 all: $(NAME)
 
