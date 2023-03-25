@@ -319,12 +319,10 @@ int main()
         struct client_info *client = clients;
         while (client)
         {
-            std::cout << client->socket << std::endl; 
             struct client_info *next = client->next;
 
             if (FD_ISSET(client->socket, &reads))
             {
-
                 if (MAX_REQUEST_SIZE == client->received)
                 {
                     send_400(client);

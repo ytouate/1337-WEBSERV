@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/24 23:20:09 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/25 15:48:43 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,6 @@ bool    Response::getMatchedLocation(Config& config)
         counterMatch = 0;
         counterNoMatch = 0;
     }
-    // std::cout << server.locations[finalPath].path << std::endl;
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -127,14 +126,22 @@ bool    Response::methodAllowed(serverParse& server, int index)
 bool    Response::validFile(serverParse& server, int index, std::string path)
 {
     std::ifstream file;
-    file.open(path);
+    file.open(path, std::ios::binary);
     if(file)
-    { 
+    {
         if (methodAllowed(server, index) == true)
         {
-            std::string line;
-            while (getline(file, line))
-                _body += line;
+            file.seekg(0, std::ios::end);
+            _contentLength = file.tellg();
+            file.seekg(0, std::ios::beg);
+            std::vector<char> buffer(_contentLength);
+            file.read(buffer.data(), _contentLength);
+            size_t i = 0;
+            while (i < buffer.size())
+            {
+                _body += buffer[i];
+                i++;
+            }
             _statusCode = 200;
             this->_requestPath = path;
             getContentType();
@@ -192,11 +199,11 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
             // if (file)
             //     fwrite(content.data(), sizeof(char), content.size(), file);
             _body += content;
-            
         }
         else
+        {
             errorPages(server, index, 404); return false;
-        std::cout << path << std::endl;
+        }
     }
     return true;
 }
@@ -226,6 +233,11 @@ void   Response::getContentType()
     else if (path == ".pdf")  this->_contentType = "application/pdf";
     else if (path == ".svg")  this->_contentType = "image/svg+xml";
     else if (path == ".txt")  this->_contentType = "text/plain";
+    else if (path == ".mp4")  this->_contentType = "video/mp4";
+    else if (path == ".WebM")  this->_contentType = "video/webm";
+    else if (path == ".Ogg")  this->_contentType = "video/ogg";
+    else if (path == ".AVI")  this->_contentType = "video/x-msvideo";
+    else if (path == ".MPEG")  this->_contentType = "video/mpeg";
     else this->_contentType = "application/octet-stream";
 }
 
@@ -239,7 +251,6 @@ void    Response::faildResponse()
     sprintf(buffer, "Content-Type: text/html\r\n\r\n");
     this->_response += buffer;
     this->_response += _body;
-    std::cout << _response << std::endl;
 }
 
 int    Response::getMethod(Config &config)
@@ -255,13 +266,14 @@ int    Response::getMethod(Config &config)
     {
         this->_statusCode = 200;
         char buffer[100];
-        sprintf(buffer, "%s  %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
+        sprintf(buffer, "%s %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
         this->_response += buffer;
-        sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
+        sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
+        this->_response += buffer;
+        sprintf(buffer, "Content-Length: %ld\r\n\r\n", this->_contentLength);
         this->_response += buffer;
         _response += _body;
     }
-    std::cout << _response << std::endl;
    return 0; 
 }
 

@@ -2,5 +2,5 @@
 *.tldr
 *.txt
 *.out
-index
-index.html
+webserv
+demos/server.cpp
