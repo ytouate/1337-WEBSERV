@@ -11,7 +11,7 @@ FILES = \
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
-CPPFLAGS = -Wall -Wextra -Werror 
+CPPFLAGS =
 
 all: $(NAME)
 
