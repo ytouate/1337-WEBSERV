@@ -46,12 +46,12 @@ void printDrective(directive &a)
 //         Accept-Language: en-US\n\
 //         Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
 //         Accept-Encoding: gzip, deflate\n\
-//         Host: example.com\n\
+//         Host: localhost:9001\n\
 //         Connection: Keep-Alive\n\
 //         "
 //     );
 //     Config config(av[1]);
 //     Response response(config, request);
-//     std::cout << response._response << std::endl;
+//     // std::cout << response._response << std::endl;
 
 // }

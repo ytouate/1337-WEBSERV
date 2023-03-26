@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/25 16:45:38 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/26 00:49:23 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ Response::Response(Config &config, requestParse& _request) : request(_request)
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
-    if (host.rfind('/') == std::string::npos)
+    host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
+    if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
         for (size_t i = 0; i < config.servers.size() ; i++)
         {
@@ -39,6 +40,7 @@ int     Response::getIndexOfServerBlock(Config &config)
     else
     {
         std::string port = host.erase(0, host.rfind('/') + 1);
+        port = host.erase(0, host.rfind(':') + 1);
         for (size_t i = 0; i < config.servers.size() ; i++)
         {
             for (size_t j = 0; j < config.servers[i].data["listen"].size(); j++)
@@ -50,7 +52,6 @@ int     Response::getIndexOfServerBlock(Config &config)
     }
     return (0);
 }
-
 
 bool    Response::getMatchedLocation(Config& config)
 {
@@ -278,7 +279,9 @@ int    Response::getMethod(Config &config)
         {
             sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
             this->_response += buffer;
-            sprintf(buffer, "Content-Length: %ld\r\n\r\n", this->_contentLength);
+            sprintf(buffer, "Content-Length: %ld\r\n", this->_contentLength);
+            this->_response += buffer;
+            sprintf(buffer, "Connection: keep-alive\r\n\r\n");
             this->_response += buffer;
         }
         else
