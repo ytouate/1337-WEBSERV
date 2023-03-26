@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/25 15:48:43 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/25 16:45:38 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,12 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
 
 bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
 {
-    std::string path = server.locations[index].data["root"][0] + line;
+    static int i;
+    std::string path;
+    if (i == 0)
+        path = server.locations[index].data["root"][0] + line;
+    else
+        path = line;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -205,6 +210,7 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
             errorPages(server, index, 404); return false;
         }
     }
+    i++;
     return true;
 }
 
@@ -268,12 +274,21 @@ int    Response::getMethod(Config &config)
         char buffer[100];
         sprintf(buffer, "%s %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
         this->_response += buffer;
-        sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
-        this->_response += buffer;
-        sprintf(buffer, "Content-Length: %ld\r\n\r\n", this->_contentLength);
-        this->_response += buffer;
+        if (_contentType != "text/html")
+        {
+            sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
+            this->_response += buffer;
+            sprintf(buffer, "Content-Length: %ld\r\n\r\n", this->_contentLength);
+            this->_response += buffer;
+        }
+        else
+        {
+            sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
+            this->_response += buffer;
+        }
         _response += _body;
     }
+    _requestPath = "";
    return 0; 
 }
 

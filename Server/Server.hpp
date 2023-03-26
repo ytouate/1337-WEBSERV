@@ -35,7 +35,7 @@ private:
     std::map<int, Client>       _clients;
     fd_set                      _readyToReadFrom;
     Config                      _configFile;
-
+    
     std::string getRequestBuffer(Client &);
     void checkCientCases();
     void getReadableClient();

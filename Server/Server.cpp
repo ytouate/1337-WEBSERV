@@ -14,7 +14,7 @@
 #include "Server.hpp"
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
-#include <filesystem>
+
 #define MAX_REQUEST_SIZE 4096
 
 void error(const char *s)
@@ -100,8 +100,12 @@ void Server::acceptConnection()
     }
 }
 
+
+#define MAX_CHUNK_SIZE 57000
+
 void Server::serveContent()
 {
+
     std::map<int, Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
@@ -121,19 +125,17 @@ void Server::serveContent()
             {
                 requestParse request(buff);
                 Response response(_configFile, request);
+                it->second.remaining = response._response.size();
                 it->second.received = 0;
-                it->second.received = send(it->first, response._response.c_str(),
-                                           response._response.size(), 0);
-                std::cout << response._response.size() << std::endl;
-                std::cout << it->second.received << std::endl;
                 while (it->second.received < (int)response._response.size())
                 {
-                    if (it->second.received == -1)
-                        error("send()");
-                    response._response = response._response.substr(it->second.received,
-                                                                   response._response.size() + 1);
-                    it->second.received = send(it->first, response._response.c_str(),
-                                               response._response.size(), 0);
+                    int chunk = std::min(it->second.remaining, MAX_CHUNK_SIZE);
+                    const char *chunkedStr = response._response.c_str() + it->second.received;
+                    int ret = send(it->first, chunkedStr, chunk, 0);
+                    if (ret == -1)
+                        break;
+                    it->second.remaining -= ret;
+                    it->second.received += ret;
                 }
                 close(it->first);
                 it = _clients.erase(it);
