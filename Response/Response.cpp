@@ -6,11 +6,12 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/26 14:56:17 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/26 17:13:58 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
+#include <algorithm>
 
 
 Response::~Response()
@@ -126,7 +127,6 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     }
     else
     {
-        puts("hana");
         if (statusCode == 400)
             path += "400.html";
         if (statusCode == 404)
@@ -195,27 +195,16 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
     return true;
 }
 
-bool    matching(std::string line1, std::string line2)
-{
-
-        std::string find = line2.erase(line2.rfind('/'), line2.size());
-        std::cout << find << std::endl;
-        std::cout << line1 << std::endl;
-        if (find == line1)
-            return true;
-    return false;
-}
+std::string checker;
 
 bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
 {
-    int status = validateRequest();
-    if (status != 0)
-        errorPages(server, index, status); return false;
     std::string path;
-    static int i;
+    static int i = 0;
+    path = server.locations[index].data["root"][0] + line;
     if (i == 0)
-        path = server.locations[index].data["root"][0] + line;
-    else
+        checker = line;
+    if (checker != line)
         path = line;
     DIR *dir = opendir(path.c_str());
     if (!dir)

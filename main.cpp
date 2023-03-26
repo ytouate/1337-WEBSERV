@@ -29,12 +29,6 @@ void printDrective(directive &a)
     std::cout << "\n";
 }
 
-// void error(const char *s)
-// {
-//     perror(s);
-//     exit(1);
-// }
-
 
 // int main(int ac, char **av)
 // {
@@ -52,6 +46,5 @@ void printDrective(directive &a)
 //     );
 //     Config config(av[1]);
 //     Response response(config, request);
-//     // std::cout << response._response << std::endl;
-
+//     std::cout << response._response << std::endl;
 // }

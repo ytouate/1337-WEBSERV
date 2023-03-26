@@ -40,4 +40,6 @@ build a functional web client
 
 -- othman
 -> path begin
--> large size_video
+-> allowd_methos {server_block}
+-> format request valid
+

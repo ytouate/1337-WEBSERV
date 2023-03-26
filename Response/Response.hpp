@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/26 14:23:57 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/26 17:06:35 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,12 @@ class Response
 {
     private:
         long        _contentLength;
-        std::string _requestPath;
-        std::string _contentType;
         int         _statusCode;
-        std::string _body;
+        std::string _contentType;
+        std::string _requestPath;
+        std::string _checker;
         requestParse request;
+        std::string _body;
         bool    getMatchedLocation(Config& config);
         bool    checkPathIfValid(serverParse& server, int index , std::string line);
         void    getContentType();

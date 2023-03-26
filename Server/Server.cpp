@@ -14,7 +14,7 @@
 #include "Server.hpp"
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
-#include <filesystem>
+
 #define MAX_REQUEST_SIZE 4096
 
 void error(const char *s)
@@ -53,17 +53,17 @@ void Server::getReadableClient()
 {
     FD_ZERO(&_readyToReadFrom);
     FD_SET(_serverSocket, &_readyToReadFrom);
-    int biggerSocket = _serverSocket;
+    int maxSocket = _serverSocket;
     std::map<int, Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
         FD_SET(it->first, &_readyToReadFrom);
-        if (it->first > biggerSocket)
-            biggerSocket = it->first;
+        if (it->first > maxSocket)
+            maxSocket = it->first;
         ++it;
     }
 
-    if (select(biggerSocket + 1, &_readyToReadFrom, 0, 0, 0) == -1)
+    if (select(maxSocket + 1, &_readyToReadFrom, 0, 0, 0) == -1)
         error("select()");
 }
 
@@ -100,8 +100,12 @@ void Server::acceptConnection()
     }
 }
 
+
+#define MAX_CHUNK_SIZE 1024
+
 void Server::serveContent()
 {
+    signal(SIGPIPE, SIG_IGN);
     std::map<int, Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
@@ -121,17 +125,17 @@ void Server::serveContent()
             {
                 requestParse request(buff);
                 Response response(_configFile, request);
+                it->second.remaining = response._response.size();
                 it->second.received = 0;
-                it->second.received = send(it->first, response._response.c_str(),
-                                           response._response.size(), 0);
                 while (it->second.received < (int)response._response.size())
                 {
-                    if (it->second.received == -1)
-                        error("send()");
-                    response._response = response._response.substr(it->second.received,
-                                                                   response._response.size() + 1);
-                    it->second.received = send(it->first, response._response.c_str(),
-                                               response._response.size(), 0);
+                    int chunk = std::min(it->second.remaining, MAX_CHUNK_SIZE);
+                    const char *chunkedStr = response._response.c_str() + it->second.received;
+                    int ret = send(it->first, chunkedStr, chunk, 0);
+                    if (ret == -1)
+                        break;
+                    it->second.remaining -= ret;
+                    it->second.received += ret;
                 }
                 close(it->first);
                 it = _clients.erase(it);
@@ -141,6 +145,7 @@ void Server::serveContent()
         it++;
     }
 }
+
 Server::Server(std::string file) : _configFile(file)
 {
     initServerSocket(NULL, "8081");
@@ -156,5 +161,5 @@ Server::Server(std::string file) : _configFile(file)
 int main(int ac, char **av)
 {
     if (ac == 2)
-    Server server(av[1]);
+        Server server(av[1]);
 }

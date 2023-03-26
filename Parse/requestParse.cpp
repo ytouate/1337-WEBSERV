@@ -31,7 +31,7 @@ void requestParse::getHost(std::string &s)
     if (token == "Host")
     {
         pos = s.find_last_of(" ");
-        s.erase(0, pos + 1);
+        s = s.erase(0, pos + 1);
         this->data.insert(std::make_pair("host", s));
     }
 }

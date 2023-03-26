@@ -3,7 +3,6 @@ NAME = webserv
 FILES = \
 	./Parse/Config.cpp			\
 	./Parse/serverParse.cpp		\
-	./main.cpp					\
 	./Parse/locationParse.cpp	\
 	./Parse/requestParse.cpp 	\
 	./Response/Response.cpp		\
@@ -11,7 +10,7 @@ FILES = \
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
-CPPFLAGS = -Wall -Wextra -Werror -fsanitize=address -g
+CPPFLAGS =
 
 all: $(NAME)
 
