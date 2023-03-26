@@ -105,7 +105,7 @@ void Server::acceptConnection()
 
 void Server::serveContent()
 {
-
+    signal(SIGPIPE, SIG_IGN);
     std::map<int, Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
