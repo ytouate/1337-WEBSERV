@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/26 14:59:29 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/26 17:13:58 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,25 @@ Response::~Response()
 Response::Response(Config &config, requestParse& _request) : request(_request)
 {
     getMethod(config);
+}
+
+int    Response::validateRequest()
+{
+    int i = 0;
+    if (request.data["path"].size() > 2048)
+        return 414;
+    while (request.data["path"][i])
+    {
+        if ((request.data["path"][i] >= 48 && request.data["data"][i] <= 59) ||
+            (request.data["path"][i] >= 61 && request.data["data"][i] <= 93) ||
+            (request.data["path"][i] >= 97 && request.data["data"][i] <= 122) ||
+            (request.data["path"][i] >= 36 && request.data["data"][i] <= 47) ||
+            (request.data["path"][i] == 95))
+            i++;
+        else
+            return 400;
+    }
+    return 0;
 }
 
 int     Response::getIndexOfServerBlock(Config &config)
@@ -78,6 +97,7 @@ bool    Response::getMatchedLocation(Config& config)
         }
         if (i == 0 || ((counterMatch > matchPath) && (counterNoMatch <= sec_matchPath)))
         {
+            if (counterMatch)
             finalPath = i;
             matchPath = counterMatch;
             sec_matchPath = counterNoMatch;
@@ -97,12 +117,28 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     std::ifstream infile;
     std::string line;
     size_t size = server.locations[id].errorPages[statusCode].size();
-    if (size > 0 || size == 0)
+    if (size > 0)
     {
-        if (size == 0)
+        path += server.locations[id].errorPages[statusCode];
+        infile.open(path);
+        while (getline(infile, line))
+            _body += line;
+        _statusCode = statusCode;
+    }
+    else
+    {
+        if (statusCode == 400)
+            path += "400.html";
+        if (statusCode == 404)
             path += "404.html";
-        else
-            path += server.locations[id].errorPages[statusCode];
+        if (statusCode == 405)
+            path += "405.html";
+        if (statusCode == 413)
+            path += "413.html";
+        if (statusCode == 414)
+            path += "414.html";
+        if (statusCode == 501)
+            path += "501.html";
         infile.open(path);
         while (getline(infile, line))
             _body += line;
@@ -159,13 +195,16 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
     return true;
 }
 
+std::string checker;
+
 bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
 {
-    static int i;
     std::string path;
+    static int i = 0;
+    path = server.locations[index].data["root"][0] + line;
     if (i == 0)
-        path = server.locations[index].data["root"][0] + line;
-    else
+        checker = line;
+    if (checker != line)
         path = line;
     DIR *dir = opendir(path.c_str());
     if (!dir)
@@ -202,9 +241,6 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
                 content += "<br>";
             }
             _contentType = "text/html";
-            // FILE *file = fopen("t.html" , "w+");
-            // if (file)
-            //     fwrite(content.data(), sizeof(char), content.size(), file);
             _body += content;
         }
         else

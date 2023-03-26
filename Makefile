@@ -3,7 +3,6 @@ NAME = webserv
 FILES = \
 	./Parse/Config.cpp			\
 	./Parse/serverParse.cpp		\
-	./main.cpp					\
 	./Parse/locationParse.cpp	\
 	./Parse/requestParse.cpp 	\
 	./Response/Response.cpp		\

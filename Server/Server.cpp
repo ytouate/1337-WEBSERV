@@ -101,7 +101,7 @@ void Server::acceptConnection()
 }
 
 
-#define MAX_CHUNK_SIZE 57000
+#define MAX_CHUNK_SIZE 1024
 
 void Server::serveContent()
 {
@@ -148,7 +148,7 @@ void Server::serveContent()
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "8080");
+    initServerSocket(NULL, "8081");
     while (1)
     {
         getReadableClient();
