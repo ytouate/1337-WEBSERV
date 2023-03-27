@@ -29,7 +29,6 @@ void printDrective(directive &a)
     std::cout << "\n";
 }
 
-
 // int main(int ac, char **av)
 // {
 //     if (ac != 2)

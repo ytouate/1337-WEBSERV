@@ -104,8 +104,8 @@ size_t serverParse::parseBlock()
     }
     if (_serverIsOpened or _locationIsOpened)
         error("block not closed");
-    fillEmptyRequiredDirectives();
     insertDirectives();
+    fillEmptyRequiredDirectives();
     return i;
 }
 
@@ -126,6 +126,8 @@ void serverParse::fillEmptyRequiredDirectives(void)
             locations[i].data["root"] = this->_serverRoot.second;
         if (locations[i].data["index"].size() == 0)
             locations[i].data["index"] = this->_serverIndex.second;
+        if (locations[i].data["allowed_methods"].size() == 0)
+            locations[i].data["allowed_methods"] = this->data["allowed_methods"];
     }
 }
 
