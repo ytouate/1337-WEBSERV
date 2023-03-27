@@ -1,15 +1,16 @@
-<?php
-header("Content-Type: text/html");
-?>
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>PHP Test Page</title>
-  </head>
-  <body>
-    <?php
-      echo "<h1>PHP Test Page</h1>";
-      echo "<p>This page was generated with PHP version " . phpversion() . ".</p>";
-    ?>
-  </body>
+<head>
+	<title>Welcome to Apache2 with PHP!</title>
+</head>
+<body>
+	<h1>It works!</h1>
+	<p>This is the default web page for Apache2 with PHP. If you see this page, it means that the web server software is installed and running on this server.</p>
+	<p>This server is powered by Ubuntu Linux.</p>
+	<hr>
+	<p><em>Thank you for using Apache2 with PHP.</em></p>
+	<?php
+		echo "This page was generated using PHP version " . phpversion() . ".";
+	?>
+</body>
 </html>
