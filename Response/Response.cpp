@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/26 17:13:58 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/27 16:43:06 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,12 +161,42 @@ bool    Response::methodAllowed(serverParse& server, int index)
     return true;
 }
 
+bool Response::executeCgi(serverParse& server, int index)
+{
+    puts("here");
+    (void)server;
+    (void)index;
+    int fd = open("./out" , O_CREAT | O_RDWR , 0644);
+    std::string path1 = "./php-cgi";
+    std::string path2 = "php.php";
+    char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
+    if (fork() == 0)
+    {
+        dup2(fd, 1);
+        execve(commad[0], commad, NULL);
+    }
+    std::ifstream infile("./out");
+    std::string line;
+    char buffer[100];
+    sprintf(buffer, "HTTP/1.1 %d OK\r\n" , 200);
+    this->_response += buffer;
+    while (getline(infile, line))
+    {
+        sprintf(buffer, "%s\r\n", (char *)line.c_str());
+        _response += buffer;
+    }
+    std::cout << _response << std::endl;
+    return true;
+}
+
 bool    Response::validFile(serverParse& server, int index, std::string path)
 {
     std::ifstream file;
     file.open(path, std::ios::binary);
     if(file)
     {
+        if (path.erase(0, path.rfind('.')) == ".php")
+            return executeCgi(server, index);
         if (methodAllowed(server, index) == true)
         {
             file.seekg(0, std::ios::end);
@@ -306,13 +336,14 @@ int    Response::getMethod(Config &config)
         faildResponse();
         return (1);
     }
-    else
+    else if (_response.size() == 0)
     {
+        
         this->_statusCode = 200;
         char buffer[100];
         sprintf(buffer, "%s %d OK\r\n", request.data["version"].c_str() , this->_statusCode);
         this->_response += buffer;
-        if (_contentType != "text/html")
+        if (_contentType != "text/html" )
         {
             sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
             this->_response += buffer;

@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/26 17:06:35 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/27 16:13:58 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class Response
         bool    validFile(serverParse& server, int index, std::string path);
         int     getMethod(Config &configt);
         int    validateRequest();
+        bool    executeCgi(serverParse& server, int index);
     public:
         std::string _response;
         Response(Config &config, requestParse& _request);
