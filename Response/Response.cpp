@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/27 22:20:58 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/27 23:20:43 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,7 @@ bool Response::executeCgi(serverParse& server, int index)
     (void)index;
     int fd = open("/tmp/out" , O_CREAT | O_RDWR , 0644);
     std::string path1 = "/usr/bin/php";
-    std::string path2 = "php.php";
+    std::string path2 = request.data["path"];
     char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     if (fork() == 0)
     {
@@ -184,6 +184,7 @@ bool Response::executeCgi(serverParse& server, int index)
     while (getline(infile, line))
         _body += line;
     _response += _body;
+    std::cout << _response << std::endl;
     return true;
 }
 
