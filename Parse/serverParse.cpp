@@ -1,5 +1,4 @@
 #include "serverParse.hpp"
-#include <iostream>
 
 serverParse::serverParse(const std::vector<std::string> &__fileBuff, int __start)
 {

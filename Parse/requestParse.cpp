@@ -1,6 +1,4 @@
 #include "requestParse.hpp"
-#include <fstream>
-#include <sstream>
 
 void requestParse::parseRequestLine(std::string &s, const std::string &delimiter)
 {

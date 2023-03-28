@@ -1,8 +1,7 @@
 #if !defined(requestParse_HPP)
 #define requestParse_HPP
 
-#include <iostream>
-#include <map>
+#include "../inc.hpp"
 
 class requestParse
 {
