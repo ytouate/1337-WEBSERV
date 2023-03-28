@@ -20,8 +20,9 @@ class Server
 {
 private:
     int                         _serverSocket;
-    std::map<int, Client>       _clients;
+    std::vector<Client>       _clients;
     fd_set                      _readyToReadFrom;
+    // fd_set                      _readyToWriteTo;
     Config                      _configFile;
     
     std::string getRequestBuffer(Client &);

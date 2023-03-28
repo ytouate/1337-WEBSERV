@@ -3,7 +3,7 @@
 
 #include "../inc.hpp"
 
-#include "serverParse.hpp"
+
 
 class serverParse;
 class Config
