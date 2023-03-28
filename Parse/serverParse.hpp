@@ -17,11 +17,10 @@ private:
     bool                        _isInsideServer;
     directive                   _root;
     directive                   _index;
+    directive                   _cgiPath;
     directive                   _allowedMethods;
     directive                   _port;
     directive                   _serverName;
-    directive                   _serverIndex;
-    directive                   _serverRoot;
     std::vector<std::string>    _fileBuff;
     std::vector<std::string>    _locationBuff;
 

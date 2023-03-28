@@ -111,6 +111,7 @@ size_t serverParse::parseBlock()
 
 void serverParse::insertDirectives(void)
 {
+    data.insert(_cgiPath);
     data.insert(_index);
     data.insert(_root);
     data.insert(_port);
@@ -123,11 +124,13 @@ void serverParse::fillEmptyRequiredDirectives(void)
     for (size_t i = 0; i < locations.size(); i++)
     {
         if (locations[i].data["root"].size() == 0)
-            locations[i].data["root"] = this->_serverRoot.second;
+            locations[i].data["root"] = this->data["root"];
         if (locations[i].data["index"].size() == 0)
-            locations[i].data["index"] = this->_serverIndex.second;
+            locations[i].data["index"] = this->data["index"];
         if (locations[i].data["allowed_methods"].size() == 0)
             locations[i].data["allowed_methods"] = this->data["allowed_methods"];
+        if (locations[i].data["cgi_path"].size() == 0)
+            locations[i].data["cgi_path"] = this->data["cgi_path"];
     }
 }
 
@@ -157,17 +160,17 @@ void serverParse::fillDirective(const std::string &key,
 {
     if (key == "listen")
         _port = std::make_pair(key, values);
+    else if (key == "cgi_path")
+        _cgiPath = std::make_pair(key, values);
     else if (key == "root")
     {
-        if (_isInsideServer)
-            this->_serverRoot = std::make_pair(key, values);
-        _root = std::make_pair(key, values);
+        if (!_locationIsOpened)
+            _root = std::make_pair(key, values);
     }
     else if (key == "index")
     {
-        if (_isInsideServer)
-            this->_serverIndex = std::make_pair(key, values);
-        _index = std::make_pair(key, values);
+        if (!_locationIsOpened)
+            _index = std::make_pair(key, values);
     }
     else if (key == "auto_index")
     {
@@ -180,7 +183,7 @@ void serverParse::fillDirective(const std::string &key,
     else if (key == "allowed_methods")
     {
         if (!_locationIsOpened)
-        _allowedMethods = std::make_pair(key, values);
+            _allowedMethods = std::make_pair(key, values);
     }
     else if (key == "error_page")
     {

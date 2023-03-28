@@ -29,3 +29,9 @@ void printDrective(directive &a)
     std::cout << "\n";
 }
 
+// int main(int ac, char **av)
+// {
+//     if (ac != 2) return 1;
+//     Config config(av[1]);
+//     std::cout << config.servers[0].data["root"][0] << std::endl;
+// }
