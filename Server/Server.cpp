@@ -149,7 +149,7 @@ void Server::serveContent()
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "808");
+    initServerSocket(NULL, "80");
     while (1)
     {
         getReadableClient();
