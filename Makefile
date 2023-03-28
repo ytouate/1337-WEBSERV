@@ -6,12 +6,12 @@ FILES = \
 	./Parse/locationParse.cpp	\
 	./Parse/requestParse.cpp 	\
 	./main.cpp					\
-	./Response/Response.cpp		\
+	./Response/getResponse.cpp	\
 	./Server/Server.cpp
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
-CPPFLAGS = -Wall -Wextra -Werror -fsanitize=address -g
+CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
 
 all: $(NAME)
 

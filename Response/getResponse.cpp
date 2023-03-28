@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Response.cpp                                       :+:      :+:    :+:   */
+/*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/27 16:43:06 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/28 14:32:48 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,11 @@ bool    Response::getMatchedLocation(Config& config)
         counterMatch = 0;
         counterNoMatch = 0;
     }
+    if (finalPath == -1)
+    {
+        errorPages(config.servers[indexServer], 0, 404);
+        return 1;
+    }
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -120,7 +125,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     if (size > 0)
     {
         path += server.locations[id].errorPages[statusCode];
-        infile.open(path);
+        infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
         _statusCode = statusCode;
@@ -139,7 +144,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
             path += "414.html";
         if (statusCode == 501)
             path += "501.html";
-        infile.open(path);
+        infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
         _statusCode = statusCode;
@@ -163,28 +168,27 @@ bool    Response::methodAllowed(serverParse& server, int index)
 
 bool Response::executeCgi(serverParse& server, int index)
 {
-    puts("here");
     (void)server;
     (void)index;
-    int fd = open("./out" , O_CREAT | O_RDWR , 0644);
-    std::string path1 = "./php-cgi";
-    std::string path2 = "php.php";
+    int fd = open("/tmp/out" , O_CREAT | O_RDWR , 0644);
+    std::string path1 = "/usr/bin/php";
+    std::string path2 = request.data["path"];
     char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     if (fork() == 0)
     {
         dup2(fd, 1);
         execve(commad[0], commad, NULL);
     }
-    std::ifstream infile("./out");
+    std::ifstream infile("/tmp/out");
     std::string line;
     char buffer[100];
     sprintf(buffer, "HTTP/1.1 %d OK\r\n" , 200);
     this->_response += buffer;
+    sprintf(buffer, "Content-Type: text/html\r\n\r\n");
+    this->_response += buffer;
     while (getline(infile, line))
-    {
-        sprintf(buffer, "%s\r\n", (char *)line.c_str());
-        _response += buffer;
-    }
+        _body += line;
+    _response += _body;
     std::cout << _response << std::endl;
     return true;
 }
@@ -192,7 +196,7 @@ bool Response::executeCgi(serverParse& server, int index)
 bool    Response::validFile(serverParse& server, int index, std::string path)
 {
     std::ifstream file;
-    file.open(path, std::ios::binary);
+    file.open(path.c_str(), std::ios::binary);
     if(file)
     {
         if (path.erase(0, path.rfind('.')) == ".php")

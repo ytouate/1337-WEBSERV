@@ -118,7 +118,7 @@ void Server::serveContent()
             if (r < 1)
             {
                 close(it->first);
-                it = _clients.erase(it);
+                _clients.erase(it++);
                 continue;
             }
             else
@@ -138,17 +138,18 @@ void Server::serveContent()
                     it->second.received += ret;
                 }
                 close(it->first);
-                it = _clients.erase(it);
+                _clients.erase(it++);
                 continue;
             }
         }
-        it++;
+        else
+            it++;
     }
 }
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "9000");
+    initServerSocket(NULL, "1337");
     while (1)
     {
         getReadableClient();
