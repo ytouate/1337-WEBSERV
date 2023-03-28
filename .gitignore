@@ -6,3 +6,4 @@ webserv
 demos/server.cpp
 index
 php-cgi
+webserv
