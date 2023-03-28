@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/28 15:00:14 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/28 15:06:01 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     if (size > 0)
     {
         path += server.locations[id].errorPages[statusCode];
-        infile.open(path);
+        infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
         _statusCode = statusCode;
@@ -147,7 +147,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
             path += "414.html";
         if (statusCode == 501)
             path += "501.html";
-        infile.open(path);
+        infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
         _statusCode = statusCode;
@@ -199,7 +199,7 @@ bool Response::executeCgi(serverParse& server, int index)
 bool    Response::validFile(serverParse& server, int index, std::string path)
 {
     std::ifstream file;
-    file.open(path, std::ios::binary);
+    file.open(path.c_str(), std::ios::binary);
     if(file)
     {
         if (path.erase(0, path.rfind('.')) == ".php")

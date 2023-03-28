@@ -5,5 +5,7 @@
 webserv
 demos/server.cpp
 index
+nginx.conf
+./main.cpp
 php-cgi
 webserv
