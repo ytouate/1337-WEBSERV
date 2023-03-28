@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/28 00:17:37 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/28 15:00:14 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,10 @@ Response::~Response()
 
 Response::Response(Config &config, requestParse& _request) : request(_request)
 {
-    getMethod(config);
+    if (request.data["method"] == "GET")
+        getMethod(config);
+    if (request.data["method"] == "POST")
+        postMethod(config);
 }
 
 int    Response::validateRequest()

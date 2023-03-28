@@ -7,6 +7,7 @@ FILES = \
 	./Parse/requestParse.cpp 	\
 	./main.cpp					\
 	./Response/getResponse.cpp	\
+	./Response/postResponse.cpp	\
 	./Server/Server.cpp
 
 CC = c++ 
