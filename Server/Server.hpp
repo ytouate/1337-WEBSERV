@@ -1,19 +1,7 @@
 #if !defined(SERVER_HPP)
 #define SERVER_HPP
 
-#include <iostream>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <ifaddrs.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <string.h>
-#include <map>
+#include "../inc.hpp"
 #include "../Parse/Config.hpp"
 #include "../Parse/requestParse.hpp"
 

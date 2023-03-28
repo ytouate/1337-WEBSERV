@@ -6,13 +6,11 @@
 /*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/28 14:32:48 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/28 15:34:20 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
-#include <algorithm>
-
 
 Response::~Response()
 {

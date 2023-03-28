@@ -1,11 +1,6 @@
 #include "inc.hpp"
-#include <map>
-#include <iostream>
-#include <vector>
 #include "Parse/Config.hpp"
 #include "Response/Response.hpp"
-#include <deque>
-#include <fcntl.h>
 
 typedef std::map<std::string, std::vector<std::string> > directive;
 
