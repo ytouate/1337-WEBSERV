@@ -6,7 +6,7 @@ FILES = \
 	./Parse/locationParse.cpp	\
 	./Parse/requestParse.cpp 	\
 	./main.cpp					\
-	./Response/Response.cpp		\
+	./Response/getResponse.cpp	\
 	./Server/Server.cpp
 
 CC = c++ 

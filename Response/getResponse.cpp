@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Response.cpp                                       :+:      :+:    :+:   */
+/*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/27 23:20:43 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/28 00:17:37 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,11 @@ bool    Response::getMatchedLocation(Config& config)
         index = 0;
         counterMatch = 0;
         counterNoMatch = 0;
+    }
+    if (finalPath == -1)
+    {
+        errorPages(config.servers[indexServer], 0, 404);
+        return 1;
     }
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
