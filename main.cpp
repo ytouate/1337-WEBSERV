@@ -39,6 +39,21 @@ Content-Type: application/json\n\
 Content-Length: 56\r\n\r\n\
 \
 {\"username\": \"johndoe\", \"email\": \"johndoe@example.com\"}");
+
+//     requestParse request ("POST /api/upload HTTP/1.1\n\
+// Host: example.com\n\
+// Content-Type: multipart/form-data\n\
+// Content-Length: 229\r\n\r\n\
+// \
+// --------------------------7d42a317ba4f4\n\
+// Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n\
+// Content-Type: text/plain\n\
+// \
+// This is an example file.\n\
+// It can contain any type of text.\n\
+// \
+// --------------------------7d42a317ba4f4--\n");
+
     std::cout << request.data["method"] << std::endl;
     std::cout << request.data["version"] << std::endl;
     std::cout << request.data["host"] << std::endl;
@@ -46,5 +61,4 @@ Content-Length: 56\r\n\r\n\
     std::cout << request.data["content-type"] << std::endl;
     std::cout << request.data["content-length"] << std::endl;
     std::cout << request.data["body"] << std::endl;
-    
 }
