@@ -30,6 +30,7 @@ public:
     std::map<std::string, std::vector<std::string> >    data;
     std::map<int, std::string>                          errorPages;
     bool                                                autoIndex;
+    bool                                                uploadAble;
     locationParse(const std::vector<std::string> &, int);
     ~locationParse();
 };

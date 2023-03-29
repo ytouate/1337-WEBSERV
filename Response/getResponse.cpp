@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/28 15:34:20 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/28 15:53:51 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,10 @@ Response::~Response()
 
 Response::Response(Config &config, requestParse& _request) : request(_request)
 {
-    getMethod(config);
+    if (request.data["method"] == "GET")
+        getMethod(config);
+    if (request.data["method"] == "POST")
+        postMethod(config);
 }
 
 int    Response::validateRequest()
@@ -187,7 +190,7 @@ bool Response::executeCgi(serverParse& server, int index)
     while (getline(infile, line))
         _body += line;
     _response += _body;
-    std::cout << _response << std::endl;
+    // std::cout << _response << std::endl;
     return true;
 }
 
@@ -197,7 +200,7 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
     file.open(path.c_str(), std::ios::binary);
     if(file)
     {
-        if (path.erase(0, path.rfind('.')) == ".php")
+        if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi_path"].size() > 0)
             return executeCgi(server, index);
         if (methodAllowed(server, index) == true)
         {
@@ -299,7 +302,7 @@ void   Response::getContentType()
     else if (path == ".csv") this->_contentType = "text/csv";
     else if (path == ".gif") this->_contentType = "image/gif";
     else if (path == ".htm") this->_contentType = "text/html";
-    else if (path == ".html") this->_contentType = "text/html";
+    else if (path == ".html" || path == ".php") this->_contentType = "text/html";
     else if (path == ".ico") this->_contentType = "image/x-icon";
     else if (path == ".jpeg") this->_contentType = "image/jpeg";
     else if (path == ".jpg") this->_contentType = "image/jpeg";

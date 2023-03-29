@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate < ytouate@student.1337.ma>         +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/28 15:32:04 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/03/28 15:54:52 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@ class Response
         void    errorPages(serverParse& server, int id, int statusCode);
         bool    methodAllowed(serverParse& server, int index);
         bool    validFile(serverParse& server, int index, std::string path);
-        int     getMethod(Config &configt);
+        int     getMethod(Config &config);
+        int     postMethod(Config &config);
         int    validateRequest();
         bool    executeCgi(serverParse& server, int index);
     public:
@@ -48,8 +49,3 @@ class Response
 };
 
 #endif
-
-
-
-
-

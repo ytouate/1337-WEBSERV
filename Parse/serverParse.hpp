@@ -39,6 +39,7 @@ private:
 
     friend class Config;
 public:
+    bool                                                        uploadAble;
     bool                                                        autoIndex;
     std::vector<locationParse>                                  locations;
     std::map<std::string, std::vector<std::string> >            data;
