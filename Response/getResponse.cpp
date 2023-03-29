@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/28 15:53:51 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/29 21:06:55 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
+    if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, index);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -237,6 +238,7 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
     std::string path;
     static int i = 0;
     path = server.locations[index].data["root"][0] + line;
+    std::cout << "path" << path << std::endl;
     if (i == 0)
         checker = line;
     if (checker != line)
