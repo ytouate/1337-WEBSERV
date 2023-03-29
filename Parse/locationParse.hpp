@@ -15,6 +15,7 @@ private:
     directive                           _root;
     directive                           _index;
     directive                           _allowed_methods;
+    directive                           _upload;
     int                                 _start;
     std::vector<std::string>            _fileBuff;
 
@@ -30,7 +31,6 @@ public:
     std::map<std::string, std::vector<std::string> >    data;
     std::map<int, std::string>                          errorPages;
     bool                                                autoIndex;
-    bool                                                uploadAble;
     locationParse(const std::vector<std::string> &, int);
     ~locationParse();
 };

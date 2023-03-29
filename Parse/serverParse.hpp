@@ -19,6 +19,7 @@ private:
     directive                   _index;
     directive                   _cgiPath;
     directive                   _allowedMethods;
+    directive                   _upload;
     directive                   _port;
     directive                   _serverName;
     std::vector<std::string>    _fileBuff;
@@ -39,12 +40,10 @@ private:
 
     friend class Config;
 public:
-    bool                                                        uploadAble;
     bool                                                        autoIndex;
     std::vector<locationParse>                                  locations;
     std::map<std::string, std::vector<std::string> >            data;
     std::map<int, std::string>                                  errorPages;
-
     serverParse(const std::vector<std::string> &, int);
     ~serverParse();
 };
