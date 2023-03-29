@@ -32,6 +32,25 @@ void requestParse::getHost(std::string &s)
         s = s.erase(0, pos + 1);
         this->data.insert(std::make_pair("host", s));
     }
+    if (token == "Content-Length")
+    {
+        pos = s.find_last_of(" ");
+        s = s.erase(0, pos + 1);
+        token = "";
+        for (size_t i = 0; i < s.size(); ++i)
+        {
+            if (isdigit(s[i]))
+                token += s[i];
+            else
+                this->data.insert(std::make_pair("content-length", token));
+        }
+    }
+    else if (token == "Content-Type")
+    {
+        pos = s.find_last_of(" ");
+        s = s.erase(0, pos + 1);
+        this->data.insert(std::make_pair("content-type", s));
+    }
 }
 
 requestParse::requestParse(std::string _requestParse)
@@ -53,6 +72,7 @@ requestParse::requestParse(std::string _requestParse)
 
         _requestParse.erase(0, pos + 1);
     }
+    this->data["body"] = _requestParse;
 }
 
 requestParse::~requestParse()
