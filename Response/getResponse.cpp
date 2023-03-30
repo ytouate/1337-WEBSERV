@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/28 15:53:51 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/30 01:31:49 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
+    if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, index);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -145,6 +146,8 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
             path += "414.html";
         if (statusCode == 501)
             path += "501.html";
+        if (statusCode == 403)
+            path += "403.html";
         infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
