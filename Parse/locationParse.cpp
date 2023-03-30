@@ -53,10 +53,12 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
         _index = std::make_pair(key, values);
     else if (key == "error_page")
     {
-        if (values.size() < 2) error("Invalid Arguments");
-        if (!isNumber(values.front())) error("Invalid Arguments");
+        if (values.size() < 2)
+            error("Invalid Arguments");
+        if (!isNumber(values.front()))
+            error("Invalid Arguments");
         this->errorPages.insert(std::make_pair(atoi(values.front().c_str()),
-                                         values.back()));
+                                               values.back()));
     }
     else if (key == "allowed_methods")
     {
@@ -66,7 +68,17 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
     {
         if (values.size() != 1)
             error("Invalid arguments");
+        if (values.front() != "on" and values.front() != "off")
+            error("Invalid Arguments");
         autoIndex = values.front() == "on" ? ON : OFF;
+    }
+    else if (key == "upload")
+    {
+        if (values.size() != 1)
+            error("Invalid arguments");
+        if (values.front() != "on" and values.front() != "off")
+            error("Invalid Arguments");
+        uploadAble = values.front() == "on" ? ON : OFF;
     }
 }
 

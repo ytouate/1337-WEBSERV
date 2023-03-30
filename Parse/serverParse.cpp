@@ -159,6 +159,17 @@ void serverParse::fillDirective(const std::string &key,
 {
     if (key == "listen")
         _port = std::make_pair(key, values);
+    else if (key == "upload")
+    {
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid arguments");
+            if (values.at(0) != "on" && values.at(0) != "off")
+                error("invalid arguments");
+            uploadAble = values.at(0) == "on" ? true : false;
+        }
+    }
     else if (key == "cgi_path")
         _cgiPath = std::make_pair(key, values);
     else if (key == "root")
@@ -173,9 +184,15 @@ void serverParse::fillDirective(const std::string &key,
     }
     else if (key == "auto_index")
     {
-        if (values.size() != 1) error("Invalid Arguments");
-        if (values.front() != "on" and values.front() != "off") error("Invalid Arguments");
-        if (!_locationIsOpened) autoIndex = values[0] == "on" ? true : false;
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid Arguments");
+            if (values.front() != "on" and values.front() != "off")
+                error("Invalid Arguments");
+            if (!_locationIsOpened)
+                autoIndex = values[0] == "on" ? true : false;
+        }
     }
     else if (key == "server_name")
         _serverName = std::make_pair(key, values);

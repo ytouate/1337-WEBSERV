@@ -1,5 +1,5 @@
 #include "Config.hpp"
-
+#include "serverParse.hpp"
 Config::Config(std::string s)
 {
     readFileIntoBuff(s);
