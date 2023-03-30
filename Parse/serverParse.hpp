@@ -19,6 +19,7 @@ private:
     directive                   _index;
     directive                   _cgiPath;
     directive                   _allowedMethods;
+    directive                   _upload_path;
     directive                   _upload;
     directive                   _port;
     directive                   _serverName;

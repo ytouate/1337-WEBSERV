@@ -117,6 +117,7 @@ void serverParse::insertDirectives(void)
     data.insert(_port);
     data.insert(_serverName);
     data.insert(_allowedMethods);
+    data.insert(_upload_path);
 }
 
 void serverParse::fillEmptyRequiredDirectives(void)
@@ -133,6 +134,8 @@ void serverParse::fillEmptyRequiredDirectives(void)
             locations[i].data["cgi_path"] = this->data["cgi_path"];
         if (locations[i].data["upload"].size() == 0)
             locations[i].data["upload"] = this->data["upload"];
+        if (locations[i].data["upload_path"].size() == 0)
+            locations[i].data["upload_path"] = this->data["upload_path"];
     }
 }
 
@@ -171,6 +174,15 @@ void serverParse::fillDirective(const std::string &key,
             if (values.at(0) != "on" && values.at(0) != "off")
                 error("invalid arguments");
             _upload = std::make_pair(key, values);
+        }
+    }
+    else if (key == "upload_path")
+    {
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid arguments");
+            _upload_path = std::make_pair(key, values);
         }
     }
     else if (key == "cgi_path")

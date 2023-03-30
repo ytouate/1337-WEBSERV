@@ -16,6 +16,7 @@ private:
     directive                           _index;
     directive                           _allowed_methods;
     directive                           _upload;
+    directive                           _upload_path;
     int                                 _start;
     std::vector<std::string>            _fileBuff;
 

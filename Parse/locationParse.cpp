@@ -72,6 +72,12 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
             error("Invalid Arguments");
         autoIndex = values.front() == "on" ? ON : OFF;
     }
+    else if (key == "upload_path")
+    {
+        if (values.size() != 1)
+            error("Invalid arguments");
+        _upload_path = std::make_pair(key, values);
+    }
     else if (key == "upload")
     {
         if (values.size() != 1)
@@ -132,7 +138,9 @@ void locationParse::parseBlock()
             isInsideLocation = false;
         i++;
     }
+    data.insert(this->_upload);
     data.insert(this->_root);
     data.insert(this->_index);
+    data.insert(this->_upload_path);
     data.insert(this->_allowed_methods);
 }
