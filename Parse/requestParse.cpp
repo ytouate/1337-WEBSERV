@@ -47,8 +47,13 @@ void requestParse::getHost(std::string &s)
     }
     else if (token == "Content-Type")
     {
-        pos = s.find_last_of(" ");
+        token = "";
+        pos = s.find(" ");
         s = s.erase(0, pos + 1);
+        pos = s.find_last_of(";");
+        if (pos != std::string::npos)
+            s = s.erase(pos, s.size() + 1);
+        std::cout << s << std::endl;
         this->data.insert(std::make_pair("content-type", s));
     }
 }
@@ -57,7 +62,7 @@ requestParse::requestParse(std::string _requestParse)
 {
     size_t pos = 0;
     std::string token;
-
+    std::string buff(_requestParse);
     bool isrequestParseLine = true;
     while ((pos = _requestParse.find("\n")) != std::string::npos)
     {
@@ -74,7 +79,12 @@ requestParse::requestParse(std::string _requestParse)
             if (this->data.size() == 6)
                 break;
     }
-    this->data["body"] = _requestParse;
+    pos = buff.find("\r\n\r\n");
+    if (pos != std::string::npos)
+    {
+        buff = buff.erase(0, pos + 4);
+        this->data["body"] = buff;
+    }
 }
 
 requestParse::~requestParse()

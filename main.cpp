@@ -57,7 +57,7 @@ int main(int ac, char **av)
 
     requestParse request ("POST /api/upload HTTP/1.1\n\
 Host: example.com\n\
-Content-Type: multipart/form-data\n\
+Content-Type: multipart/form-data; boundary asjfkslajfklsa\n\
 Content-Length: 229\r\n\r\n\
 \
 --------------------------7d42a317ba4f4\n\
