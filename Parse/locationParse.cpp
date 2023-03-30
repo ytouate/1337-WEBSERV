@@ -78,7 +78,7 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
             error("Invalid arguments");
         if (values.front() != "on" and values.front() != "off")
             error("Invalid Arguments");
-        uploadAble = values.front() == "on" ? ON : OFF;
+        _upload = std::make_pair(key, values);
     }
 }
 

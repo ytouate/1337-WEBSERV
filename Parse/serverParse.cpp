@@ -111,6 +111,7 @@ size_t serverParse::parseBlock()
 void serverParse::insertDirectives(void)
 {
     data.insert(_cgiPath);
+    data.insert(_upload);
     data.insert(_index);
     data.insert(_root);
     data.insert(_port);
@@ -130,6 +131,8 @@ void serverParse::fillEmptyRequiredDirectives(void)
             locations[i].data["allowed_methods"] = this->data["allowed_methods"];
         if (locations[i].data["cgi_path"].size() == 0)
             locations[i].data["cgi_path"] = this->data["cgi_path"];
+        if (locations[i].data["upload"].size() == 0)
+            locations[i].data["upload"] = this->data["upload"];
     }
 }
 
@@ -167,7 +170,7 @@ void serverParse::fillDirective(const std::string &key,
                 error("Invalid arguments");
             if (values.at(0) != "on" && values.at(0) != "off")
                 error("invalid arguments");
-            uploadAble = values.at(0) == "on" ? true : false;
+            _upload = std::make_pair(key, values);
         }
     }
     else if (key == "cgi_path")

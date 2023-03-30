@@ -56,8 +56,8 @@ void requestParse::getHost(std::string &s)
 requestParse::requestParse(std::string _requestParse)
 {
     size_t pos = 0;
-    std::string buff;
     std::string token;
+
     bool isrequestParseLine = true;
     while ((pos = _requestParse.find("\n")) != std::string::npos)
     {
@@ -69,8 +69,10 @@ requestParse::requestParse(std::string _requestParse)
             continue;
         }
         this->getHost(token);
-
         _requestParse.erase(0, pos + 1);
+        if (this->data["method"] == "POST")
+            if (this->data.size() == 6)
+                break;
     }
     this->data["body"] = _requestParse;
 }

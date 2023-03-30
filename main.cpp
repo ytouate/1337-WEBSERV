@@ -23,42 +23,47 @@ void printDrective(directive &a)
         std::cout << " " << a["server_name"][i];
     std::cout << "\n";
 }
+// int main(int ac, char *av[])
+// {
+//     if (ac != 2)
+//         return 1;
+// //     requestParse request("POST /api/users HTTP/1.1\n\
+// // Host: example.com\n\
+// // User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
+// // Accept-Language: en-US\n\
+// // Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
+// // Accept-Encoding: gzip, deflate\n\
+// // Connection: Keep-Alive\n\
+// // Content-Type: application/json\n\
+// // Content-Length: 56\r\n\r\n\
+// // \
+// // {\"username\": \"johndoe\", \"email\": \"johndoe@example.com\"}");
 
-int main(int ac, char **)
-{
-    if (ac != 2)
-        return 1;
-//     requestParse request("POST /api/users HTTP/1.1\n\
+//     requestParse request ("POST / HTTP/1.1\n\
 // Host: example.com\n\
-// User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
-// Accept-Language: en-US\n\
-// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
-// Accept-Encoding: gzip, deflate\n\
-// Connection: Keep-Alive\n\
-// Content-Type: application/json\n\
-// Content-Length: 56\r\n\r\n\
+// Content-Type: multipart/form-data\n\
+// Content-Length: 229\r\n\r\n\
+// \
+// --------------------------7d42a317ba4f4\n\
+// Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n\
+// Content-Type: text/plain\n\
 // \
 // {\"username\": \"johndoe\", \"email\": \"johndoe@example.com\"}");
+// Config config(av[1]);
+// //     requestParse request ("POST /api/upload HTTP/1.1\n\
+// // Host: example.com\n\
+// // Content-Type: multipart/form-data\n\
+// // Content-Length: 229\r\n\r\n\
+// // \
+// // --------------------------7d42a317ba4f4\n\
+// // Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n\
+// // Content-Type: text/plain\n\
+// // \
+// // This is an example file.\n\
+// // It can contain any type of text.\n\
+// // \
+// // --------------------------7d42a317ba4f4--\n");
+//     Response response(config, request);
+//     std::cout << response._response << std::endl;
+// }
 
-    requestParse request ("POST /api/upload HTTP/1.1\n\
-Host: example.com\n\
-Content-Type: multipart/form-data\n\
-Content-Length: 229\r\n\r\n\
-\
---------------------------7d42a317ba4f4\n\
-Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n\
-Content-Type: text/plain\n\
-\
-This is an example file.\n\
-It can contain any type of text.\n\
-\
---------------------------7d42a317ba4f4--\n");
-
-    // std::cout << request.data["method"] << std::endl;
-    // std::cout << request.data["version"] << std::endl;
-    // std::cout << request.data["host"] << std::endl;
-    // std::cout << request.data["path"] << std::endl;
-    // std::cout << request.data["content-type"] << std::endl;
-    // std::cout << request.data["content-length"] << std::endl;
-    std::cout << request.data["body"] << std::endl;
-}
