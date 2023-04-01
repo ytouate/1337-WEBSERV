@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/01 21:46:31 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/01 21:51:08 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,29 +93,30 @@ void    Response::postType(std::string path)
 int     Response::postMethod(Config& config)
 {
     srand(time(0));
-    int number = rand() / 2;
+    // int number = rand() / 2;
     if (getMatchedLocation(config) == true)
     {
-        if (_indexLocation != -1)
-        {
-            if (_uploadPath.size() > 0)
-            {
-                // DIR *dir = opendir(_uploadPath.c_str());
-                _uploadPath = "./upload/";
-            }
-            _statusCode = 201;
-            _uploadPath += std::to_string(number) + ".html";
-            int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
-            write(fd, request.data["body"].c_str(), request.data["body"].size());
-            _body += "<h1> kolchi daze </h1>";
-            postResponse();
-            return 0;
-        }
-        DIR *dir = opendir(_postPath.c_str());
-        if (dir)
-        {
+        std::cout << request.data["body"] << std::endl;
+        // if (_indexLocation != -1)
+        // {
+        //     if (_uploadPath.size() > 0)
+        //     {
+        //         // DIR *dir = opendir(_uploadPath.c_str());
+        //         _uploadPath = "./upload/";
+        //     }
+        //     _statusCode = 201;
+        //     _uploadPath += std::to_string(number) + ".html";
+        //     int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
+        //     write(fd, request.data["body"].c_str(), request.data["body"].size());
+        //     _body += "<h1> kolchi daze </h1>";
+        //     postResponse();
+        //     return 0;
+        // }
+        // DIR *dir = opendir(_postPath.c_str());
+        // if (dir)
+        // {
             
-        }
+        // }
     }
     else
         errorPages(config.servers[_indexServer], _indexLocation, 404);
