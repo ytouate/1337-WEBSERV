@@ -53,7 +53,6 @@ void requestParse::getHost(std::string &s)
         pos = s.find_last_of(";");
         if (pos != std::string::npos)
             s = s.erase(pos, s.size() + 1);
-        // std::cout << s << std::endl;
         this->data.insert(std::make_pair("content-type", s));
     }
 }

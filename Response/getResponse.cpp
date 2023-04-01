@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/31 01:28:19 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/01 21:05:50 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,7 +197,6 @@ bool Response::executeCgi(serverParse& server, int index)
     while (getline(infile, line))
         _body += line;
     _response += _body;
-    // std::cout << _response << std::endl;
     return true;
 }
 
