@@ -7,12 +7,13 @@ FILES = \
 	./Parse/requestParse.cpp 	\
 	./Response/getResponse.cpp	\
 	./Response/postResponse.cpp	\
+	./Response/deleteResponse.cpp	\
 	./Server/Server.cpp			\
 	./main.cpp
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
-CPPFLAGS = #-Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
+CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
 
 all: $(NAME)
 

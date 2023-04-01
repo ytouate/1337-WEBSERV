@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/30 01:31:49 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/31 01:28:19 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,13 @@ Response::~Response()
 
 Response::Response(Config &config, requestParse& _request) : request(_request)
 {
+    _indexLocation = -1;
     if (request.data["method"] == "GET")
         getMethod(config);
     if (request.data["method"] == "POST")
         postMethod(config);
+    if (request.data["method"] == "DELETE")
+        deleteMethod(config);
 }
 
 int    Response::validateRequest()
@@ -87,6 +90,7 @@ bool    Response::getMatchedLocation(Config& config)
     std::string line = request.data["path"];
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
+        _indexServer = indexServer;
         save = (char *)config.servers[indexServer].locations[i].path.c_str(); 
         while (index < line.size() && save[index])
         {

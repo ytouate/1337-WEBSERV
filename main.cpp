@@ -55,7 +55,7 @@ int main(int ac, char **av)
 // \
 // {\"username\": \"johndoe\", \"email\": \"johndoe@example.com\"}");
 
-    requestParse request ("POST /api/upload HTTP/1.1\n\
+    requestParse request ("DELETE /index HTTP/1.1\n\
 Host: example.com\n\
 Content-Type: multipart/form-data; boundary asjfkslajfklsa\n\
 Content-Length: 229\r\n\r\n\
@@ -70,8 +70,9 @@ It can contain any type of text.\n\
 --------------------------7d42a317ba4f4--\n");
 
     Config config(av[1]);
-    if (config.servers[0].data["upload"].size() > 0 && config.servers[0].data["upload"].front() == "on")
-        std::cout << "here\n";
+    Response response(config, request);
+    // if (config.servers[0].data["upload"].size() > 0 && config.servers[0].data["upload"].front() == "on")
+    //     std::cout << "here\n";
     // std::cout << request.data["method"] << std::endl;
     // std::cout << request.data["version"] << std::endl;
     // std::cout << request.data["host"] << std::endl;

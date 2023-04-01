@@ -39,7 +39,6 @@ build a functional web client
 
 
 -- othman
--> path begin
--> allowd_methos {server_block}
--> format request valid
+-> cgi run set env
+-> return 301 '/'
 

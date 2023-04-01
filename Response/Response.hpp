@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/30 14:19:11 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/03/31 01:27:02 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,9 @@ class Response
         requestParse request;
         std::string _body;
         std::string _postPath;
+        std::string _uploadPath;
         int         _indexLocation;
+        int         _indexServer;
         bool    getMatchedLocation(Config& config);
         bool    checkPathIfValid(serverParse& server, int index , std::string line);
         void    getContentType();
@@ -42,10 +44,12 @@ class Response
         bool    validFile(serverParse& server, int index, std::string path);
         int     getMethod(Config &config);
         int     postMethod(Config& config);
+        int     deleteMethod(Config& config);
         int     checkPathOfPostmethod(serverParse& server, std::string line, int index);
         int    validateRequest();
         bool    executeCgi(serverParse& server, int index);
         void    postResponse(void);
+        void    postType(std::string path);
     public:
         std::string _response;
         Response(Config &config, requestParse& _request);
