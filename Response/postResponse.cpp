@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/01 21:51:08 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/01 22:27:22 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ int     Response::checkPathOfPostmethod(serverParse& server, std::string line, i
 {
     std::string path;
     static int i = 0;
-    std::cout <<  "i = " << i  << std::endl;
     // if (i == 0)
     // {
     //     path = server.locations[index].data["root"][0] + line;
@@ -25,9 +24,6 @@ int     Response::checkPathOfPostmethod(serverParse& server, std::string line, i
     // if (_checker != line )
         path = line;
     _postPath = path;
-    std::cout << _checker << std::endl;
-    std::cout << line << std::endl;
-    std::cout << path << std::endl;
     if (server.data["upload"].size() > 0 && server.data["upload"].front() == "on")
     {
         if (server.data["upload_path"].size() > 0)
@@ -93,25 +89,26 @@ void    Response::postType(std::string path)
 int     Response::postMethod(Config& config)
 {
     srand(time(0));
-    // int number = rand() / 2;
+    int number = rand() / 2;
     if (getMatchedLocation(config) == true)
     {
         std::cout << request.data["body"] << std::endl;
-        // if (_indexLocation != -1)
-        // {
-        //     if (_uploadPath.size() > 0)
-        //     {
-        //         // DIR *dir = opendir(_uploadPath.c_str());
-        //         _uploadPath = "./upload/";
-        //     }
-        //     _statusCode = 201;
-        //     _uploadPath += std::to_string(number) + ".html";
-        //     int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
-        //     write(fd, request.data["body"].c_str(), request.data["body"].size());
-        //     _body += "<h1> kolchi daze </h1>";
-        //     postResponse();
-        //     return 0;
-        // }
+        if (_indexLocation != -1)
+        {
+            if (_uploadPath.size() > 0)
+            {
+                // DIR *dir = opendir(_uploadPath.c_str());
+            }
+                _uploadPath = "./upload/";
+            std::cout << _uploadPath << std::endl;
+            _statusCode = 201;
+            _uploadPath += std::to_string(number) + ".html";
+            int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
+            write(fd, request.data["body"].c_str(), request.data["body"].size());
+            _body += "<h1> kolchi daze </h1>";
+            postResponse();
+            return 0;
+        }
         // DIR *dir = opendir(_postPath.c_str());
         // if (dir)
         // {
@@ -121,6 +118,5 @@ int     Response::postMethod(Config& config)
     else
         errorPages(config.servers[_indexServer], _indexLocation, 404);
     postResponse();
-    std::cout << _response << std::endl;
     return 0;
 }

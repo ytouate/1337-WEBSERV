@@ -25,6 +25,7 @@ private:
     // fd_set                      _readyToWriteTo;
     Config                      _configFile;
     
+    requestParse getRequest(const Client &_client);
     std::string getRequestBuffer(Client &);
     void checkCientCases();
     void getReadableClient();

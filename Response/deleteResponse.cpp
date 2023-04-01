@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/01 21:25:30 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/01 23:34:20 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,18 @@ int     Response::deleteMethod(Config& config)
     if (dir)
     {
         dirent *name = readdir(dir);
-        std::cout << path << std::endl;
         int _ok = 0;
         while (name != NULL)
         {
             std::string file = path + "/" + name->d_name;
             if (stat(file.c_str(), &filestat) == 0) 
             {
-                if (!(filestat.st_mode & S_IWUSR))
+                if (S_ISDIR(filestat.st_mode) || !(filestat.st_mode & S_IWUSR))
+                {
+                    std::cout << "you don't have permission" << std::endl;
                     _ok = 1;
+                    break;
+                }
             }
             name = readdir(dir);
         }
@@ -44,10 +47,11 @@ int     Response::deleteMethod(Config& config)
                 remove(file.c_str());
                 name = readdir(dir);
             }
+            
         }
         return 0;
     }
-    if (stat(path.c_str(), &filestat) == 0)
+    else if (stat(path.c_str(), &filestat) == 0)
     {
         if (filestat.st_mode & S_IWUSR)
             remove(path.c_str());
