@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/01 23:47:23 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 01:34:32 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,11 +103,36 @@ int     Response::postMethod(Config& config)
             _statusCode = 201;
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
+            std::cout << _uploadPath << std::endl;
             int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
             write(fd, request.body.content.c_str(), request.body.content.size());
             _body += "<h1> kolchi daze </h1>";
             postResponse();
             return 0;
+        }
+        _indexLocation = 0;
+        std::cout << _postPath << std::endl;
+        DIR *dir = opendir(_uploadPath.c_str());
+        if (dir)
+        {
+            if (config.servers[_indexServer].locations[_indexLocation].data["index"].size() > 0)
+            {
+                if (config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].size() > 0)
+                {
+                    executeCgi(config.servers[_indexServer], _indexLocation);
+                    return 0;
+                }
+            }
+            errorPages(config.servers[_indexServer], _indexLocation, 403);
+        }
+        else
+        {
+            if (config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].size() > 0)
+            {
+                executeCgi(config.servers[_indexServer], _indexLocation);
+                return 0;
+            }
+            errorPages(config.servers[_indexServer], _indexLocation, 403);
         }
     }
     else

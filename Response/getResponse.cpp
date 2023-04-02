@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/01 21:05:50 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/02 00:35:06 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,6 +181,7 @@ bool Response::executeCgi(serverParse& server, int index)
     int fd = open("/tmp/out" , O_CREAT | O_RDWR , 0644);
     std::string path1 = "/usr/bin/php";
     std::string path2 = request.data["path"];
+    std::cout << path2 << std::endl;
     char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     if (fork() == 0)
     {
