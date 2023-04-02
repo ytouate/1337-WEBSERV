@@ -5,7 +5,7 @@
 #include "../Response/Response.hpp"
 #include "../Parse/serverParse.hpp"
 #define MAX_REQUEST_SIZE 4096
-
+#define MAX_CHUNK_SIZE 100
 void error(const char *s)
 {
     perror(s);
@@ -96,10 +96,10 @@ void Server::acceptConnection()
     }
 }
 
-#define MAX_CHUNK_SIZE 1024
 
 requestParse Server::getRequest(const Client &_client)
 {
+    fcntl(_client.socket, F_SETFL, O_NONBLOCK);
     int bytesRead, bytesLeft;
     char buff[MAX_REQUEST_SIZE];
     std::string header;
@@ -114,6 +114,8 @@ requestParse Server::getRequest(const Client &_client)
 
     requestParse request(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
+    if (bytesLeft == 0)
+        return request;
     memset(buff, 0, sizeof buff);
     while (bytesLeft > 0)
     {
@@ -126,7 +128,6 @@ requestParse Server::getRequest(const Client &_client)
         memset(buff, 0, sizeof buff);
     }
     request.body.setUp();
-    request.data["body"] = buff;
     return request;
 }
 
@@ -159,22 +160,34 @@ void Server::serveContent()
             it = _clients.erase(it);
         }
         else
+        {
             it++;
+        }
     }
 }
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "70");
+    srand(time(NULL));
+    int port = (rand() % (65535 - 1024 + 1)) + 1024;
+
+
+    initServerSocket(NULL, std::to_string(port).c_str());
+    std::cout << "http://localhost:" << port << std::endl;
     while (1)
     {
         getReadableClient();
         acceptConnection();
         serveContent();
     }
+
     close(_serverSocket);
 }
 
+Client::Client(): received(0), remaining(0)
+{
+
+}
 int main(int ac, char **av)
 {
     if (ac == 2)

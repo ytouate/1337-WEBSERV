@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 02:43:12 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 02:48:31 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int     Response::deleteMethod(Config& config)
         int _ok = 0;
         while (name != NULL)
         {
-            std::string file = _deletePath + "/" + name->d_name;
+            std::string file = _deletePath + name->d_name;
             if (stat(file.c_str(), &filestat) == 0) 
             {
                 if (S_ISDIR(filestat.st_mode) || !(filestat.st_mode & S_IWUSR))

@@ -9,7 +9,9 @@ struct Body
     std::string content;
     std::string contentType;
     std::string contentName;
-
+    void getFileName();
+    void getContentType();
+    void trimUnwantedLines();
     void setUp();
 };
 
