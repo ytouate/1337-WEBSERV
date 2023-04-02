@@ -12,8 +12,9 @@ struct Client
     int socket;
     int received;
     int remaining;
-    int connectionClosed;
     const std::string getClientAddress();
+
+    Client();
 };
 
 class Server

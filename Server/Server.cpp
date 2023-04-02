@@ -5,7 +5,7 @@
 #include "../Response/Response.hpp"
 #include "../Parse/serverParse.hpp"
 #define MAX_REQUEST_SIZE 4096
-#define MAX_CHUNK_SIZE 25000
+#define MAX_CHUNK_SIZE 100
 void error(const char *s)
 {
     perror(s);
@@ -99,6 +99,7 @@ void Server::acceptConnection()
 
 requestParse Server::getRequest(const Client &_client)
 {
+    fcntl(_client.socket, F_SETFL, O_NONBLOCK);
     int bytesRead, bytesLeft;
     char buff[MAX_REQUEST_SIZE];
     std::string header;
@@ -113,6 +114,8 @@ requestParse Server::getRequest(const Client &_client)
 
     requestParse request(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
+    if (bytesLeft == 0)
+        return request;
     memset(buff, 0, sizeof buff);
     while (bytesLeft > 0)
     {
@@ -125,7 +128,6 @@ requestParse Server::getRequest(const Client &_client)
         memset(buff, 0, sizeof buff);
     }
     request.body.setUp();
-    request.data["body"] = buff;
     return request;
 }
 
@@ -150,10 +152,6 @@ void Server::serveContent()
                 {
                     close(it->socket);
                     break;
-                    // it = _clients.erase(it);
-                    // continue;
-                    // // how do i delete the iterator from the vector without affecting the loop
-                    // break;
                 }
                 it->remaining -= ret;
                 it->received += ret;
@@ -170,8 +168,11 @@ void Server::serveContent()
 
 Server::Server(std::string file) : _configFile(file)
 {
-    const char *port = "8000";
-    initServerSocket(NULL, port);
+    srand(time(NULL));
+    int port = (rand() % (65535 - 1024 + 1)) + 1024;
+
+
+    initServerSocket(NULL, std::to_string(port).c_str());
     std::cout << "http://localhost:" << port << std::endl;
     while (1)
     {
@@ -179,9 +180,14 @@ Server::Server(std::string file) : _configFile(file)
         acceptConnection();
         serveContent();
     }
+
     close(_serverSocket);
 }
 
+Client::Client(): received(0), remaining(0)
+{
+
+}
 int main(int ac, char **av)
 {
     if (ac == 2)
