@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 17:32:32 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 17:59:23 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,6 +220,8 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
             _contentLength = file.tellg();
             file.seekg(0, std::ios::beg);
             std::vector<char> buffer(_contentLength);
+            if  ((_contentLength * 0.000001) > 20)
+                _transferEncoding = "Yes";
             file.read(buffer.data(), _contentLength);
             size_t i = 0;
             while (i < buffer.size())
@@ -368,6 +370,12 @@ int    Response::getMethod(Config &config)
             sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
             this->_response += buffer;
             _header += buffer;
+            if (_transferEncoding == "Yes")
+            {
+                sprintf(buffer, "Transfer-Encoding: chunked\r\n");
+                this->_response += buffer;
+                _header += buffer;
+            }
             sprintf(buffer, "Content-Length: %ld\r\n", this->_contentLength);
             this->_response += buffer;
             _header += buffer;
