@@ -57,6 +57,62 @@ void requestParse::getHost(std::string &s)
     }
 }
 
+void trimFirstLastThreeLines(std::string& str)
+{
+    // Find the first newline character and skip the first three lines
+    size_t pos = 0;
+    for (int i = 0; i < 3; ++i) {
+        pos = str.find("\n", pos) + 1;
+        if (pos == std::string::npos) {
+            return; // Less than three lines
+        }
+    }
+
+    // Find the last newline character and skip the last three lines
+    size_t last = str.find_last_of("\n");
+    if (last != std::string::npos) {
+        for (int i = 0; i < 2; ++i) {
+            last = str.find_last_of("\n", last - 1);
+            if (last == std::string::npos) {
+                break;
+            }
+        }
+    }
+
+    // Remove the first and last three lines
+    if (last != std::string::npos && pos <= last) {
+        str = str.substr(pos, last - pos);
+    }
+}
+
+
+void Body::setUp()
+{
+    size_t pos;
+    pos = this->content.find("filename=\"");
+    if (pos != std::string::npos)
+    {
+        pos += 10;
+        for (size_t i = pos; this->content[i]; i++)
+        {
+            if (this->content[i] == '"')
+                break;
+            this->contentName += this->content[i];
+        }
+    }
+    pos = this->content.find("Content-Type: ");
+    if (pos != std::string::npos)
+    {
+        pos += 14;
+        for (size_t i = pos; this->content[i]; ++i)
+        {
+            if (this->content[i] == '\n')
+                break;
+            this->contentType += this->content[i];
+        }
+    }
+    trimFirstLastThreeLines(this->content);
+}
 requestParse::requestParse(std::string _requestParse)
 {
     size_t pos = 0;
@@ -74,15 +130,6 @@ requestParse::requestParse(std::string _requestParse)
         }
         this->getHost(token);
         _requestParse.erase(0, pos + 1);
-        if (this->data["method"] == "POST")
-            if (this->data.size() == 6)
-                break;
-    }
-    pos = buff.find("\r\n\r\n");
-    if (pos != std::string::npos)
-    {
-        buff = buff.erase(0, pos + 4);
-        this->data["body"] = buff;
     }
 }
 

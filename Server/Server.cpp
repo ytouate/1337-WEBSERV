@@ -111,14 +111,17 @@ requestParse Server::getRequest(const Client &_client)
 
     requestParse request(buff);
     bytesLeft = atoi(request.data["content-length"].c_str());
-    memset(buff, '\0', sizeof buff);
+    memset(buff, 0, sizeof buff);
     while (bytesLeft > 0)
     {
         bytesRead = recv(_client.socket, buff, std::min(bytesLeft, MAX_REQUEST_SIZE), 0);
         if (bytesRead <= 0)
             break;
         bytesLeft -= bytesRead;
+        request.body.content += buff;
+        memset(buff, 0, sizeof buff);
     }
+    request.body.setUp();
     request.data["body"] = buff;
     return request;
 }
@@ -158,7 +161,7 @@ void Server::serveContent()
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "7000");
+    initServerSocket(NULL, "80");
     while (1)
     {
         getReadableClient();
@@ -168,8 +171,8 @@ Server::Server(std::string file) : _configFile(file)
     close(_serverSocket);
 }
 
-// int main(int ac, char **av)
-// {
-//     if (ac == 2)
-//         Server server(av[1]);
-// }
+int main(int ac, char **av)
+{
+    if (ac == 2)
+        Server server(av[1]);
+}
