@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 01:34:32 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 02:12:37 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,7 @@ std::string _checker;
 int     Response::checkPathOfPostmethod(serverParse& server, std::string line, int index)
 {
     std::string path;
-    static int i = 0;
-    // if (i == 0)
-    // {
-    //     path = server.locations[index].data["root"][0] + line;
-    //     _checker = line;
-    // }
-    // if (_checker != line )
-        path = line;
+    path = line;
     _postPath = path;
     if (server.data["upload"].size() > 0 && server.data["upload"].front() == "on")
     {
@@ -49,7 +42,6 @@ int     Response::checkPathOfPostmethod(serverParse& server, std::string line, i
         postResponse();
         return false;
     }
-    i++;
     return true;
 }
 
@@ -103,7 +95,6 @@ int     Response::postMethod(Config& config)
             _statusCode = 201;
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
-            std::cout << _uploadPath << std::endl;
             int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
             write(fd, request.body.content.c_str(), request.body.content.size());
             _body += "<h1> kolchi daze </h1>";

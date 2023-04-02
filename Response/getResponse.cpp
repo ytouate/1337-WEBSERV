@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 00:35:06 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 02:36:37 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,7 @@ bool    Response::getMatchedLocation(Config& config)
         return 1;
     }
     if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, index);
+    if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, index);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -166,7 +167,9 @@ bool    Response::methodAllowed(serverParse& server, int index)
         for (size_t i = 0; i < server.locations[index].data["allowed_methods"].size(); i++)
         {
             if (request.data["method"] == server.locations[index].data["allowed_methods"][i])
+            {
                 return true;
+            }
         }
         errorPages(server, index, 405);
         return false;

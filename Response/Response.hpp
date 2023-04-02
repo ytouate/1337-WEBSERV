@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/03/31 01:27:02 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 02:23:14 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class Response
         std::string _body;
         std::string _postPath;
         std::string _uploadPath;
+        std::string _deletePath;
         int         _indexLocation;
         int         _indexServer;
         bool    getMatchedLocation(Config& config);
@@ -46,9 +47,11 @@ class Response
         int     postMethod(Config& config);
         int     deleteMethod(Config& config);
         int     checkPathOfPostmethod(serverParse& server, std::string line, int index);
+        int     checkPathOfDeletemethod(serverParse& server, std::string line, int index);
         int    validateRequest();
         bool    executeCgi(serverParse& server, int index);
         void    postResponse(void);
+        void    success();
         void    postType(std::string path);
     public:
         std::string _response;
