@@ -57,36 +57,38 @@ void requestParse::getHost(std::string &s)
     }
 }
 
-void trimFirstLastThreeLines(std::string& str)
+void Body::trimUnwantedLines()
 {
-    // Find the first newline character and skip the first three lines
     size_t pos = 0;
-    for (int i = 0; i < 3; ++i) {
-        pos = str.find("\n", pos) + 1;
-        if (pos == std::string::npos) {
-            return; // Less than three lines
-        }
+    for (int i = 0; i < 3; ++i)
+    {
+        pos = content.find("\n", pos) + 1;
+        if (pos == std::string::npos)
+            return;
     }
 
-    // Find the last newline character and skip the last three lines
-    size_t last = str.find_last_of("\n");
-    if (last != std::string::npos) {
-        for (int i = 0; i < 2; ++i) {
-            last = str.find_last_of("\n", last - 1);
-            if (last == std::string::npos) {
+    size_t last = content.find_last_of("\n");
+    if (last != std::string::npos)
+    {
+        for (int i = 0; i < 2; ++i)
+        {
+            last = content.find_last_of("\n", last - 1);
+            if (last == std::string::npos)
                 break;
-            }
         }
     }
-
-    // Remove the first and last three lines
-    if (last != std::string::npos && pos <= last) {
-        str = str.substr(pos, last - pos);
-    }
+    if (last != std::string::npos && pos <= last)
+        content = content.substr(pos, last - pos);
 }
 
-
 void Body::setUp()
+{
+    getFileName();
+    getContentType();
+    trimUnwantedLines();
+}
+
+void Body::getFileName()
 {
     size_t pos;
     pos = this->content.find("filename=\"");
@@ -100,6 +102,11 @@ void Body::setUp()
             this->contentName += this->content[i];
         }
     }
+}
+void Body::getContentType()
+{
+    size_t pos;
+
     pos = this->content.find("Content-Type: ");
     if (pos != std::string::npos)
     {
@@ -111,7 +118,6 @@ void Body::setUp()
             this->contentType += this->content[i];
         }
     }
-    trimFirstLastThreeLines(this->content);
 }
 requestParse::requestParse(std::string _requestParse)
 {

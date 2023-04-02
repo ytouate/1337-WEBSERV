@@ -5,7 +5,7 @@
 #include "../Response/Response.hpp"
 #include "../Parse/serverParse.hpp"
 #define MAX_REQUEST_SIZE 4096
-
+#define MAX_CHUNK_SIZE 25000
 void error(const char *s)
 {
     perror(s);
@@ -96,7 +96,6 @@ void Server::acceptConnection()
     }
 }
 
-#define MAX_CHUNK_SIZE 1024
 
 requestParse Server::getRequest(const Client &_client)
 {
@@ -147,6 +146,10 @@ void Server::serveContent()
                 {
                     close(it->socket);
                     break;
+                    // it = _clients.erase(it);
+                    // continue;
+                    // // how do i delete the iterator from the vector without affecting the loop
+                    // break;
                 }
                 it->remaining -= ret;
                 it->received += ret;
@@ -155,13 +158,17 @@ void Server::serveContent()
             it = _clients.erase(it);
         }
         else
+        {
             it++;
+        }
     }
 }
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "8000");
+    const char *port = "8080";
+    initServerSocket(NULL, port);
+    std::cout << "http://localhost:" << port << std::endl;
     while (1)
     {
         getReadableClient();
