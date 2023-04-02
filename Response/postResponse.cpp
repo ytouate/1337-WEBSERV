@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 02:12:37 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 17:33:19 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,10 @@ void    Response::postResponse(void)
     char buffer[100];
     sprintf(buffer, "HTTP/1.1 %d\r\n", _statusCode);
     this->_response += buffer;
+    _header += buffer;
     sprintf(buffer, "content-type : %s\r\n\r\n", "text/html");
     this->_response += buffer;
+    _header += buffer;
     this->_response += _body;
 }
 

@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 02:48:31 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 15:01:52 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ int     Response::checkPathOfDeletemethod(serverParse& server, std::string line,
     {
         std::cout << "301 moved -> path = " << path << std::endl;
         path += "/";
+        _deletePath = path;
         _statusCode = 301;
     }
     return true;
@@ -66,11 +67,22 @@ int     Response::deleteMethod(Config& config)
         while (name != NULL)
         {
             std::string file = _deletePath + name->d_name;
+            std::cout << file << std::endl;
             if (stat(file.c_str(), &filestat) == 0) 
             {
-                if (S_ISDIR(filestat.st_mode) || !(filestat.st_mode & S_IWUSR))
+                if ((S_ISDIR(filestat.st_mode)))
                 {
-                    std::cout << "you don't have permission" << std::endl;
+                    if (filestat.st_mode & S_IREAD)
+                        {}
+                    else
+                    {
+                        _ok = 1;
+                        break;
+                    }
+                    std::cout << _ok << std::endl;
+                }
+                if (!(filestat.st_mode & S_IWUSR))
+                {
                     _ok = 1;
                     break;
                 }
@@ -83,7 +95,7 @@ int     Response::deleteMethod(Config& config)
             dirent *name = readdir(dir);
             while (name != NULL)
             {
-                std::string file = _deletePath + "/" + name->d_name;
+                std::string file = _deletePath + name->d_name;
                 remove(file.c_str());
                 name = readdir(dir);
             }
@@ -91,6 +103,7 @@ int     Response::deleteMethod(Config& config)
             return 0;
         }
         errorPages(config.servers[_indexServer], _indexLocation, 403);
+        postResponse();
         return 0;
     }
     else if (stat(_deletePath.c_str(), &filestat) == 0)

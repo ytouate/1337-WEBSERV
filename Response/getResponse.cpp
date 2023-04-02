@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 02:36:37 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 17:32:32 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,8 +196,10 @@ bool Response::executeCgi(serverParse& server, int index)
     char buffer[100];
     sprintf(buffer, "HTTP/1.1 %d OK\r\n" , 200);
     this->_response += buffer;
+    _header += buffer;
     sprintf(buffer, "Content-Type: text/html\r\n\r\n");
     this->_response += buffer;
+    _header += buffer;
     while (getline(infile, line))
         _body += line;
     _response += _body;
@@ -335,10 +337,13 @@ void    Response::faildResponse()
     char buffer[100];
     sprintf(buffer, "HTTP/1.1 %d \r\n", this->_statusCode);
     this->_response += buffer;
+    _header += buffer;
     sprintf(buffer, "Connection: closed\r\n");
     this->_response += buffer;
+    _header += buffer;
     sprintf(buffer, "Content-Type: text/html\r\n\r\n");
     this->_response += buffer;
+    _header += buffer;
     this->_response += _body;
 }
 
@@ -362,15 +367,19 @@ int    Response::getMethod(Config &config)
         {
             sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
             this->_response += buffer;
+            _header += buffer;
             sprintf(buffer, "Content-Length: %ld\r\n", this->_contentLength);
             this->_response += buffer;
+            _header += buffer;
             sprintf(buffer, "Connection: keep-alive\r\n\r\n");
             this->_response += buffer;
+            _header += buffer;
         }
         else
         {
             sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
             this->_response += buffer;
+            _header += buffer;
         }
         _response += _body;
     }

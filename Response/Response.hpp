@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 02:23:14 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/02 17:30:23 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class Response
         std::string _postPath;
         std::string _uploadPath;
         std::string _deletePath;
+        std::string _header;
         int         _indexLocation;
         int         _indexServer;
         bool    getMatchedLocation(Config& config);
