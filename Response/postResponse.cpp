@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/01 21:06:09 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/01 23:47:23 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,29 +88,26 @@ void    Response::postType(std::string path)
 
 int     Response::postMethod(Config& config)
 {
-    srand(time(0));
-    int number = rand() / 2;
     if (getMatchedLocation(config) == true)
     {
         if (_indexLocation != -1)
         {
             if (_uploadPath.size() > 0)
             {
-                // DIR *dir = opendir(_uploadPath.c_str());
-                _uploadPath = "./upload/";
+                DIR *dir = opendir(_uploadPath.c_str());
+                if (!dir)
+                    _uploadPath = "./upload/";
             }
+            else
+                _uploadPath = "./upload/";
             _statusCode = 201;
-            _uploadPath += std::to_string(number) + ".html";
+            _uploadPath += "upload_";
+            _uploadPath += request.body.contentName;
             int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
-            write(fd, request.data["body"].c_str(), request.data["body"].size());
+            write(fd, request.body.content.c_str(), request.body.content.size());
             _body += "<h1> kolchi daze </h1>";
             postResponse();
             return 0;
-        }
-        DIR *dir = opendir(_postPath.c_str());
-        if (dir)
-        {
-            
         }
     }
     else

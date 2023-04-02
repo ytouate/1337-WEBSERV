@@ -166,7 +166,7 @@ void Server::serveContent()
 
 Server::Server(std::string file) : _configFile(file)
 {
-    const char *port = "8080";
+    const char *port = "8000";
     initServerSocket(NULL, port);
     std::cout << "http://localhost:" << port << std::endl;
     while (1)
