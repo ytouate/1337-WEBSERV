@@ -6,7 +6,11 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/04/03 14:56:48 by ytouate          ###   ########.fr       */
+=======
+/*   Updated: 2023/04/03 16:12:04 by otmallah         ###   ########.fr       */
+>>>>>>> 345377922738738aa2b178f412292fdb3f694f8b
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,6 +213,7 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
 {
     std::ifstream file;
     file.open(path.c_str(), std::ios::binary);
+    int fd = open(path.c_str() , O_RDWR);
     if(file)
     {
         if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi_path"].size() > 0)
@@ -218,14 +223,14 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
             file.seekg(0, std::ios::end);
             _contentLength = file.tellg();
             file.seekg(0, std::ios::beg);
-            std::vector<char> buffer(_contentLength);
-            file.read(buffer.data(), _contentLength);
-            size_t i = 0;
-            while (i < buffer.size())
+            char buffer[1000];
+            int bytes;
+            while ((bytes = read(fd, buffer, 1000)) > 0)
             {
-                _body += buffer[i];
-                i++;
+                std::string line(buffer, bytes);
+                _body += line;
             }
+            
             _statusCode = 200;
             this->_requestPath = path;
             getContentType();
