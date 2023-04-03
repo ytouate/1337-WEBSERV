@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 17:33:19 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/03 16:25:43 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,8 @@ int     Response::postMethod(Config& config)
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
             int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
-            write(fd, request.body.content.c_str(), request.body.content.size());
+            size_t size = 0;
+                write(fd, request.body.content.c_str(), request.body.content.size());
             _body += "<h1> kolchi daze </h1>";
             postResponse();
             return 0;
