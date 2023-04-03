@@ -136,12 +136,11 @@ requestParse::requestParse(std::string _requestParse)
         else if (headerName == "Content-Type")
             this->data["content-type"] = headerValue;
     }
-
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;
     std::string save = _requestParse;
-    _requestParse = _requestParse.erase(0, pos + 1);
+    _requestParse = _requestParse.erase(0, pos + 4);
     this->body.content = _requestParse;
 }
 

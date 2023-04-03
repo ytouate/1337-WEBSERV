@@ -108,9 +108,7 @@ requestParse Server::getRequest(const Client &_client)
         memset(buff, 0, sizeof buff);
     }
     requestParse request(header);
-
     bytesLeft = atoi(request.data["content-length"].c_str());
-    std::cout << bytesLeft << std::endl;
     if (bytesLeft == 0)
         return request;
     memset(buff, 0, sizeof buff);
@@ -137,12 +135,9 @@ void Server::serveContent()
         if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
             requestParse request = getRequest(*it);
+            if (request.data["method"] == "POST" && request.body.contentName.empty())
+                break;
             Response response(_configFile, request);
-
-            // if (request.data["method"] == "POST")
-            // {
-            //     std::cout << "Body: " << request.body.content << std::endl;
-            // }
             it->remaining = response._response.size();
             it->received = 0;
             while (it->received < (int)response._response.size())
