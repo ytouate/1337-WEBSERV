@@ -133,11 +133,20 @@ void Server::serveContent()
     std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
+
         if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
             requestParse request = getRequest(*it);
-            if (request.data["method"] == "POST" && request.body.contentName.empty())
-                break;
+            if (request.data["method"] == "POST")
+            {
+                if (request.body.contentName.empty())
+                {
+                    it->_waitingForBody = true;
+                    continue;
+                }
+                else if (it->_waitingForBody)
+                    it->_waitingForBody = false;
+            }
             Response response(_configFile, request);
             it->remaining = response._response.size();
             it->received = 0;
@@ -181,7 +190,7 @@ Server::Server(std::string file) : _configFile(file)
     close(_serverSocket);
 }
 
-Client::Client() : received(0), remaining(0) {}
+Client::Client() : received(0), remaining(0), _waitingForBody(false) {}
 
 int main(int ac, char **av)
 {

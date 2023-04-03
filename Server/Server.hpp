@@ -12,6 +12,7 @@ struct Client
     int socket;
     int received;
     int remaining;
+    bool _waitingForBody;
     const std::string getClientAddress();
 
     Client();
@@ -24,7 +25,6 @@ private:
     std::vector<Client>         _clients;
     fd_set                      _readyToReadFrom;
     Config                      _configFile;
-    
     requestParse    getRequest(const Client &_client);
     std::string     getRequestBuffer(Client &);
     void            checkCientCases();
