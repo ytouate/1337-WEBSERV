@@ -1,5 +1,6 @@
 #include "requestParse.hpp"
-
+#include <string>
+#include <sstream>
 void requestParse::parseRequestLine(std::string &s, const std::string &delimiter)
 {
     size_t pos = 0;
@@ -103,6 +104,7 @@ void Body::getFileName()
         }
     }
 }
+
 void Body::getContentType()
 {
     size_t pos;
@@ -119,24 +121,28 @@ void Body::getContentType()
         }
     }
 }
+
 requestParse::requestParse(std::string _requestParse)
 {
-    size_t pos = 0;
-    std::string token;
-    std::string buff(_requestParse);
-    bool isrequestParseLine = true;
-    while ((pos = _requestParse.find("\n")) != std::string::npos)
+    std::stringstream ss(_requestParse);
+    ss >> this->data["method"] >> this->data["path"] >> this->data["protocol"] >> this->data["host"];
+    std::string headerName, headerValue;
+    getline(ss, this->data["host"]);
+    std::remove_if(data["host"].begin(), data["host"].end(), ::isspace);
+    while (getline(ss, headerName, ':') && getline(ss, headerValue))
     {
-        token = _requestParse.substr(0, pos);
-        if (isrequestParseLine)
-        {
-            isrequestParseLine = false;
-            parseRequestLine(token, " ");
-            continue;
-        }
-        this->getHost(token);
-        _requestParse.erase(0, pos + 1);
+        if (headerName == "Content-Length")
+            this->data["content-length"] = headerValue;
+        else if (headerName == "Content-Type")
+            this->data["content-type"] = headerValue;
     }
+
+    size_t pos = _requestParse.find("\r\n\r\n");
+    if (pos == std::string::npos)
+        return;
+    std::string save = _requestParse;
+    _requestParse = _requestParse.erase(0, pos + 1);
+    this->body.content = _requestParse;
 }
 
 requestParse::~requestParse()

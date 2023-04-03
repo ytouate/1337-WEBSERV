@@ -23,7 +23,6 @@ private:
     int                         _serverSocket;
     std::vector<Client>         _clients;
     fd_set                      _readyToReadFrom;
-    // fd_set                      _readyToWriteTo;
     Config                      _configFile;
     
     requestParse    getRequest(const Client &_client);
@@ -32,7 +31,7 @@ private:
     void            getReadableClient();
     void            acceptConnection();
     void            serveContent();
-    void            initServerSocket(const char *host, const char *port);
+    void            initServerSocket(const char *port);
 public:
     Server(std::string file);
     ~Server();

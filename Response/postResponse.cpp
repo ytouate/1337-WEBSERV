@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 17:33:19 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/03 14:56:55 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,6 @@ int     Response::postMethod(Config& config)
             return 0;
         }
         _indexLocation = 0;
-        std::cout << _postPath << std::endl;
         DIR *dir = opendir(_uploadPath.c_str());
         if (dir)
         {

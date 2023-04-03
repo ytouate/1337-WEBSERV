@@ -9,10 +9,12 @@ struct Body
     std::string content;
     std::string contentType;
     std::string contentName;
+    void setUp();
+
+    private:
     void getFileName();
     void getContentType();
     void trimUnwantedLines();
-    void setUp();
 };
 
 class requestParse

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 21:03:40 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/03 14:56:48 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,6 @@ bool Response::executeCgi(serverParse& server, int index)
     int fd = open("/tmp/out" , O_CREAT | O_RDWR , 0644);
     std::string path1 = "/usr/bin/php";
     std::string path2 = request.data["path"];
-    std::cout << path2 << std::endl;
     char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     if (fork() == 0)
     {
@@ -329,7 +328,9 @@ void   Response::getContentType()
     else if (path == ".Ogg")  this->_contentType = "video/ogg";
     else if (path == ".AVI")  this->_contentType = "video/x-msvideo";
     else if (path == ".MPEG")  this->_contentType = "video/mpeg";
-    else if (path == ".tiff")  this->_contentType = "image/tiff";
+    else if (path == ".tiff")  this->_contentType = "image/tif";
+    else if (path == ".tif")  this->_contentType = "image/tif";
+
     else this->_contentType = "application/octet-stream";
 }
 
@@ -388,13 +389,3 @@ int    Response::getMethod(Config &config)
     _requestPath = "";
    return 0; 
 }
-
-// bool    Response::validationRequestPath(Config& config, requestParse& request)
-// {
-//     if (getMatchedLocation(config, request) == false)
-//         std::cout << "404 not found" << std::endl;
-//     else
-//     {
-    
-//     }
-// }
