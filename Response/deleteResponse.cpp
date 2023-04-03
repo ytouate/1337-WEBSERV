@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   deleteResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 15:01:52 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/03 14:56:45 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ int     Response::checkPathOfDeletemethod(serverParse& server, std::string line,
     _indexLocation = index;
     path = server.locations[index].data["root"][0] + line;
     _deletePath = path;
-    std::cout << path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
     {
@@ -61,13 +60,11 @@ int     Response::deleteMethod(Config& config)
     DIR *dir = opendir(_deletePath.c_str());
     if (dir)
     {
-        std::cout << "test" << std::endl;
         dirent *name = readdir(dir);
         int _ok = 0;
         while (name != NULL)
         {
             std::string file = _deletePath + name->d_name;
-            std::cout << file << std::endl;
             if (stat(file.c_str(), &filestat) == 0) 
             {
                 if ((S_ISDIR(filestat.st_mode)))
@@ -79,7 +76,6 @@ int     Response::deleteMethod(Config& config)
                         _ok = 1;
                         break;
                     }
-                    std::cout << _ok << std::endl;
                 }
                 if (!(filestat.st_mode & S_IWUSR))
                 {
