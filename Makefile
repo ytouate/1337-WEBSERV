@@ -3,15 +3,17 @@ NAME = webserv
 FILES = \
 	./Parse/Config.cpp			\
 	./Parse/serverParse.cpp		\
-	./main.cpp					\
 	./Parse/locationParse.cpp	\
 	./Parse/requestParse.cpp 	\
-	./Response/Response.cpp		\
-	./Server/Server.cpp
+	./Response/getResponse.cpp	\
+	./Response/postResponse.cpp	\
+	./Response/deleteResponse.cpp	\
+	./Server/Server.cpp			\
+	./main.cpp
 
 CC = c++ 
 O_FILE = $(FILES:.cpp=.o)
-CPPFLAGS =
+CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
 
 all: $(NAME)
 

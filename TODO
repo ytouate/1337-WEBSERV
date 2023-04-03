@@ -39,5 +39,6 @@ build a functional web client
 
 
 -- othman
--> path begin
--> large size_video
+-> cgi run set env
+-> return 301 '/'
+

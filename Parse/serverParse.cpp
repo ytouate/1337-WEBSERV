@@ -1,5 +1,4 @@
 #include "serverParse.hpp"
-#include <iostream>
 
 serverParse::serverParse(const std::vector<std::string> &__fileBuff, int __start)
 {
@@ -104,18 +103,21 @@ size_t serverParse::parseBlock()
     }
     if (_serverIsOpened or _locationIsOpened)
         error("block not closed");
-    fillEmptyRequiredDirectives();
     insertDirectives();
+    fillEmptyRequiredDirectives();
     return i;
 }
 
 void serverParse::insertDirectives(void)
 {
+    data.insert(_cgiPath);
+    data.insert(_upload);
     data.insert(_index);
     data.insert(_root);
     data.insert(_port);
     data.insert(_serverName);
     data.insert(_allowedMethods);
+    data.insert(_upload_path);
 }
 
 void serverParse::fillEmptyRequiredDirectives(void)
@@ -123,9 +125,17 @@ void serverParse::fillEmptyRequiredDirectives(void)
     for (size_t i = 0; i < locations.size(); i++)
     {
         if (locations[i].data["root"].size() == 0)
-            locations[i].data["root"] = this->_serverRoot.second;
+            locations[i].data["root"] = this->data["root"];
         if (locations[i].data["index"].size() == 0)
-            locations[i].data["index"] = this->_serverIndex.second;
+            locations[i].data["index"] = this->data["index"];
+        if (locations[i].data["allowed_methods"].size() == 0)
+            locations[i].data["allowed_methods"] = this->data["allowed_methods"];
+        if (locations[i].data["cgi_path"].size() == 0)
+            locations[i].data["cgi_path"] = this->data["cgi_path"];
+        if (locations[i].data["upload"].size() == 0)
+            locations[i].data["upload"] = this->data["upload"];
+        if (locations[i].data["upload_path"].size() == 0)
+            locations[i].data["upload_path"] = this->data["upload_path"];
     }
 }
 
@@ -155,30 +165,56 @@ void serverParse::fillDirective(const std::string &key,
 {
     if (key == "listen")
         _port = std::make_pair(key, values);
+    else if (key == "upload")
+    {
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid arguments");
+            if (values.at(0) != "on" && values.at(0) != "off")
+                error("invalid arguments");
+            _upload = std::make_pair(key, values);
+        }
+    }
+    else if (key == "upload_path")
+    {
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid arguments");
+            _upload_path = std::make_pair(key, values);
+        }
+    }
+    else if (key == "cgi_path")
+        _cgiPath = std::make_pair(key, values);
     else if (key == "root")
     {
-        if (_isInsideServer)
-            this->_serverRoot = std::make_pair(key, values);
-        _root = std::make_pair(key, values);
+        if (!_locationIsOpened)
+            _root = std::make_pair(key, values);
     }
     else if (key == "index")
     {
-        if (_isInsideServer)
-            this->_serverIndex = std::make_pair(key, values);
-        _index = std::make_pair(key, values);
+        if (!_locationIsOpened)
+            _index = std::make_pair(key, values);
     }
     else if (key == "auto_index")
     {
-        if (values.size() != 1) error("Invalid Arguments");
-        if (values.front() != "on" and values.front() != "off") error("Invalid Arguments");
-        if (!_locationIsOpened) autoIndex = values[0] == "on" ? true : false;
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid Arguments");
+            if (values.front() != "on" and values.front() != "off")
+                error("Invalid Arguments");
+            if (!_locationIsOpened)
+                autoIndex = values[0] == "on" ? true : false;
+        }
     }
     else if (key == "server_name")
         _serverName = std::make_pair(key, values);
     else if (key == "allowed_methods")
     {
         if (!_locationIsOpened)
-        _allowedMethods = std::make_pair(key, values);
+            _allowedMethods = std::make_pair(key, values);
     }
     else if (key == "error_page")
     {

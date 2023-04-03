@@ -1,22 +1,11 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <ifaddrs.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <string.h>
+
 #include "../inc.hpp"
 #include "Server.hpp"
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
-
+#include "../Parse/serverParse.hpp"
 #define MAX_REQUEST_SIZE 4096
-
+#define MAX_CHUNK_SIZE 250
 void error(const char *s)
 {
     perror(s);
@@ -40,6 +29,10 @@ void Server::initServerSocket(const char *host, const char *port)
     _serverSocket = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
     if (_serverSocket == -1)
         error("socket()");
+
+    // setting the socket to be non blocking
+    fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
+
     std::cout << "Binding the server socket to local address\n";
     if (bind(_serverSocket, data->ai_addr, data->ai_addrlen))
         error("bind()");
@@ -52,14 +45,18 @@ void Server::initServerSocket(const char *host, const char *port)
 void Server::getReadableClient()
 {
     FD_ZERO(&_readyToReadFrom);
+    // FD_ZERO(&_readyToWriteTo);
     FD_SET(_serverSocket, &_readyToReadFrom);
+    // FD_SET(_serverSocket, &_readyToWriteTo);
     int maxSocket = _serverSocket;
-    std::map<int, Client>::iterator it = _clients.begin();
+    std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
-        FD_SET(it->first, &_readyToReadFrom);
-        if (it->first > maxSocket)
-            maxSocket = it->first;
+
+        FD_SET(it->socket, &_readyToReadFrom);
+        // FD_SET(it->socket, &_readyToWriteTo);
+        if (it->socket > maxSocket)
+            maxSocket = it->socket;
         ++it;
     }
 
@@ -93,71 +90,105 @@ void Server::acceptConnection()
                                    &_newClient.addressLenght);
         if (_newClient.socket == -1)
             error("accept()");
-        _clients.insert(std::make_pair(_newClient.socket,
-                                       _newClient));
+        _clients.push_back(_newClient);
         std::cout << "New connection from: "
                   << _newClient.getClientAddress() << "\n";
     }
 }
 
 
-#define MAX_CHUNK_SIZE 57000
+requestParse Server::getRequest(const Client &_client)
+{
+    fcntl(_client.socket, F_SETFL, O_NONBLOCK);
+    int bytesRead, bytesLeft;
+    char buff[MAX_REQUEST_SIZE];
+    std::string header;
+    while ((bytesRead = recv(_client.socket, buff, MAX_REQUEST_SIZE - 1, 0)) > 0)
+    {
+        buff[bytesRead] = '\0';
+        header += buff;
+        if (bytesRead == 2 && buff[0] == '\r' && buff[1] == '\n')
+            break;
+        memset(buff, 0, sizeof buff);
+    }
+
+    requestParse request(header);
+    bytesLeft = atoi(request.data["content-length"].c_str());
+    if (bytesLeft == 0)
+        return request;
+    memset(buff, 0, sizeof buff);
+    while (bytesLeft > 0)
+    {
+        bytesRead = recv(_client.socket, buff, std::min(bytesLeft, MAX_REQUEST_SIZE - 1), 0);
+        if (bytesRead <= 0)
+            break;
+        buff[bytesRead] = '\0';
+        bytesLeft -= bytesRead;
+        request.body.content.append(buff);
+        memset(buff, 0, sizeof buff);
+    }
+    request.body.setUp();
+    return request;
+}
 
 void Server::serveContent()
 {
-
-    std::map<int, Client>::iterator it = _clients.begin();
+    signal(SIGPIPE, SIG_IGN);
+    std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
-        if (FD_ISSET(it->first, &_readyToReadFrom))
+        if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
-            int r;
-            char buff[MAX_REQUEST_SIZE];
-            memset(buff, '\0', sizeof buff);
-            r = recv(it->first, buff, sizeof buff, 0);
-            if (r < 1)
+            requestParse request = getRequest(*it);
+            Response response(_configFile, request);
+            std::cout << "|" <<  response._header << "|" << std::endl;
+            it->remaining = response._response.size();
+            it->received = 0;
+            while (it->received < (int)response._response.size())
             {
-                close(it->first);
-                it = _clients.erase(it);
-                continue;
-            }
-            else
-            {
-                requestParse request(buff);
-                Response response(_configFile, request);
-                it->second.remaining = response._response.size();
-                it->second.received = 0;
-                while (it->second.received < (int)response._response.size())
+                int chunk = std::min(it->remaining, MAX_CHUNK_SIZE);
+                const char *chunkedStr = response._response.c_str() + it->received;
+                int ret = send(it->socket, chunkedStr, chunk, 0);
+                if (ret == -1)
                 {
-                    int chunk = std::min(it->second.remaining, MAX_CHUNK_SIZE);
-                    const char *chunkedStr = response._response.c_str() + it->second.received;
-                    int ret = send(it->first, chunkedStr, chunk, 0);
-                    if (ret == -1)
-                        break;
-                    it->second.remaining -= ret;
-                    it->second.received += ret;
+                    close(it->socket);
+                    break;
                 }
-                close(it->first);
-                it = _clients.erase(it);
-                continue;
+                it->remaining -= ret;
+                it->received += ret;
             }
+            close(it->socket);
+            it = _clients.erase(it);
         }
-        it++;
+        else
+        {
+            it++;
+        }
     }
 }
 
 Server::Server(std::string file) : _configFile(file)
 {
-    initServerSocket(NULL, "8080");
+    srand(time(NULL));
+    int port = (rand() % (65535 - 1024 + 1)) + 1024;
+
+
+    initServerSocket(NULL, std::to_string(port).c_str());
+    std::cout << "http://localhost:" << port << std::endl;
     while (1)
     {
         getReadableClient();
         acceptConnection();
         serveContent();
     }
+
     close(_serverSocket);
 }
 
+Client::Client(): received(0), remaining(0)
+{
+
+}
 int main(int ac, char **av)
 {
     if (ac == 2)

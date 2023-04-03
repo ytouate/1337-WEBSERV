@@ -1,6 +1,5 @@
 #include "Config.hpp"
-#include <iostream>
-
+#include "serverParse.hpp"
 Config::Config(std::string s)
 {
     readFileIntoBuff(s);
@@ -31,7 +30,7 @@ std::string Config::trim(const std::string &s)
 
 void Config::readFileIntoBuff(const std::string &s)
 {
-    _configFile.open(s, std::fstream::in);
+    _configFile.open(s.c_str(), std::fstream::in);
     std::string tmp;
     while (std::getline(_configFile, tmp))
     {

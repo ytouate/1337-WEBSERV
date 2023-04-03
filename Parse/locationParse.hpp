@@ -3,7 +3,6 @@
 
 #include "../inc.hpp"
 #include "Config.hpp"
-#include <map>
 
 #define  ON 1
 #define  OFF 0
@@ -16,6 +15,8 @@ private:
     directive                           _root;
     directive                           _index;
     directive                           _allowed_methods;
+    directive                           _upload;
+    directive                           _upload_path;
     int                                 _start;
     std::vector<std::string>            _fileBuff;
 
