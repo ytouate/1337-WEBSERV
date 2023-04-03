@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/03 20:46:41 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/03 21:26:20 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,7 +226,6 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
                 std::string line(buffer, bytes);
                 _body += line;
             }
-            
             _statusCode = 200;
             this->_requestPath = path;
             getContentType();

@@ -109,6 +109,7 @@ requestParse Server::getRequest(const Client &_client)
     }
     requestParse request(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
+    std::cout << "bytesLeft: " <<  bytesLeft << std::endl;
     if (bytesLeft == 0)
         return request;
     memset(buff, 0, sizeof buff);

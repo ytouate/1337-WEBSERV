@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/03 14:56:55 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/03 21:24:52 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,12 +80,22 @@ void    Response::postType(std::string path)
     else if (path == "video/mpeg")  this->_contentType = ".MPEG";
 }
 
+#define CHUNK 100
+
 int     Response::postMethod(Config& config)
 {
     if (getMatchedLocation(config) == true)
     {
         if (_indexLocation != -1)
         {
+            if (request.body.contentName.size() == 0)
+            {
+                errorPages(config.servers[_indexServer], _indexLocation, 403); 
+                _body += "<br>";
+                _body += "<h1> BODY KHAWI </h1>";
+                postResponse();
+                return 0;
+            }
             if (_uploadPath.size() > 0)
             {
                 DIR *dir = opendir(_uploadPath.c_str());
@@ -98,7 +108,18 @@ int     Response::postMethod(Config& config)
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
             int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
-            write(fd, request.body.content.c_str(), request.body.content.size());
+            int sent = 0;
+            int remaining = request.body.content.size();
+            while (sent < (int)request.body.content.size())
+            {
+                int bytes = std::min(remaining, CHUNK);
+                const char *chunkedStr = request.body.content.c_str() + sent;
+                int ret = write(fd, chunkedStr, bytes);
+                if (ret == -1)
+                    break ;
+                remaining -= ret;
+                sent += ret;
+            }
             _body += "<h1> kolchi daze </h1>";
             postResponse();
             return 0;
