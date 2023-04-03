@@ -5,7 +5,7 @@
 #include "../Response/Response.hpp"
 #include "../Parse/serverParse.hpp"
 #define MAX_REQUEST_SIZE 4096
-#define MAX_CHUNK_SIZE 100
+#define MAX_CHUNK_SIZE 250
 void error(const char *s)
 {
     perror(s);
@@ -141,6 +141,7 @@ void Server::serveContent()
         {
             requestParse request = getRequest(*it);
             Response response(_configFile, request);
+            std::cout << "|" <<  response._header << "|" << std::endl;
             it->remaining = response._response.size();
             it->received = 0;
             while (it->received < (int)response._response.size())
