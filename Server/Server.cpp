@@ -122,8 +122,8 @@ requestParse Server::getRequest(const Client &_client)
         request.body.content.append(std::string(buff, bytesRead));
         memset(buff, 0, sizeof buff);
     }
-    int fd = open("9bel", O_RDWR | O_CREAT, 0644);
-    int fd2 = open("ba3d", O_RDWR | O_CREAT, 0644);
+    int fd = open("9bel", O_RDWR | O_CREAT | O_TRUNC, 0644);
+    int fd2 = open("ba3d", O_RDWR | O_CREAT | O_TRUNC, 0644);
     write(fd, request.body.content.c_str(), request.body.content.size());
     request.body.setUp();
     write(fd2, request.body.content.c_str(), request.body.content.size());
@@ -161,7 +161,7 @@ void Server::serveContent()
                 if (ret == -1)
                 {
                     perror("send()");
-                    close(it->socket);
+                    // close(it->socket);
                     break;
                 }
                 it->remaining -= ret;

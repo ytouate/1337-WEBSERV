@@ -1,6 +1,7 @@
 #include "requestParse.hpp"
 #include <string>
 #include <sstream>
+
 void requestParse::parseRequestLine(std::string &s, const std::string &delimiter)
 {
     size_t pos = 0;
@@ -67,19 +68,14 @@ void Body::trimUnwantedLines()
         if (pos == std::string::npos)
             return;
     }
-
-    size_t last = content.find_last_of("\n");
-    if (last != std::string::npos)
+    std::cout << pos << std::endl;
+    content = std::string(content.c_str() + pos, content.size() - pos);
+    size_t t = content.rfind("------WebKitFormBoundary");
+    if (t != std::string::npos)
     {
-        for (int i = 0; i < 1; ++i)
-        {
-            last = content.find_last_of("\n", last - 1);
-            if (last == std::string::npos)
-                break;
-        }
+        content.erase(t, content.size());
     }
-    if (last != std::string::npos && pos <= last)
-        content = content.substr(pos, last - pos);
+
 }
 
 void Body::setUp()
