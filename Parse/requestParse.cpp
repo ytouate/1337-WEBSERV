@@ -61,7 +61,7 @@ void requestParse::getHost(std::string &s)
 void Body::trimUnwantedLines()
 {
     size_t pos = 0;
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         pos = content.find("\n", pos) + 1;
         if (pos == std::string::npos)
@@ -71,7 +71,7 @@ void Body::trimUnwantedLines()
     size_t last = content.find_last_of("\n");
     if (last != std::string::npos)
     {
-        for (int i = 0; i < 2; ++i)
+        for (int i = 0; i < 1; ++i)
         {
             last = content.find_last_of("\n", last - 1);
             if (last == std::string::npos)

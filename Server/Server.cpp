@@ -88,8 +88,8 @@ void Server::acceptConnection()
         if (_newClient.socket == -1)
             error("accept()");
         _clients.push_back(_newClient);
-        std::cout << "New connection from: "
-                  << _newClient.getClientAddress() << "\n";
+        // std::cout << "New connection from: "
+        //           << _newClient.getClientAddress() << "\n";
     }
 }
 
@@ -102,14 +102,13 @@ requestParse Server::getRequest(const Client &_client)
     while ((bytesRead = recv(_client.socket, buff, MAX_REQUEST_SIZE - 1, 0)) > 0)
     {
         buff[bytesRead] = '\0';
-        header += std::string(buff, bytesRead);
+        header.append(std::string(buff, bytesRead));
         if (bytesRead == 2 && buff[0] == '\r' && buff[1] == '\n')
             break;
         memset(buff, 0, sizeof buff);
     }
     requestParse request(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
-    std::cout << "bytesLeft: " <<  bytesLeft << std::endl;
     if (bytesLeft == 0)
         return request;
     memset(buff, 0, sizeof buff);
@@ -123,7 +122,11 @@ requestParse Server::getRequest(const Client &_client)
         request.body.content.append(std::string(buff, bytesRead));
         memset(buff, 0, sizeof buff);
     }
+    int fd = open("9bel", O_RDWR | O_CREAT, 0644);
+    int fd2 = open("ba3d", O_RDWR | O_CREAT, 0644);
+    write(fd, request.body.content.c_str(), request.body.content.size());
     request.body.setUp();
+    write(fd2, request.body.content.c_str(), request.body.content.size());
     return request;
 }
 
@@ -157,6 +160,7 @@ void Server::serveContent()
                 int ret = send(it->socket, chunkedStr, chunk, 0);
                 if (ret == -1)
                 {
+                    perror("send()");
                     close(it->socket);
                     break;
                 }
