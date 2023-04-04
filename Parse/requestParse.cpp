@@ -68,7 +68,6 @@ void Body::trimUnwantedLines()
         if (pos == std::string::npos)
             return;
     }
-    std::cout << pos << std::endl;
     content = std::string(content.c_str() + pos, content.size() - pos);
     size_t t = content.rfind("------WebKitFormBoundary");
     if (t != std::string::npos)
