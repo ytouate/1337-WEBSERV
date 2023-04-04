@@ -99,9 +99,8 @@ requestParse Server::getRequest(const Client &_client)
     int bytesRead, bytesLeft;
     char buff[MAX_REQUEST_SIZE];
     std::string header;
-    while ((bytesRead = recv(_client.socket, buff, MAX_REQUEST_SIZE - 1, 0)) > 0)
+    while ((bytesRead = recv(_client.socket, buff, MAX_REQUEST_SIZE, 0)) > 0)
     {
-        buff[bytesRead] = '\0';
         header.append(std::string(buff, bytesRead));
         if (bytesRead == 2 && buff[0] == '\r' && buff[1] == '\n')
             break;
@@ -114,10 +113,9 @@ requestParse Server::getRequest(const Client &_client)
     memset(buff, 0, sizeof buff);
     while (bytesLeft > 0)
     {
-        bytesRead = recv(_client.socket, buff, std::min(bytesLeft, MAX_REQUEST_SIZE - 1), 0);
+        bytesRead = recv(_client.socket, buff, std::min(bytesLeft, MAX_REQUEST_SIZE), 0);
         if (bytesRead <= 0)
             break;
-        buff[bytesRead] = '\0';
         bytesLeft -= bytesRead;
         request.body.content.append(std::string(buff, bytesRead));
         memset(buff, 0, sizeof buff);

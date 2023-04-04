@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/03 21:24:52 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/04 23:06:40 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ int     Response::checkPathOfPostmethod(serverParse& server, std::string line, i
     std::string path;
     path = line;
     _postPath = path;
+    std::cout << "path = " << path << std::endl;
     if (server.data["upload"].size() > 0 && server.data["upload"].front() == "on")
     {
         if (server.data["upload_path"].size() > 0)
@@ -78,20 +79,28 @@ void    Response::postType(std::string path)
     else if (path == "video/ogg")  this->_contentType = ".Ogg";
     else if (path == "video/x-msvideo")  this->_contentType = ".AVI";
     else if (path == "video/mpeg")  this->_contentType = ".MPEG";
+    else if (path == "application/zip")  this->_contentType = ".zip";
 }
 
 #define CHUNK 100
 
 int     Response::postMethod(Config& config)
 {
+    srand(time(0));
+    int number = rand() / 3;
     if (getMatchedLocation(config) == true)
     {
+        std::cout << "size = " << request.body.content.size() << std::endl;
         if (_indexLocation != -1)
         {
-            if (request.body.contentName.size() == 0)
+            if (request.body.content.size() > 0 && request.body.contentName.size() == 0)
             {
-                errorPages(config.servers[_indexServer], _indexLocation, 403); 
-                _body += "<br>";
+                postType(request.body.contentType);
+                request.body.contentName = std::to_string(number) + _contentType;
+            }
+            if (request.body.content.size() < 4)
+            {
+                _statusCode = 403;
                 _body += "<h1> BODY KHAWI </h1>";
                 postResponse();
                 return 0;
@@ -149,7 +158,10 @@ int     Response::postMethod(Config& config)
         }
     }
     else
+    {
+            std::cout << _postPath << std::endl;
         errorPages(config.servers[_indexServer], _indexLocation, 404);
+    }
     postResponse();
     return 0;
 }

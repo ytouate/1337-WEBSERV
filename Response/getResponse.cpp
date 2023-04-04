@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/03 21:26:20 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/04 23:13:06 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
+#include <stdlib.h>
 
 Response::~Response()
 {
@@ -21,10 +22,10 @@ Response::Response(Config &config, requestParse& _request) : request(_request)
     _indexLocation = -1;
     if (request.data["method"] == "GET")
         getMethod(config);
-    if (request.data["method"] == "POST")
-        postMethod(config);
     if (request.data["method"] == "DELETE")
         deleteMethod(config);
+    if (request.data["method"] == "POST")
+        postMethod(config);
 }
 
 int    Response::validateRequest()
@@ -128,6 +129,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     std::string path = "./index/";
     std::ifstream infile;
     std::string line;
+    std::cout << id << std::endl;
     size_t size = server.locations[id].errorPages[statusCode].size();
     if (size > 0)
     {
@@ -177,6 +179,17 @@ bool    Response::methodAllowed(serverParse& server, int index)
     return true;
 }
 
+char    **Response::setEnv()
+{
+    char **env = (char **)malloc(sizeof(char *) * 3);
+    std::string line = "CONTENT_LENGTH=" + std::to_string(_contentLength);
+    env[0] = (char *)line.c_str();
+    line = request.data["path"].erase(0 , request.data["path"].rfind("?"));
+    env[1] = (char *)line.c_str();
+    env[2] = 0;
+    return env;
+}
+
 bool Response::executeCgi(serverParse& server, int index)
 {
     (void)server;
@@ -188,7 +201,7 @@ bool Response::executeCgi(serverParse& server, int index)
     if (fork() == 0)
     {
         dup2(fd, 1);
-        execve(commad[0], commad, NULL);
+        execve(commad[0], commad, setEnv());
     }
     std::ifstream infile("/tmp/out");
     std::string line;
