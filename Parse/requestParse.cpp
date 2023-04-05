@@ -81,7 +81,6 @@ void Body::setUp()
 {
     getFileName();
     getContentType();
-    trimUnwantedLines();
 }
 
 void Body::getFileName()

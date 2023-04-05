@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/03 21:24:52 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/04 23:05:07 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,9 @@ int     Response::postMethod(Config& config)
     {
         if (_indexLocation != -1)
         {
-            if (request.body.contentName.size() == 0)
+            std::cout << "Body-size: " << request.body.content.size() << std::endl;
+            std::cout << "Content-type: " << request.data["content-type"] << std::endl;
+            if (request.body.content.size() < 4)
             {
                 errorPages(config.servers[_indexServer], _indexLocation, 403); 
                 _body += "<br>";
