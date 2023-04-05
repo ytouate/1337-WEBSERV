@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/02 20:51:52 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/04 22:00:47 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Response
     private:
         long        _contentLength;
         int         _statusCode;
+        int         _fdFile;
         std::string _contentType;
         std::string _requestPath;
         std::string _checker;
@@ -53,6 +54,7 @@ class Response
         void    postResponse(void);
         void    success();
         void    postType(std::string path);
+        char    **setEnv();
     public:
         std::string _header;
         std::string _response;

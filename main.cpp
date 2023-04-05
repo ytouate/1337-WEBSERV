@@ -23,21 +23,6 @@ void printDrective(directive &a)
         std::cout << " " << a["server_name"][i];
     std::cout << "\n";
 }
-// int main(int ac, char *av[])
-// {
-//     if (ac != 2)
-//         return 1;
-// //     requestParse request("POST /api/users HTTP/1.1\n\
-// // Host: example.com\n\
-// // User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\n\
-// // Accept-Language: en-US\n\
-// // Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n\
-// // Accept-Encoding: gzip, deflate\n\
-// // Connection: Keep-Alive\n\
-// // Content-Type: application/json\n\
-// // Content-Length: 56\r\n\r\n\
-// // \
-// // {\"username\": \"johndoe\", \"email\": \"johndoe@example.com\"}");
 
 // int main(int ac, char **av)
 // {
