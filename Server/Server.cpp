@@ -5,7 +5,7 @@
 #include "../Response/Response.hpp"
 #include "../Parse/serverParse.hpp"
 
-#define MAX_REQUEST_SIZE 4096
+#define MAX_REQUEST_SIZE 1024
 #define MAX_CHUNK_SIZE 200
 
 static void error(const char *s)
@@ -88,8 +88,8 @@ void Server::acceptConnection()
         if (_newClient.socket == -1)
             error("accept()");
         _clients.push_back(_newClient);
-        std::cout << "New connection from: "
-                  << _newClient.getClientAddress() << "\n";
+        // std::cout << "New connection from: "
+        //           << _newClient.getClientAddress() << "\n";
     }
 }
 
@@ -105,25 +105,19 @@ requestParse Server::getRequest(const Client &_client)
         header.append(std::string(buff, bytesRead));
         totalSize += bytesRead;
     }
-    size_t pos = header.find("Content-Length: ");
-    std::cout << "Found in pos: " << pos << std::endl;
-    if (header.size() != totalSize)
-        error("katkhra");
+    
     requestParse request(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
+    size_t test = bytesLeft;
     if (bytesLeft == 0)
         return request;
-    while (bytesLeft > 0)
+    char c[100];
+    while (true)
     {
-        bytesRead = recv(_client.socket, buff, std::min(bytesLeft, MAX_REQUEST_SIZE), 0);
-        if (bytesRead < 0)
-        {
+        if ((bytesRead = recv(_client.socket, c, 100, 0)) < 0)
             break;
-        }
-        bytesLeft -= bytesRead;
-        request.body.content.append(std::string(buff, bytesRead));
+        request.body.content += std::string(c, bytesRead);
     }
-    request.body.setUp();
     return request;
 }
 
@@ -137,7 +131,6 @@ void Server::serveContent()
         if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
             requestParse request = getRequest(*it);
-            std::cout << "content-length: " << request.data["content-length"] << std::endl;
             Response response(_configFile, request);
             it->remaining = response._response.size();
             it->received = 0;
@@ -147,10 +140,7 @@ void Server::serveContent()
                 const char *chunkedStr = response._response.c_str() + it->received;
                 int ret = send(it->socket, chunkedStr, chunk, 0);
                 if (ret == -1)
-                {
-                    perror("send()");
                     break;
-                }
                 it->remaining -= ret;
                 it->received += ret;
             }

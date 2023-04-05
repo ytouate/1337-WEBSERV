@@ -79,8 +79,8 @@ void Body::trimUnwantedLines()
 
 void Body::setUp()
 {
-    getFileName();
-    getContentType();
+    // getFileName();
+    // getContentType();
 }
 
 void Body::getFileName()
@@ -125,6 +125,8 @@ requestParse::requestParse(std::string _requestParse)
     std::remove_if(data["host"].begin(), data["host"].end(), ::isspace);
     while (getline(ss, headerName, ':') && getline(ss, headerValue))
     {
+        if (headerValue.size() > 3)
+            headerValue = headerValue.substr(1, headerValue.size() - 2);
         if (headerName == "Content-Length")
             this->data["content-length"] = headerValue;
         else if (headerName == "Content-Type")
@@ -133,7 +135,6 @@ requestParse::requestParse(std::string _requestParse)
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;
-    std::string save = _requestParse;
     _requestParse = _requestParse.erase(0, pos + 4);
     this->body.content = _requestParse;
 }

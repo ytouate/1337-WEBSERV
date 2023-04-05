@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/04 23:13:06 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/05 00:49:05 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,6 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     std::string path = "./index/";
     std::ifstream infile;
     std::string line;
-    std::cout << id << std::endl;
     size_t size = server.locations[id].errorPages[statusCode].size();
     if (size > 0)
     {
