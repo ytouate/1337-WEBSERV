@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/05 00:49:21 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/05 14:02:55 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ void    Response::postType(std::string path)
     else if (path == "video/x-msvideo")  this->_contentType = ".AVI";
     else if (path == "video/mpeg")  this->_contentType = ".MPEG";
     else if (path == "application/zip")  this->_contentType = ".zip";
+    else if (path == "image/tiff") this->_contentType = ".tiff";
 }
 
 #define CHUNK 100

@@ -6,18 +6,18 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/05 00:49:05 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/05 14:29:46 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include <stdlib.h>
-
+#include "sys/stat.h"
 Response::~Response()
 {
 }
 
-Response::Response(Config &config, requestParse& _request) : request(_request)
+Response::Response(Config &config, requestParse &_request) : request(_request)
 {
     _indexLocation = -1;
     if (request.data["method"] == "GET")
@@ -28,7 +28,7 @@ Response::Response(Config &config, requestParse& _request) : request(_request)
         postMethod(config);
 }
 
-int    Response::validateRequest()
+int Response::validateRequest()
 {
     int i = 0;
     if (request.data["path"].size() > 2048)
@@ -47,13 +47,13 @@ int    Response::validateRequest()
     return 0;
 }
 
-int     Response::getIndexOfServerBlock(Config &config)
+int Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
-        for (size_t i = 0; i < config.servers.size() ; i++)
+        for (size_t i = 0; i < config.servers.size(); i++)
         {
             for (size_t j = 0; j < config.servers[i].data["server_name"].size(); j++)
             {
@@ -66,7 +66,7 @@ int     Response::getIndexOfServerBlock(Config &config)
     {
         std::string port = host.erase(0, host.rfind('/') + 1);
         port = host.erase(0, host.rfind(':') + 1);
-        for (size_t i = 0; i < config.servers.size() ; i++)
+        for (size_t i = 0; i < config.servers.size(); i++)
         {
             for (size_t j = 0; j < config.servers[i].data["listen"].size(); j++)
             {
@@ -78,7 +78,7 @@ int     Response::getIndexOfServerBlock(Config &config)
     return (0);
 }
 
-bool    Response::getMatchedLocation(Config& config)
+bool Response::getMatchedLocation(Config &config)
 {
     size_t index = 0;
     int finalPath = -1;
@@ -92,7 +92,7 @@ bool    Response::getMatchedLocation(Config& config)
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
         _indexServer = indexServer;
-        save = (char *)config.servers[indexServer].locations[i].path.c_str(); 
+        save = (char *)config.servers[indexServer].locations[i].path.c_str();
         while (index < line.size() && save[index])
         {
             if (save[index] == line[index])
@@ -104,7 +104,7 @@ bool    Response::getMatchedLocation(Config& config)
         if (i == 0 || ((counterMatch > matchPath) && (counterNoMatch <= sec_matchPath)))
         {
             if (counterMatch)
-            finalPath = i;
+                finalPath = i;
             matchPath = counterMatch;
             sec_matchPath = counterNoMatch;
         }
@@ -117,14 +117,16 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
-    if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, index);
-    if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, index);
+    if (request.data["method"] == "POST")
+        return checkPathOfPostmethod(config.servers[indexServer], line, index);
+    if (request.data["method"] == "DELETE")
+        return checkPathOfDeletemethod(config.servers[indexServer], line, index);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
 }
 
-void    Response::errorPages(serverParse& server, int id, int statusCode)
+void Response::errorPages(serverParse &server, int id, int statusCode)
 {
     std::string path = "./index/";
     std::ifstream infile;
@@ -161,7 +163,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     }
 }
 
-bool    Response::methodAllowed(serverParse& server, int index)
+bool Response::methodAllowed(serverParse &server, int index)
 {
     if (server.locations[index].data["allowed_methods"].size() > 0)
     {
@@ -178,22 +180,22 @@ bool    Response::methodAllowed(serverParse& server, int index)
     return true;
 }
 
-char    **Response::setEnv()
+char **Response::setEnv()
 {
     char **env = (char **)malloc(sizeof(char *) * 3);
     std::string line = "CONTENT_LENGTH=" + std::to_string(_contentLength);
     env[0] = (char *)line.c_str();
-    line = request.data["path"].erase(0 , request.data["path"].rfind("?"));
+    line = request.data["path"].erase(0, request.data["path"].rfind("?"));
     env[1] = (char *)line.c_str();
     env[2] = 0;
     return env;
 }
 
-bool Response::executeCgi(serverParse& server, int index)
+bool Response::executeCgi(serverParse &server, int index)
 {
     (void)server;
     (void)index;
-    int fd = open("/tmp/out" , O_CREAT | O_RDWR , 0644);
+    int fd = open("/tmp/out", O_CREAT | O_RDWR, 0644);
     std::string path1 = "/usr/bin/php";
     std::string path2 = request.data["path"];
     char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
@@ -205,7 +207,7 @@ bool Response::executeCgi(serverParse& server, int index)
     std::ifstream infile("/tmp/out");
     std::string line;
     char buffer[100];
-    sprintf(buffer, "HTTP/1.1 %d OK\r\n" , 200);
+    sprintf(buffer, "HTTP/1.1 %d OK\r\n", 200);
     this->_response += buffer;
     _header += buffer;
     sprintf(buffer, "Content-Type: text/html\r\n\r\n");
@@ -217,12 +219,12 @@ bool Response::executeCgi(serverParse& server, int index)
     return true;
 }
 
-bool    Response::validFile(serverParse& server, int index, std::string path)
+bool Response::validFile(serverParse &server, int index, std::string path)
 {
     std::ifstream file;
     file.open(path.c_str(), std::ios::binary);
-    int fd = open(path.c_str() , O_RDWR);
-    if(file)
+    int fd = open(path.c_str(), O_RDWR);
+    if (file)
     {
         if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi_path"].size() > 0)
             return executeCgi(server, index);
@@ -253,100 +255,230 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
     return true;
 }
 
+
+// bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
+// {
+//     std::string path;
+//     static int i = 0;
+//     path = server.locations[index].data["root"][0] + line;
+//     if (i == 0)
+//         checker = line;
+//     if (checker != line)
+//         path = line;
+//     DIR *dir = opendir(path.c_str());
+//     if (!dir)
+//         return validFile(server, index, path);
+//     else
+//     {
+//         if (methodAllowed(server, index) == false)
+//             return false;
+//         _statusCode = 200;
+//         if (path[path.size() - 1] != '/')
+//         {
+//             path += "/";
+//             std::cout << "301 moved -> path = " << path << std::endl;
+//         }
+//         if (server.locations[index].data["index"].size() > 0 )
+//         {
+//             path += server.locations[index].data["index"][0];
+//             this->_requestPath = path;
+//             return validFile(server, index, path);
+//         }
+//         if (server.locations[index].autoIndex == true)
+//         {
+//             dirent *test ;
+//             std::string line;
+//             std::string content = "";
+//             while ((test = readdir(dir)) != NULL)
+//             {
+//                 content += "<a href=\"";
+//                 content += path + test->d_name;
+//                 content += "\">";
+//                 content += test->d_name ;
+//                 content += "</a>";
+//                 content += "\n";
+//                 content += "<br>";
+//             }
+//             _contentType = "text/html";
+//             _body += content;
+//         }
+//         else
+//         {
+//             errorPages(server, index, 404); return false;
+//         }
+//     }
+//     i++;
+//     return true;
+// }
 std::string checker;
 
-bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
+bool Response::checkPathIfValid(serverParse &server, int index, std::string line)
 {
     std::string path;
     static int i = 0;
     path = server.locations[index].data["root"][0] + line;
-    if (i == 0)
-        checker = line;
-    if (checker != line)
-        path = line;
+    std::cout << path << std::endl;
+
     DIR *dir = opendir(path.c_str());
     if (!dir)
+    {
         return validFile(server, index, path);
+    }
     else
     {
-        if (methodAllowed(server, index) == false)
+        if (!methodAllowed(server, index))
+        {
             return false;
+        }
+
         _statusCode = 200;
         if (path[path.size() - 1] != '/')
         {
             path += "/";
             std::cout << "301 moved -> path = " << path << std::endl;
         }
-        if (server.locations[index].data["index"].size() > 0 )
+
+        if (server.locations[index].data["index"].size() > 0)
         {
             path += server.locations[index].data["index"][0];
             this->_requestPath = path;
             return validFile(server, index, path);
         }
-        if (server.locations[index].autoIndex == true)
+
+        if (server.locations[index].autoIndex)
         {
-            dirent *test ;
-            std::string line;
-            std::string content = "";
+            dirent *test;
+            std::string content = "<html><head><title>Index of ";
+            content += line;
+            content += "</title>";
+            content += "<style>";
+            content += "body { font-family: sans-serif; background-color: #fafafa; }";
+            content += "table { border-collapse: collapse; margin-top: 20px; }";
+            content += "td, th { border: 1px solid #ddd; padding: 8px; }";
+            content += "th { background-color: #f5f5f5; font-weight: normal; }";
+            content += "a { color: #0077cc; text-decoration: none; }";
+            content += "</style>";
+            content += "</head><body>";
+            content += "<h1>Index of ";
+            content += line;
+            content += "</h1>";
+            content += "<table>";
+            content += "<thead><tr><th>Name</th><th>Last Modified</th><th>Size</th></tr></thead>";
+            content += "<tbody>";
+
             while ((test = readdir(dir)) != NULL)
             {
-                content += "<a href=\"";
-                content += path + test->d_name;
+                struct stat s;
+                std::string filename = path + test->d_name;
+                if (stat(filename.c_str(), &s) == -1)
+                {
+                    continue;
+                }
+
+                std::string size = "-";
+                if (S_ISDIR(s.st_mode))
+                {
+                    size = "<DIR>";
+                }
+                else if (S_ISREG(s.st_mode))
+                {
+                    size = std::to_string(s.st_size);
+                }
+
+                std::string date = std::asctime(std::localtime(&s.st_mtime));
+                date = date.substr(0, date.size() - 1);
+
+                content += "<tr>";
+                content += "<td><a href=\"";
+                content += line + test->d_name;
                 content += "\">";
-                content += test->d_name ;
-                content += "</a>";
-                content += "\n";
-                content += "<br>";
+                content += test->d_name;
+                content += "</a></td>";
+                content += "<td>";
+                content += date;
+                content += "</td>";
+                content += "<td>";
+                content += size;
+                content += "</td>";
+                content += "</tr>";
             }
+
+            content += "</tbody></table>";
+            content += "<hr>";
+            content += "Webserver Mhaaayb";
+            content += "</body></html>";
+
             _contentType = "text/html";
             _body += content;
         }
         else
         {
-            errorPages(server, index, 404); return false;
+            errorPages(server, index, 404);
+            return false;
         }
     }
     i++;
     return true;
 }
-
-void   Response::getContentType()
+void Response::getContentType()
 {
     std::string path = this->_requestPath;
     try
     {
         path = path.erase(0, path.rfind('.'));
     }
-    catch(...)
+    catch (...)
     {
         this->_contentType = "application/octet-stream";
     }
-    if (path == ".css") this->_contentType = "text/css";
-    else if (path == ".csv") this->_contentType = "text/csv";
-    else if (path == ".gif") this->_contentType = "image/gif";
-    else if (path == ".htm") this->_contentType = "text/html";
-    else if (path == ".html" || path == ".php") this->_contentType = "text/html";
-    else if (path == ".ico") this->_contentType = "image/x-icon";
-    else if (path == ".jpeg") this->_contentType = "image/jpeg";
-    else if (path == ".jpg") this->_contentType = "image/jpeg";
-    else if (path == ".js")  this->_contentType = "application/javascript";
-    else if (path == ".json") this->_contentType = "application/json";
-    else if (path == ".png")  this->_contentType = "image/png";
-    else if (path == ".pdf")  this->_contentType = "application/pdf";
-    else if (path == ".svg")  this->_contentType = "image/svg+xml";
-    else if (path == ".txt")  this->_contentType = "text/plain";
-    else if (path == ".mp4")  this->_contentType = "video/mp4";
-    else if (path == ".WebM")  this->_contentType = "video/webm";
-    else if (path == ".Ogg")  this->_contentType = "video/ogg";
-    else if (path == ".AVI")  this->_contentType = "video/x-msvideo";
-    else if (path == ".MPEG")  this->_contentType = "video/mpeg";
-    else if (path == ".tiff")  this->_contentType = "image/tif";
-    else if (path == ".tif")  this->_contentType = "image/tif";
+    if (path == ".css")
+        this->_contentType = "text/css";
+    else if (path == ".csv")
+        this->_contentType = "text/csv";
+    else if (path == ".gif")
+        this->_contentType = "image/gif";
+    else if (path == ".htm")
+        this->_contentType = "text/html";
+    else if (path == ".html" || path == ".php")
+        this->_contentType = "text/html";
+    else if (path == ".ico")
+        this->_contentType = "image/x-icon";
+    else if (path == ".jpeg")
+        this->_contentType = "image/jpeg";
+    else if (path == ".jpg")
+        this->_contentType = "image/jpeg";
+    else if (path == ".js")
+        this->_contentType = "application/javascript";
+    else if (path == ".json")
+        this->_contentType = "application/json";
+    else if (path == ".png")
+        this->_contentType = "image/png";
+    else if (path == ".pdf")
+        this->_contentType = "application/pdf";
+    else if (path == ".svg")
+        this->_contentType = "image/svg+xml";
+    else if (path == ".txt")
+        this->_contentType = "text/plain";
+    else if (path == ".mp4")
+        this->_contentType = "video/mp4";
+    else if (path == ".WebM")
+        this->_contentType = "video/webm";
+    else if (path == ".Ogg")
+        this->_contentType = "video/ogg";
+    else if (path == ".AVI")
+        this->_contentType = "video/x-msvideo";
+    else if (path == ".MPEG")
+        this->_contentType = "video/mpeg";
+    else if (path == ".tiff")
+        this->_contentType = "image/tif";
+    else if (path == ".tif")
+        this->_contentType = "image/tif";
 
-    else this->_contentType = "application/octet-stream";
+    else
+        this->_contentType = "application/octet-stream";
 }
 
-void    Response::faildResponse()
+void Response::faildResponse()
 {
     char buffer[100];
     sprintf(buffer, "HTTP/1.1 %d \r\n", this->_statusCode);
@@ -361,7 +493,7 @@ void    Response::faildResponse()
     this->_response += _body;
 }
 
-int    Response::getMethod(Config &config)
+int Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
     if (getMatchedLocation(config) == 1 && _statusCode != 200)
@@ -372,13 +504,13 @@ int    Response::getMethod(Config &config)
     }
     else if (_response.size() == 0)
     {
-        
+
         this->_statusCode = 200;
         char buffer[100];
         sprintf(buffer, "HTTP/1.1 %d OK\r\n", this->_statusCode);
         this->_response += buffer;
         this->_header += buffer;
-        if (_contentType != "text/html" )
+        if (_contentType != "text/html")
         {
             sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
             this->_response += buffer;
@@ -399,5 +531,5 @@ int    Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
-   return 0; 
+    return 0;
 }

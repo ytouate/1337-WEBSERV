@@ -108,16 +108,24 @@ requestParse Server::getRequest(const Client &_client)
     
     requestParse request(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
-    size_t test = bytesLeft;
     if (bytesLeft == 0)
         return request;
-    char c[100];
+    int size  = 512;
+    char c[size];
+    // char c;
+    int i = 0;
     while (true)
     {
-        if ((bytesRead = recv(_client.socket, c, 100, 0)) < 0)
+        if ((bytesRead = recv(_client.socket, c, size, 0)) < 0)
             break;
         request.body.content += std::string(c, bytesRead);
+        i += bytesRead;
+        std::cout << "Sending: "<< i << " Out of: " << bytesLeft << std::endl; 
     }
+    if ((int)request.body.content.size() == bytesLeft)
+        std::cout << "ALL SENT\n";
+    else
+        std::cout << "NOT ALL SENT\n";
     return request;
 }
 
