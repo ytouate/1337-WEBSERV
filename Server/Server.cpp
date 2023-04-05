@@ -108,24 +108,35 @@ requestParse Server::getRequest(const Client &_client)
     
     requestParse request(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
+    int BUFFER_SIZE  = 512;
+    float factor = 0;
     if (bytesLeft == 0)
         return request;
-    int size  = 512;
-    char c[size];
-    // char c;
+    else if ((bytesLeft * 0.000001) <= 100)
+        factor += 0.25;
+    else if ((bytesLeft * 0.000001) <= 300)
+        factor += 0.50;
+    else
+        factor += 1;
+    BUFFER_SIZE += factor;
+    char c[BUFFER_SIZE];
     int i = 0;
+    sendAgain:
     while (true)
     {
-        if ((bytesRead = recv(_client.socket, c, size, 0)) < 0)
+        if ((bytesRead = recv(_client.socket, c, BUFFER_SIZE, 0)) < 0)
             break;
         request.body.content += std::string(c, bytesRead);
         i += bytesRead;
-        std::cout << "Sending: "<< i << " Out of: " << bytesLeft << std::endl; 
+        // std::cout << "Sending: "<< i << " Out of: " << bytesLeft << std::endl; 
     }
     if ((int)request.body.content.size() == bytesLeft)
         std::cout << "ALL SENT\n";
     else
+    {
         std::cout << "NOT ALL SENT\n";
+        goto sendAgain;
+    }
     return request;
 }
 
