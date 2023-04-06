@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/05 14:02:55 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/05 15:25:13 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void    Response::postType(std::string path)
     else if (path == "image/tiff") this->_contentType = ".tiff";
 }
 
-#define CHUNK 100
+#define CHUNK 1024
 
 int     Response::postMethod(Config& config)
 {

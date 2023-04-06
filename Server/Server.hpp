@@ -10,7 +10,7 @@ struct Client
     socklen_t addressLenght;
     struct sockaddr_storage clientAddress;
     int socket;
-    int received;
+    size_t received;
     int remaining;
     bool _waitingForBody;
     const std::string getClientAddress();
@@ -24,6 +24,7 @@ private:
     int                         _serverSocket;
     std::vector<Client>         _clients;
     fd_set                      _readyToReadFrom;
+    fd_set                      _readyToWriteTo;
     Config                      _configFile;
     requestParse    getRequest(const Client &_client);
     std::string     getRequestBuffer(Client &);

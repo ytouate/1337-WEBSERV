@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include "serverParse.hpp"
+
 Config::Config(std::string s)
 {
     readFileIntoBuff(s);
@@ -31,6 +32,11 @@ std::string Config::trim(const std::string &s)
 void Config::readFileIntoBuff(const std::string &s)
 {
     _configFile.open(s.c_str(), std::fstream::in);
+    if (!_configFile.is_open())
+    {
+        perror("open()");
+        exit(1);
+    }
     std::string tmp;
     while (std::getline(_configFile, tmp))
     {
@@ -40,7 +46,8 @@ void Config::readFileIntoBuff(const std::string &s)
     }
     _configFile.close();
 }
-Config::~Config() {}
+
+Config::~Config() { servers.clear(); }
 
 bool Config::isWhiteSpace(char c)
 {

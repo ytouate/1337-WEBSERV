@@ -8,7 +8,7 @@
 class serverParse;
 class Config
 {
-protected:
+private:
     std::fstream                    _configFile;
     std::vector<std::string>        _fileBuff;
 

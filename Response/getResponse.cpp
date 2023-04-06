@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/05 14:29:46 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/05 14:57:44 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,171 +255,171 @@ bool Response::validFile(serverParse &server, int index, std::string path)
     return true;
 }
 
-
-// bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
-// {
-//     std::string path;
-//     static int i = 0;
-//     path = server.locations[index].data["root"][0] + line;
-//     if (i == 0)
-//         checker = line;
-//     if (checker != line)
-//         path = line;
-//     DIR *dir = opendir(path.c_str());
-//     if (!dir)
-//         return validFile(server, index, path);
-//     else
-//     {
-//         if (methodAllowed(server, index) == false)
-//             return false;
-//         _statusCode = 200;
-//         if (path[path.size() - 1] != '/')
-//         {
-//             path += "/";
-//             std::cout << "301 moved -> path = " << path << std::endl;
-//         }
-//         if (server.locations[index].data["index"].size() > 0 )
-//         {
-//             path += server.locations[index].data["index"][0];
-//             this->_requestPath = path;
-//             return validFile(server, index, path);
-//         }
-//         if (server.locations[index].autoIndex == true)
-//         {
-//             dirent *test ;
-//             std::string line;
-//             std::string content = "";
-//             while ((test = readdir(dir)) != NULL)
-//             {
-//                 content += "<a href=\"";
-//                 content += path + test->d_name;
-//                 content += "\">";
-//                 content += test->d_name ;
-//                 content += "</a>";
-//                 content += "\n";
-//                 content += "<br>";
-//             }
-//             _contentType = "text/html";
-//             _body += content;
-//         }
-//         else
-//         {
-//             errorPages(server, index, 404); return false;
-//         }
-//     }
-//     i++;
-//     return true;
-// }
 std::string checker;
 
-bool Response::checkPathIfValid(serverParse &server, int index, std::string line)
+bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
 {
     std::string path;
     static int i = 0;
     path = server.locations[index].data["root"][0] + line;
-    std::cout << path << std::endl;
-
+    if (i == 0)
+        checker = line;
+    if (checker != line)
+        path = line;
     DIR *dir = opendir(path.c_str());
     if (!dir)
-    {
         return validFile(server, index, path);
-    }
     else
     {
-        if (!methodAllowed(server, index))
-        {
+        if (methodAllowed(server, index) == false)
             return false;
-        }
-
         _statusCode = 200;
         if (path[path.size() - 1] != '/')
         {
             path += "/";
             std::cout << "301 moved -> path = " << path << std::endl;
         }
-
-        if (server.locations[index].data["index"].size() > 0)
+        if (server.locations[index].data["index"].size() > 0 )
         {
             path += server.locations[index].data["index"][0];
             this->_requestPath = path;
             return validFile(server, index, path);
         }
-
-        if (server.locations[index].autoIndex)
+        if (server.locations[index].autoIndex == true)
         {
-            dirent *test;
-            std::string content = "<html><head><title>Index of ";
-            content += line;
-            content += "</title>";
-            content += "<style>";
-            content += "body { font-family: sans-serif; background-color: #fafafa; }";
-            content += "table { border-collapse: collapse; margin-top: 20px; }";
-            content += "td, th { border: 1px solid #ddd; padding: 8px; }";
-            content += "th { background-color: #f5f5f5; font-weight: normal; }";
-            content += "a { color: #0077cc; text-decoration: none; }";
-            content += "</style>";
-            content += "</head><body>";
-            content += "<h1>Index of ";
-            content += line;
-            content += "</h1>";
-            content += "<table>";
-            content += "<thead><tr><th>Name</th><th>Last Modified</th><th>Size</th></tr></thead>";
-            content += "<tbody>";
-
+            dirent *test ;
+            std::string line;
+            std::string content = "";
             while ((test = readdir(dir)) != NULL)
             {
-                struct stat s;
-                std::string filename = path + test->d_name;
-                if (stat(filename.c_str(), &s) == -1)
-                {
-                    continue;
-                }
-
-                std::string size = "-";
-                if (S_ISDIR(s.st_mode))
-                {
-                    size = "<DIR>";
-                }
-                else if (S_ISREG(s.st_mode))
-                {
-                    size = std::to_string(s.st_size);
-                }
-
-                std::string date = std::asctime(std::localtime(&s.st_mtime));
-                date = date.substr(0, date.size() - 1);
-
-                content += "<tr>";
-                content += "<td><a href=\"";
-                content += line + test->d_name;
+                content += "<a href=\"";
+                content += path + test->d_name;
                 content += "\">";
-                content += test->d_name;
-                content += "</a></td>";
-                content += "<td>";
-                content += date;
-                content += "</td>";
-                content += "<td>";
-                content += size;
-                content += "</td>";
-                content += "</tr>";
+                content += test->d_name ;
+                content += "</a>";
+                content += "\n";
+                content += "<br>";
             }
-
-            content += "</tbody></table>";
-            content += "<hr>";
-            content += "Webserver Mhaaayb";
-            content += "</body></html>";
-
             _contentType = "text/html";
             _body += content;
         }
         else
         {
-            errorPages(server, index, 404);
-            return false;
+            errorPages(server, index, 404); return false;
         }
     }
     i++;
     return true;
 }
+
+// bool Response::checkPathIfValid(serverParse &server, int index, std::string line)
+// {
+//     std::string path;
+//     static int i = 0;
+//     path = server.locations[index].data["root"][0] + line;
+//     std::cout << path << std::endl;
+
+//     DIR *dir = opendir(path.c_str());
+//     if (!dir)
+//     {
+//         return validFile(server, index, path);
+//     }
+//     else
+//     {
+//         if (!methodAllowed(server, index))
+//         {
+//             return false;
+//         }
+
+//         _statusCode = 200;
+//         if (path[path.size() - 1] != '/')
+//         {
+//             path += "/";
+//             std::cout << "301 moved -> path = " << path << std::endl;
+//         }
+
+//         if (server.locations[index].data["index"].size() > 0)
+//         {
+//             path += server.locations[index].data["index"][0];
+//             this->_requestPath = path;
+//             return validFile(server, index, path);
+//         }
+
+//         if (server.locations[index].autoIndex)
+//         {
+//             dirent *test;
+//             std::string content = "<html><head><title>Index of ";
+//             content += line;
+//             content += "</title>";
+//             content += "<style>";
+//             content += "body { font-family: sans-serif; background-color: #fafafa; }";
+//             content += "table { border-collapse: collapse; margin-top: 20px; }";
+//             content += "td, th { border: 1px solid #ddd; padding: 8px; }";
+//             content += "th { background-color: #f5f5f5; font-weight: normal; }";
+//             content += "a { color: #0077cc; text-decoration: none; }";
+//             content += "</style>";
+//             content += "</head><body>";
+//             content += "<h1>Index of ";
+//             content += line;
+//             content += "</h1>";
+//             content += "<table>";
+//             content += "<thead><tr><th>Name</th><th>Last Modified</th><th>Size</th></tr></thead>";
+//             content += "<tbody>";
+
+//             while ((test = readdir(dir)) != NULL)
+//             {
+//                 struct stat s;
+//                 std::string filename = path + test->d_name;
+//                 if (stat(filename.c_str(), &s) == -1)
+//                 {
+//                     continue;
+//                 }
+
+//                 std::string size = "-";
+//                 if (S_ISDIR(s.st_mode))
+//                 {
+//                     size = "<DIR>";
+//                 }
+//                 else if (S_ISREG(s.st_mode))
+//                 {
+//                     size = std::to_string(s.st_size);
+//                 }
+
+//                 std::string date = std::asctime(std::localtime(&s.st_mtime));
+//                 date = date.substr(0, date.size() - 1);
+
+//                 content += "<tr>";
+//                 content += "<td><a href=\"";
+//                 content += line + test->d_name;
+//                 content += "\">";
+//                 content += test->d_name;
+//                 content += "</a></td>";
+//                 content += "<td>";
+//                 content += date;
+//                 content += "</td>";
+//                 content += "<td>";
+//                 content += size;
+//                 content += "</td>";
+//                 content += "</tr>";
+//             }
+
+//             content += "</tbody></table>";
+//             content += "<hr>";
+//             content += "Webserver Mhaaayb";
+//             content += "</body></html>";
+
+//             _contentType = "text/html";
+//             _body += content;
+//         }
+//         else
+//         {
+//             errorPages(server, index, 404);
+//             return false;
+//         }
+//     }
+//     i++;
+//     return true;
+// }
 void Response::getContentType()
 {
     std::string path = this->_requestPath;

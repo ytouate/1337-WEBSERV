@@ -20,6 +20,7 @@ private:
     int                                 _start;
     std::vector<std::string>            _fileBuff;
 
+    void        setDirective(const std::string &key, std::vector<std::string> &values);
     bool        isWhiteSpace(char c);
     void        error(const std::string &a) const;
     void        collectPath(const std::string &s);

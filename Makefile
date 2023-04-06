@@ -1,19 +1,20 @@
 NAME = webserv
 
 FILES = \
-	./Parse/Config.cpp			\
-	./Parse/serverParse.cpp		\
-	./Parse/locationParse.cpp	\
-	./Parse/requestParse.cpp 	\
-	./Response/getResponse.cpp	\
-	./Response/postResponse.cpp	\
+	./Parse/Config.cpp				\
+	./Parse/serverParse.cpp			\
+	./Parse/locationParse.cpp		\
+	./Parse/requestParse.cpp 		\
+	./Response/getResponse.cpp		\
+	./Response/postResponse.cpp		\
 	./Response/deleteResponse.cpp	\
-	./Server/Server.cpp			\
+	./Server/Server.cpp				\
 	./main.cpp
 
 CC = c++ 
-O_FILE = $(FILES:.cpp=.o)
 CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
+
+O_FILE = $(FILES:.cpp=.o)
 
 all: $(NAME)
 
@@ -30,3 +31,6 @@ fclean: clean
 	rm -rf $(NAME)
 
 re: fclean all
+
+run:
+	./webserv nginx.conf

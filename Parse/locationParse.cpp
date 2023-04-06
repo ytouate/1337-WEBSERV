@@ -25,6 +25,46 @@ void locationParse::error(const std::string &s) const
 locationParse::locationParse(const std::vector<std::string> &a, int i)
     : _start(i), _fileBuff(a), autoIndex(OFF) {}
 
+void locationParse::setDirective(const std::string &key, std::vector<std::string> &values)
+{
+    if (key == "root")
+        _root = std::make_pair(key, values);
+    else if (key == "index")
+        _index = std::make_pair(key, values);
+    else if (key == "error_page")
+    {
+        if (values.size() < 2)
+            error("Invalid directive arguments");
+        if (!isNumber(values.front()))
+            error("Invalid directive arguments");
+        this->errorPages.insert(std::make_pair(atoi(values.front().c_str()),
+                                               values.back()));
+    }
+    else if (key == "allowed_methods")
+        _allowed_methods = std::make_pair(key, values);
+    else if (key == "auto_index")
+    {
+        if (values.size() != 1)
+            error("Invalid arguments");
+        if (values.front() != "on" and values.front() != "off")
+            error("Invalid directive arguments");
+        autoIndex = values.front() == "on" ? ON : OFF;
+    }
+    else if (key == "upload_path")
+    {
+        if (values.size() != 1)
+            error("Invalid directive arguments");
+        _upload_path = std::make_pair(key, values);
+    }
+    else if (key == "upload")
+    {
+        if (values.size() != 1)
+            error("Invalid directive arguments");
+        if (values.front() != "on" and values.front() != "off")
+            error("Invalid directive Arguments");
+        _upload = std::make_pair(key, values);
+    }
+}
 void locationParse::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
@@ -47,45 +87,7 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
             val = "";
         }
     }
-    if (key == "root")
-        _root = std::make_pair(key, values);
-    else if (key == "index")
-        _index = std::make_pair(key, values);
-    else if (key == "error_page")
-    {
-        if (values.size() < 2)
-            error("Invalid Arguments");
-        if (!isNumber(values.front()))
-            error("Invalid Arguments");
-        this->errorPages.insert(std::make_pair(atoi(values.front().c_str()),
-                                               values.back()));
-    }
-    else if (key == "allowed_methods")
-    {
-        _allowed_methods = std::make_pair(key, values);
-    }
-    else if (key == "auto_index")
-    {
-        if (values.size() != 1)
-            error("Invalid arguments");
-        if (values.front() != "on" and values.front() != "off")
-            error("Invalid Arguments");
-        autoIndex = values.front() == "on" ? ON : OFF;
-    }
-    else if (key == "upload_path")
-    {
-        if (values.size() != 1)
-            error("Invalid arguments");
-        _upload_path = std::make_pair(key, values);
-    }
-    else if (key == "upload")
-    {
-        if (values.size() != 1)
-            error("Invalid arguments");
-        if (values.front() != "on" and values.front() != "off")
-            error("Invalid Arguments");
-        _upload = std::make_pair(key, values);
-    }
+    setDirective(key, values);
 }
 
 locationParse::~locationParse()
