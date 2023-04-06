@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/04 23:06:40 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/06 16:18:41 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,11 +88,23 @@ int     Response::postMethod(Config& config)
 {
     srand(time(0));
     int number = rand() / 3;
+    std::string line ;
     if (getMatchedLocation(config) == true)
     {
-        std::cout << "size = " << request.body.content.size() << std::endl;
         if (_indexLocation != -1)
         {
+            line = _postPath;
+            if (line.erase(0, line.rfind(".")) == ".php")
+            {
+                if (!config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].empty())
+                {
+                    executeCgi(config.servers[_indexServer], 0, 1);
+                    postResponse();
+                    return 0;
+                    //request.data["path"] = _postPath;
+                    //request.body.content = _body;
+                }
+            }
             if (request.body.content.size() > 0 && request.body.contentName.size() == 0)
             {
                 postType(request.body.contentType);
@@ -141,7 +153,7 @@ int     Response::postMethod(Config& config)
             {
                 if (config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].size() > 0)
                 {
-                    executeCgi(config.servers[_indexServer], _indexLocation);
+                    executeCgi(config.servers[_indexServer], _indexLocation, 1);
                     return 0;
                 }
             }
@@ -151,7 +163,7 @@ int     Response::postMethod(Config& config)
         {
             if (config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].size() > 0)
             {
-                executeCgi(config.servers[_indexServer], _indexLocation);
+                executeCgi(config.servers[_indexServer], _indexLocation, 1);
                 return 0;
             }
             errorPages(config.servers[_indexServer], _indexLocation, 403);

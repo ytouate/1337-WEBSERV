@@ -120,7 +120,7 @@ requestParse Server::getRequest(const Client &_client)
         request.body.content.append(std::string(buff, bytesRead));
         memset(buff, 0, sizeof buff);
     }
-    int fd = open("9bel", O_RDWR | O_CREAT, 0644);
+    int fd = open("9bel", O_RDWR | O_CREAT | O_TRUNC, 0644);
     int fd2 = open("ba3d", O_RDWR | O_CREAT, 0644);
     write(fd, request.body.content.c_str(), request.body.content.size());
     request.body.setUp();
@@ -148,7 +148,8 @@ void Server::serveContent()
                 else if (it->_waitingForBody)
                     it->_waitingForBody = false;
             }
-            Response response(_configFile, request);
+            Response response(_configFile, request, env);
+            
             it->remaining = response._response.size();
             it->received = 0;
             while (it->received < (int)response._response.size())
@@ -175,8 +176,9 @@ void Server::serveContent()
     }
 }
 
-Server::Server(std::string file) : _configFile(file)
+Server::Server(std::string file, char **_env) : _configFile(file)
 {
+    env = _env;
     srand(time(NULL));
     int port = (rand() % (65535 - 1024 + 1)) + 1024;
 
@@ -194,8 +196,8 @@ Server::Server(std::string file) : _configFile(file)
 
 Client::Client() : received(0), remaining(0), _waitingForBody(false) {}
 
-int main(int ac, char **av)
+int main(int ac, char **av, char **env)
 {
     if (ac == 2)
-        Server server(av[1]);
+        Server server(av[1], env);
 }

@@ -6,19 +6,22 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/04 23:13:06 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/06 21:57:35 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include <stdlib.h>
+#include "../Server/Server.hpp"
+
 
 Response::~Response()
 {
 }
 
-Response::Response(Config &config, requestParse& _request) : request(_request)
+Response::Response(Config &config, requestParse& _request, char **env) : request(_request)
 {
+    g_env = env;
     _indexLocation = -1;
     if (request.data["method"] == "GET")
         getMethod(config);
@@ -179,42 +182,103 @@ bool    Response::methodAllowed(serverParse& server, int index)
     return true;
 }
 
-char    **Response::setEnv()
+std::vector<std::string>    Response::setEnv()
 {
-    char **env = (char **)malloc(sizeof(char *) * 3);
-    std::string line = "CONTENT_LENGTH=" + std::to_string(_contentLength);
-    env[0] = (char *)line.c_str();
-    line = request.data["path"].erase(0 , request.data["path"].rfind("?"));
-    env[1] = (char *)line.c_str();
-    env[2] = 0;
-    return env;
+    std::string line = "REQUEST_METHOD,SCRIPT_FILENAME,CONTENT_LENGTH,CONTENT_TYPE,QUERY_STRING,REDIRECT_STATUS";
+    std::string temp = line;
+    std::string result;
+    std::vector<std::string> vec;
+    for (size_t i = 0; i < 6; i++)
+    {
+        if (temp.rfind(",") != std::string::npos)
+        {
+            temp.erase(0, temp.rfind(","));
+            vec.push_back(temp.c_str() + 1);
+            line.erase(line.rfind(","), line.size());
+            temp = line;
+        }
+        else
+            vec.push_back(temp);
+    }
+    vec[1] += "=" + request.data["path"].erase(0, request.data["path"].rfind("?"));
+    if (_flag == 1)
+        vec[4] += "=" + _postPath;
+    else
+        vec[4] += "=" + _getPath;
+    vec[3] += "=" + request.data["content-length"];
+    vec[2] += "=" + request.data["content-type"];
+    vec[5] += "=" + request.data["method"];
+    vec[0] += "=" + std::to_string(200);
+    return vec;
 }
 
-bool Response::executeCgi(serverParse& server, int index)
+
+
+bool Response::executeCgi(serverParse& , int, int flag)
 {
-    (void)server;
-    (void)index;
-    int fd = open("/tmp/out" , O_CREAT | O_RDWR , 0644);
-    std::string path1 = "/usr/bin/php";
-    std::string path2 = request.data["path"];
+    _flag = flag;
+    std::vector<std::string> _env = setEnv();
+    char *env[_env.size()  + 1];
+    for (size_t i = 0; i < _env.size(); i++)
+        env[i] = (char *)_env[i].c_str();
+    env[_env.size()] = NULL;
+    int fd[2];
+    //int _fd[2];
+    int fdw = open("/tmp/test1", O_CREAT | O_RDWR | O_TRUNC , 0644);
+    std::string path1 = "./cgi_bin/php-cgi";
+    std::string path2 = _getPath;
     char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
-    if (fork() == 0)
+    if (fdw < 0)
     {
-        dup2(fd, 1);
-        execve(commad[0], commad, setEnv());
+        std::cerr << "faild to open" << std::endl;
+        exit(1);
     }
-    std::ifstream infile("/tmp/out");
-    std::string line;
+    pipe(fd);
+    int id = fork();
+    if (id == 0)
+    {
+        if (flag == 1)
+        {
+            if (write(fdw, request.body.content.c_str(), request.body.content.size()) < 0)
+            {
+                std::cout << "can't write" << std::endl; 
+                exit(1);
+            }
+            close(fdw);
+            fdw = open("/tmp/test1" , O_RDONLY);
+            dup2(fdw, 0);
+            dup2(fd[1], 1);
+            close(fd[0]);
+            close(fd[1]);
+            commad[1] = (char *)"/Users/otmallah/Desktop/1337-WebServ/script.php";
+            execve(commad[0], commad, env);
+            perror("execve()");
+            exit(1);
+        }
+        dup2(fd[1], 1);
+        close(fd[0]);
+        close(fd[1]);
+        execve(commad[0], commad, this->g_env);
+        perror("execve()");
+        exit(1);
+    }
+    close(fd[1]);
     char buffer[100];
-    sprintf(buffer, "HTTP/1.1 %d OK\r\n" , 200);
-    this->_response += buffer;
-    _header += buffer;
-    sprintf(buffer, "Content-Type: text/html\r\n\r\n");
-    this->_response += buffer;
-    _header += buffer;
-    while (getline(infile, line))
+    int bytes;
+    if (flag != 1)
+    {
+        sprintf(buffer, "HTTP/1.1 200 OK\r\n");
+        _body += buffer;
+    }
+    while ((bytes = read(fd[0], buffer, 100)) > 0)
+    {
+        std::string line(buffer, bytes);
         _body += line;
-    _response += _body;
+    }
+    close(fd[0]);
+    wait(NULL);
+    unlink("/tmp/test1");
+    std::cout << _body << std::endl;
     return true;
 }
 
@@ -223,10 +287,11 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
     std::ifstream file;
     file.open(path.c_str(), std::ios::binary);
     int fd = open(path.c_str() , O_RDWR);
+    _getPath = path;
     if(file)
     {
         if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi_path"].size() > 0)
-            return executeCgi(server, index);
+            return executeCgi(server, index, 2);
         if (methodAllowed(server, index) == true)
         {
             file.seekg(0, std::ios::end);
@@ -371,7 +436,9 @@ int    Response::getMethod(Config &config)
         faildResponse();
         return (1);
     }
-    else if (_response.size() == 0)
+    if (_flag == 2 || _flag == 1)
+        _response += _body;
+    if (_response.size() == 0)
     {
         
         this->_statusCode = 200;
