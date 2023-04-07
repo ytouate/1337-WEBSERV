@@ -21,6 +21,7 @@ struct Client
 class Server
 {
 private:
+    char **env;
     int                         _serverSocket;
     std::vector<Client>         _clients;
     fd_set                      _readyToReadFrom;
@@ -34,7 +35,7 @@ private:
     void            serveContent();
     void            initServerSocket(const char *port);
 public:
-    Server(std::string file);
+    Server(std::string file, char **env);
     ~Server();
 };
 

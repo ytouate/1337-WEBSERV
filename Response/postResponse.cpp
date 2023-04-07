@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/05 15:25:13 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/07 00:04:48 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,12 +48,20 @@ int     Response::checkPathOfPostmethod(serverParse& server, std::string line, i
 void    Response::postResponse(void)
 {
     char buffer[100];
-    sprintf(buffer, "HTTP/1.1 %d\r\n", _statusCode);
-    this->_response += buffer;
-    _header += buffer;
-    sprintf(buffer, "content-type : %s\r\n\r\n", "text/html");
-    this->_response += buffer;
-    _header += buffer;
+    if (_flag == 1)
+    {
+        sprintf(buffer, "HTTP/1.1 200 OK\r\n");
+        this->_response += buffer;
+    }
+    else
+    {
+        sprintf(buffer, "HTTP/1.1 %d\r\n", _statusCode);
+        this->_response += buffer;
+        _header += buffer;
+        sprintf(buffer, "content-type : %s\r\n\r\n", "text/html");
+        this->_response += buffer;
+        _header += buffer;
+    }
     this->_response += _body;
 }
 
@@ -88,10 +96,23 @@ int     Response::postMethod(Config& config)
 {
     srand(time(0));
     int number = rand() / 3;
+    std::string line ;
     if (getMatchedLocation(config) == true)
     {
         if (_indexLocation != -1)
         {
+            line = _postPath;
+            if (line.erase(0, line.rfind(".")) == ".php")
+            {
+                if (!config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].empty())
+                {
+                    executeCgi(config.servers[_indexServer], 0, 1);
+                    postResponse();
+                    return 0;
+                    //request.data["path"] = _postPath;
+                    //request.body.content = _body;
+                }
+            }
             if (request.body.content.size() > 0 && request.body.contentName.size() == 0)
             {
                 postType(request.data["content-type"]);
@@ -140,7 +161,7 @@ int     Response::postMethod(Config& config)
             {
                 if (config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].size() > 0)
                 {
-                    executeCgi(config.servers[_indexServer], _indexLocation);
+                    executeCgi(config.servers[_indexServer], _indexLocation, 1);
                     return 0;
                 }
             }
@@ -150,7 +171,7 @@ int     Response::postMethod(Config& config)
         {
             if (config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].size() > 0)
             {
-                executeCgi(config.servers[_indexServer], _indexLocation);
+                executeCgi(config.servers[_indexServer], _indexLocation, 1);
                 return 0;
             }
             errorPages(config.servers[_indexServer], _indexLocation, 403);

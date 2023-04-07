@@ -40,22 +40,19 @@ void printDrective(directive &a)
 // // \
 // // {\"username\": \"johndoe\", \"email\": \"johndoe@example.com\"}");
 
-//     requestParse request ("DELETE /index HTTP/1.1\n\
+//     requestParse request ("GET /script.php HTTP/1.1\n\
 // Host: example.com\n\
 // Content-Type: multipart/form-data; boundary asjfkslajfklsa\n\
 // Content-Length: 229\r\n\r\n\
 // \
-// --------------------------7d42a317ba4f4\n\
-// Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\n\
-// Content-Type: text/plain\n\
+// <?php\n\
+// echo \"Hello World\";\n\
 // \
-// This is an example file.\n\
-// It can contain any type of text.\n\
-// \
-// --------------------------7d42a317ba4f4--\n");
+// ?>\n");
 
 //     Config config(av[1]);
 //     Response response(config, request);
+//     // std::cout << response._response << std::endl;
 //     // if (config.servers[0].data["upload"].size() > 0 && config.servers[0].data["upload"].front() == "on")
 //     //     std::cout << "here\n";
 //     // std::cout << request.data["method"] << std::endl;

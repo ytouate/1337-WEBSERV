@@ -177,8 +177,9 @@ void Server::serveContent()
     }
 }
 
-Server::Server(std::string file) : _configFile(file)
+Server::Server(std::string file, char **_env) : _configFile(file)
 {
+    env = _env;
     srand(time(NULL));
     int port = (rand() % (65535 - 1024 + 1)) + 1024;
 
@@ -195,8 +196,8 @@ Server::Server(std::string file) : _configFile(file)
 
 Client::Client() : received(0), remaining(0), _waitingForBody(false) {}
 
-int main(int ac, char **av)
+int main(int ac, char **av, char **env)
 {
     if (ac == 2)
-        Server server(av[1]);
+        Server server(av[1], env);
 }
