@@ -123,17 +123,23 @@ requestParse::requestParse(std::string _requestParse)
     std::string headerName, headerValue;
     getline(ss, this->data["host"]);
     std::remove_if(data["host"].begin(), data["host"].end(), ::isspace);
+    int count = 0;
     while (getline(ss, headerName, ':') && getline(ss, headerValue))
     {
         if (headerValue.size() > 3)
             headerValue = headerValue.substr(1, headerValue.size() - 2);
         if (headerName == "Content-Length")
+        {
             this->data["content-length"] = headerValue;
+            ++count;
+        }
         else if (headerName == "Content-Type")
+        {
             this->data["content-type"] = headerValue;
+            ++count;
+        }
+        if (count == 2) break;
     }
-    if (this->data["content-length"].empty())
-        this->data["transfer-encoding"] = "Chunked";
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;

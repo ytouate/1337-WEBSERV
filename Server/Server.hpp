@@ -5,6 +5,10 @@
 #include "../Parse/Config.hpp"
 #include "../Parse/requestParse.hpp"
 
+/*
+    a struct which identifies each connected
+    client
+*/
 struct Client
 {
     socklen_t addressLenght;
@@ -12,25 +16,31 @@ struct Client
     int socket;
     size_t received;
     int remaining;
-    bool _waitingForBody;
     const std::string getClientAddress();
 
-    Client();
 };
 
+/*
+    class which represents a server ready to accept connections
+    takes a config file name in it's constructor
+*/
 class Server
 {
 private:
-    char **env;
+    // the server socket
     int                         _serverSocket;
-    std::vector<Client>         _clients;
-    fd_set                      _readyToReadFrom;
-    fd_set                      _readyToWriteTo;
-    Config                      _configFile;
+    // vector of clients
+    std::vector<Client>         _clients; 
+    // the sockets/fds that are ready to be read from
+    fd_set                      _readyToReadFrom; 
+    // the sockets/fds that are ready to write to
+    fd_set                      _readyToWriteTo; 
+    // The config file was parsed and stored in this object to make it easier to work with.
+    Config                      _configFile; 
     requestParse    getRequest(const Client &_client);
     std::string     getRequestBuffer(Client &);
     void            checkCientCases();
-    void            getReadableClient();
+    void            waitForClients();
     void            acceptConnection();
     void            serveContent();
     void            initServerSocket(const char *port);

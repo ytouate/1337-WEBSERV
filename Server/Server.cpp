@@ -1,4 +1,3 @@
-
 #include "../inc.hpp"
 #include "Server.hpp"
 #include "../Parse/requestParse.hpp"
@@ -8,12 +7,17 @@
 #define MAX_REQUEST_SIZE 4096
 #define MAX_CHUNK_SIZE 4096
 
+// Write the last error happened in s method and exit
 static void error(const char *s)
 {
     perror(s);
     exit(1);
 }
 
+/*
+    initializing the socket and binding it to local address
+    and listening for new connections
+*/
 void Server::initServerSocket(const char *port)
 {
     struct addrinfo hints, *data;
@@ -43,7 +47,11 @@ void Server::initServerSocket(const char *port)
     freeaddrinfo(data);
 }
 
-void Server::getReadableClient()
+/*
+    adds new client to the _readyToWriteTo and _readyToReadFrom fd_sets
+    and handles communication with already connected clients using select
+*/
+void Server::waitForClients()
 {
     FD_ZERO(&_readyToReadFrom);
     FD_ZERO(&_readyToWriteTo);
@@ -62,11 +70,17 @@ void Server::getReadableClient()
         error("select()");
 }
 
+/*
+    Destructor that clears the _clients vector
+*/
 Server::~Server()
 {
     _clients.clear();
 }
 
+/*
+    returns the client's ip address in form of a string
+*/
 const std::string Client::getClientAddress()
 {
     char buff[100];
@@ -77,6 +91,11 @@ const std::string Client::getClientAddress()
     return save;
 }
 
+/*
+    checks if the server socket able to be read from
+    if so a connection is accepted and a new client is
+    added to the _clients vector
+*/
 void Server::acceptConnection()
 {
     if (FD_ISSET(_serverSocket, &_readyToReadFrom))
@@ -92,6 +111,10 @@ void Server::acceptConnection()
     }
 }
 
+/*
+    returns a requestParse object which contains the
+    request of a given client parsed after reading it
+*/
 requestParse Server::getRequest(const Client &_client)
 {
     fcntl(_client.socket, F_SETFL, O_NONBLOCK);
@@ -136,6 +159,12 @@ recvAgain:
     return request;
 }
 
+
+/*
+    sends the response to all the clients that have requests 
+    queued and able to write to their sockets the connection
+    is closed after the client have been served
+*/
 void Server::serveContent()
 {
     signal(SIGPIPE, SIG_IGN);
@@ -177,6 +206,11 @@ void Server::serveContent()
     }
 }
 
+
+/*
+    a constructor which calls all the helper methods
+    and starts the server main loop
+*/
 Server::Server(std::string file, char **_env) : _configFile(file)
 {
     env = _env;
@@ -187,14 +221,12 @@ Server::Server(std::string file, char **_env) : _configFile(file)
     std::cout << "http://localhost:" << port << std::endl;
     while (1)
     {
-        getReadableClient();
+        waitForClients();
         acceptConnection();
         serveContent();
     }
     close(_serverSocket);
 }
-
-Client::Client() : received(0), remaining(0), _waitingForBody(false) {}
 
 int main(int ac, char **av, char **env)
 {
