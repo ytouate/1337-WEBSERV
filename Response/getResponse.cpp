@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 00:02:28 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/07 00:10:41 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,7 +230,7 @@ bool Response::executeCgi(serverParse& , int, int flag)
     if (fdw < 0)
     {
         std::cerr << "faild to open" << std::endl;
-        exit(1);
+        return false;
     }
     pipe(fd);
     int id = fork();
@@ -277,7 +277,6 @@ bool Response::executeCgi(serverParse& , int, int flag)
     close(fd[0]);
     wait(NULL);
     unlink("/tmp/test1");
-    std::cout << _body << std::endl;
     return true;
 }
 
