@@ -211,9 +211,8 @@ void Server::serveContent()
     a constructor which calls all the helper methods
     and starts the server main loop
 */
-Server::Server(std::string file, char **_env) : _configFile(file)
+Server::Server(std::string file) : _configFile(file)
 {
-    env = _env;
     srand(time(NULL));
     int port = (rand() % (65535 - 1024 + 1)) + 1024;
 
@@ -228,8 +227,8 @@ Server::Server(std::string file, char **_env) : _configFile(file)
     close(_serverSocket);
 }
 
-int main(int ac, char **av, char **env)
+int main(int ac, char **av)
 {
     if (ac == 2)
-        Server server(av[1], env);
+        Server server(av[1]);
 }

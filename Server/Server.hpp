@@ -45,7 +45,7 @@ private:
     void            serveContent();
     void            initServerSocket(const char *port);
 public:
-    Server(std::string file, char **env);
+    Server(std::string file);
     ~Server();
 };
 
