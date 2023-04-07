@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/06 15:23:25 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/06 22:02:24 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ class Response
         char **g_env;
         std::string _header;
         std::string _response;
-        Response(Config &config, requestParse& _request, char **env);
+        Response(Config &config, requestParse& _request);
         ~Response();
 };
 

@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/06 21:57:35 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/07 00:02:28 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,8 @@ Response::~Response()
 {
 }
 
-Response::Response(Config &config, requestParse& _request, char **env) : request(_request)
+Response::Response(Config &config, requestParse& _request) : request(_request)
 {
-    g_env = env;
     _indexLocation = -1;
     if (request.data["method"] == "GET")
         getMethod(config);
@@ -258,7 +257,7 @@ bool Response::executeCgi(serverParse& , int, int flag)
         dup2(fd[1], 1);
         close(fd[0]);
         close(fd[1]);
-        execve(commad[0], commad, this->g_env);
+        execve(commad[0], commad, env);
         perror("execve()");
         exit(1);
     }

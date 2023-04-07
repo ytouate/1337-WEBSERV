@@ -1,6 +1,7 @@
 #include "requestParse.hpp"
 #include <string>
 #include <sstream>
+
 void requestParse::parseRequestLine(std::string &s, const std::string &delimiter)
 {
     size_t pos = 0;
@@ -67,26 +68,19 @@ void Body::trimUnwantedLines()
         if (pos == std::string::npos)
             return;
     }
-
-    size_t last = content.find_last_of("\n");
-    if (last != std::string::npos)
+    content = std::string(content.c_str() + pos, content.size() - pos);
+    size_t t = content.rfind("------WebKitFormBoundary");
+    if (t != std::string::npos)
     {
-        for (int i = 0; i < 1; ++i)
-        {
-            last = content.find_last_of("\n", last - 1);
-            if (last == std::string::npos)
-                break;
-        }
+        content.erase(t, content.size());
     }
-    if (last != std::string::npos && pos <= last)
-        content = content.substr(pos, last - pos);
+
 }
 
 void Body::setUp()
 {
-    getFileName();
-    getContentType();
-    trimUnwantedLines();
+    // getFileName();
+    // getContentType();
 }
 
 void Body::getFileName()
@@ -131,15 +125,18 @@ requestParse::requestParse(std::string _requestParse)
     std::remove_if(data["host"].begin(), data["host"].end(), ::isspace);
     while (getline(ss, headerName, ':') && getline(ss, headerValue))
     {
+        if (headerValue.size() > 3)
+            headerValue = headerValue.substr(1, headerValue.size() - 2);
         if (headerName == "Content-Length")
             this->data["content-length"] = headerValue;
         else if (headerName == "Content-Type")
             this->data["content-type"] = headerValue;
+        else if (headerName == "Transfer-Encoding")
+            this->data["transfer-encoding"] = headerValue;
     }
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;
-    std::string save = _requestParse;
     _requestParse = _requestParse.erase(0, pos + 4);
     this->body.content = _requestParse;
 }
