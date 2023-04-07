@@ -131,9 +131,9 @@ requestParse::requestParse(std::string _requestParse)
             this->data["content-length"] = headerValue;
         else if (headerName == "Content-Type")
             this->data["content-type"] = headerValue;
-        else if (headerName == "Transfer-Encoding")
-            this->data["transfer-encoding"] = headerValue;
     }
+    if (this->data["content-length"].empty())
+        this->data["transfer-encoding"] = "Chunked";
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;

@@ -135,8 +135,7 @@ recvAgain:
         goto recvAgain;
     return request;
 }
-adding some error handling
-reformating the code and error messagesq
+
 void Server::serveContent()
 {
     signal(SIGPIPE, SIG_IGN);
