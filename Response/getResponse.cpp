@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 00:10:41 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/07 03:01:02 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,8 +319,7 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
 
 std::string checker;
 
-bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
-{
+bool Response::checkPathIfValid(serverParse& server, int index, std::string line) {
     std::string path;
     static int i = 0;
     path = server.locations[index].data["root"][0] + line;
@@ -331,31 +330,32 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
-    else
-    {
+    else {
         if (methodAllowed(server, index) == false)
             return false;
         _statusCode = 200;
-        if (path[path.size() - 1] != '/')
-        {
+        if (path[path.size() - 1] != '/') {
             path += "/";
             std::cout << "301 moved -> path = " << path << std::endl;
         }
-        if (server.locations[index].data["index"].size() > 0 )
-        {
+        if (server.locations[index].data["index"].size() > 0 ) {
             path += server.locations[index].data["index"][0];
             this->_requestPath = path;
             return validFile(server, index, path);
         }
-        if (server.locations[index].autoIndex == true)
-        {
+        if (server.locations[index].autoIndex == true) {
             dirent *test ;
             std::string line;
             std::string content = "";
-            while ((test = readdir(dir)) != NULL)
-            {
+            std::string prev = "..";
+            while ((test = readdir(dir)) != NULL) {
                 content += "<a href=\"";
-                content += path + test->d_name;
+                if (test->d_name == prev) {
+                    std::string _test = path + test->d_name;
+                    if (_test.size() > server.locations[index].data["root"][0].size())
+                        content += path + test->d_name;
+                } else
+                    content += path + test->d_name;
                 content += "\">";
                 content += test->d_name ;
                 content += "</a>";
@@ -363,16 +363,17 @@ bool    Response::checkPathIfValid(serverParse& server, int index , std::string 
                 content += "<br>";
             }
             _contentType = "text/html";
+            content = "<html><head><title>Index of " + path + "</title><style>body {background-color: #f2f2f2; font-family: Arial, sans-serif;} h1 {background-color: #4CAF50; color: white; padding: 10px;} table {border-collapse: collapse; width: 100%; margin-top: 20px;} th, td {text-align: left; padding: 8px;} th {background-color: #4CAF50; color: white;} tr:nth-child(even) {background-color: #f2f2f2;} a {text-decoration: none; color: #333;} a:hover {text-decoration: underline;}</style></head><body><h1>Index of " + path + "</h1>" + content + "</body></html>";
             _body += content;
-        }
-        else
-        {
-            errorPages(server, index, 404); return false;
+        } else {
+            errorPages(server, index, 404);
+            return false;
         }
     }
     i++;
     return true;
 }
+
 
 void   Response::getContentType()
 {
