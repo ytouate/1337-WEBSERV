@@ -114,7 +114,7 @@ void Body::getContentType()
 requestParse::requestParse(std::string _requestParse)
 {
     std::stringstream ss(_requestParse);
-    ss >> this->data["method"] >> this->data["path"] >> this->data["protocol"];
+    ss >> this->data["method"] >> this->data["path"] >> this->data["version"];
     std::string headerName, headerValue;
     this->data["host"] = headerName;
     headerName.clear();
@@ -141,11 +141,16 @@ requestParse::requestParse(std::string _requestParse)
         if (count == 3)
             break;
     }
+    if (this->data["content-length"].empty() && this->data["method"] != "GET")
+    {
+        this->data["transfer-encoding"] = "Chunked";
+    }
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;
     _requestParse = _requestParse.erase(0, pos + 4);
     this->body.content = _requestParse;
+    
 }
 
 requestParse::~requestParse()

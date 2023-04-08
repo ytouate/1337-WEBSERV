@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 15:35:27 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 16:25:20 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,7 +276,8 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
     int bytes;
     if (flag != 1)
     {
-        sprintf(buffer, "HTTP/1.1 200 OK\r\n");
+        // if (request.data["version"].empty())
+        sprintf(buffer, "%s 200 OK\r\n", request.data["version"].c_str());
         _body += buffer;
     }
     while ((bytes = read(fd[0], buffer, 100)) > 0)
@@ -432,7 +433,7 @@ void   Response::getContentType()
 void    Response::faildResponse()
 {
     char buffer[100];
-    sprintf(buffer, "HTTP/1.1 %d \r\n", this->_statusCode);
+    sprintf(buffer, "%s %d \r\n", request.data["version"].c_str(), this->_statusCode);
     this->_response += buffer;
     _header += buffer;
     sprintf(buffer, "Connection: closed\r\n");
@@ -493,7 +494,7 @@ int    Response::getMethod(Config &config)
         
         this->_statusCode = 200;
         char buffer[100];
-        sprintf(buffer, "HTTP/1.1 %d OK\r\n", this->_statusCode);
+        sprintf(buffer, "%s %d OK\r\n", request.data["version"].c_str(), this->_statusCode);
         this->_response += buffer;
         this->_header += buffer;
         if (_contentType != "text/html" )

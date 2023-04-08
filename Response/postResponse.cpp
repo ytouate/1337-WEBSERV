@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 23:56:40 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 16:25:58 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,13 @@ void    Response::postResponse(void)
     char buffer[100];
     if (_flag == 1)
     {
-        sprintf(buffer, "HTTP/1.1 200 OK\r\n");
+        sprintf(buffer, "%s 200 OK\r\n", request.data["version"].c_str());
         this->_response += buffer;
     }
     else
     {
-        sprintf(buffer, "HTTP/1.1 %d\r\n", _statusCode);
+        
+        sprintf(buffer, "%s %d\r\n", request.data["version"].c_str(), _statusCode);
         this->_response += buffer;
         _header += buffer;
         sprintf(buffer, "content-type : %s\r\n\r\n", "text/html");

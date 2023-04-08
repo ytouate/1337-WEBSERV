@@ -2,7 +2,6 @@
 #include "Server.hpp"
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
-#include "../Parse/serverParse.hpp"
 
 #include "../Parse/Config.hpp"
 
@@ -36,12 +35,10 @@ void Server::initServerSocket(const char *port)
     int ret = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
     if (ret == -1)
         error("socket()");
-    
     _serverSockets.push_back(ret);
-    fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
-   int optval = 1;
+    int optval = 1;
     setsockopt(_serverSockets.back(), SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
-
+    fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
     if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
         error("bind()");
     if (listen(_serverSockets.back(), 10))
@@ -120,6 +117,71 @@ void Server::acceptConnection(int serverIndex)
     }
 }
 
+
+/*
+    returns true if the passed string is a hexadecimal number
+    representing the chunk line
+*/
+bool isChunkLine(const std::string &s)
+{
+    if (s.empty())
+        return false;
+    if (s.back() != '\r')
+    {
+        return false;
+    }
+    for (size_t i = 0; i < s.size(); ++i)
+    {
+        if (!std::isxdigit(s[i]) && (s[i] != '\r' && s[i] != '\n'))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+/*
+    in case the request header contains transfer-encoding: chunked
+    the chuned line that contains the chunk size are removed from the
+    body of the response
+*/
+void requestParse::converChunkedRequest(void)
+{
+    if (this->data["transfer-encoding"] != "Chunked")
+        return ;
+
+    std::istringstream f(this->body.content);
+    std::string new_body;
+    std::string line;
+
+    while (std::getline(f, line))
+    {
+        if (line == "0")
+            break;
+
+        if (isChunkLine(line))
+        {
+            size_t chunk_size;
+            std::istringstream iss(line);
+            iss >> std::hex >> chunk_size;
+            std::string chunk_data(chunk_size, '\0');
+            f.read(&chunk_data[0], chunk_size);
+            new_body += chunk_data;
+            f.ignore(2);
+        }
+        else
+        {
+            new_body += line;
+            f.ignore(2);
+        }
+    }
+
+    this->body.content = new_body;
+    this->data["content-length"] = std::to_string(new_body.size());
+
+}
+
 /*
     returns a requestParse object which contains the
     request of a given client parsed after reading it
@@ -142,8 +204,10 @@ requestParse Server::getRequest(const Client &_client)
     bytesLeft = atoi(request.data["content-length"].c_str());
     int BUFFER_SIZE = 512;
     float factor = 0;
-    if (bytesLeft == 0)
+    if (bytesLeft == 0 && request.data["transfer-encoding"] != "Chunked")
+    {
         return request;
+    }
     else if ((bytesLeft * 0.000001) <= 100)
         factor += 0.25;
     else if ((bytesLeft * 0.000001) <= 300)
@@ -163,8 +227,14 @@ recvAgain:
         request.body.content += std::string(c, bytesRead);
         i += bytesRead;
     }
-    if (request.body.content.size() < bytesLeft)
+    if (request.data["transfer-encoding"] == "Chunked")
+    {
+        if (request.body.content.find("\r\n0\r\n") == std::string::npos)
+            goto recvAgain;
+    }
+    else if (request.body.content.size() < bytesLeft)
         goto recvAgain;
+    request.converChunkedRequest();
     return request;
 }
 
@@ -224,7 +294,7 @@ Server::Server(std::string file) : _configFile(file)
     std::vector<std::string> _ports;
     for (size_t i = 0; i < _configFile.servers.size(); ++i)
     {
-    // int port = (rand() % (65535 - 1024 + 1)) + 1024;
+        // int port = (rand() % (65535 - 1024 + 1)) + 1024;
         initServerSocket(_configFile.servers[i].data["listen"].front().c_str());
         std::cout << "Server: " << i << " is listening on "
                   << "http://localhost:"
@@ -242,7 +312,6 @@ Server::Server(std::string file) : _configFile(file)
     }
     for (size_t i = 0; i < _serverSockets.size(); i++)
     {
-
         close(_serverSockets[i]);
     }
 }

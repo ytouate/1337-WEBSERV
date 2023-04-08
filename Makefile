@@ -8,8 +8,7 @@ FILES = \
 	./Response/getResponse.cpp		\
 	./Response/postResponse.cpp		\
 	./Response/deleteResponse.cpp	\
-	./Server/Server.cpp				\
-	./main.cpp
+	./Server/Server.cpp				
 
 CC = c++ 
 CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
