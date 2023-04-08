@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 02:56:45 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 02:58:28 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int     Response::deleteMethod(Config& config)
     struct stat filestat;
     if (getMatchedLocation(config) == false)
     {
-        puts("hana");
+        errorPages(config.servers[0], 0, 404);
         return 0;
     }
     DIR *dir = opendir(_deletePath.c_str());
