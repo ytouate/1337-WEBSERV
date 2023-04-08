@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 18:29:10 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 21:23:05 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ bool    Response::getMatchedLocation(Config& config)
     char *save;
     int indexServer = getIndexOfServerBlock(config);
     std::string line = request.data["path"];
+    std::cout << line << std::endl;
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
         _indexServer = indexServer;
@@ -228,13 +229,9 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
     std::vector<std::string> _env = setEnv();
     char *env[_env.size()  + 1];
     for (size_t i = 0; i < _env.size(); i++)
-    {
         env[i] = (char *)_env[i].c_str();
-        std::cout << env[i] << std::endl;
-    }
     env[_env.size()] = NULL;
     int fd[2];
-    //int _fd[2];
     int fdw = open("/tmp/test1", O_CREAT | O_RDWR | O_TRUNC , 0644);
     std::string path1 = "./cgi_bin/php-cgi";
     std::string path2 = _getPath;
@@ -272,12 +269,12 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
         perror("execve()");
         exit(1);
     }
+    wait(NULL);
     close(fd[1]);
     char buffer[100];
     int bytes;
     if (flag != 1)
     {
-        // if (request.data["version"].empty())
         sprintf(buffer, "%s 200 OK\r\n", request.data["version"].c_str());
         _body += buffer;
     }
@@ -288,7 +285,6 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
         _body += line;
     }
     close(fd[0]);
-    wait(NULL);
     unlink("/tmp/test1");
     return true;
 }

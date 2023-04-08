@@ -118,6 +118,7 @@ void Config::serverParse::insertDirectives(void)
     data.insert(_serverName);
     data.insert(_allowedMethods);
     data.insert(_upload_path);
+    data.insert(_bodySize);
 }
 
 void Config::serverParse::fillEmptyRequiredDirectives(void)
@@ -136,6 +137,8 @@ void Config::serverParse::fillEmptyRequiredDirectives(void)
             locations[i].data["upload"] = this->data["upload"];
         if (locations[i].data["upload_path"].size() == 0)
             locations[i].data["upload_path"] = this->data["upload_path"];
+        if (locations[i].data["body_size"].size() == 0)
+            locations[i].data["body_size"] = this->data["body_size"];
     }
 }
 
@@ -174,6 +177,17 @@ void Config::serverParse::fillDirective(const std::string &key,
             if (values.at(0) != "on" && values.at(0) != "off")
                 error("invalid arguments");
             _upload = std::make_pair(key, values);
+        }
+    }
+    else if (key == "body_size")
+    {
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid arguments");
+            if (!isNumber(values.front()))
+                error("Invalid directive arguments"); 
+            _bodySize = std::make_pair(key, values);
         }
     }
     else if (key == "upload_path")

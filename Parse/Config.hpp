@@ -26,9 +26,10 @@ public:
 
         directive _root;
         directive _index;
-        directive _allowed_methods;
+        directive _allowedMethods;
         directive _upload;
-        directive _upload_path;
+        directive _uploadPath;
+        directive _bodySize;
         int _start;
         std::vector<std::string> _fileBuff;
 
@@ -65,6 +66,7 @@ public:
         directive _upload_path;
         directive _upload;
         directive _port;
+        directive _bodySize;
         directive _serverName;
         std::vector<std::string> _fileBuff;
         std::vector<std::string> _locationBuff;

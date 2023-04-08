@@ -40,8 +40,16 @@ void Config::locationParse::setDirective(const std::string &key, std::vector<std
         this->errorPages.insert(std::make_pair(atoi(values.front().c_str()),
                                                values.back()));
     }
+    else if (key == "body_size")
+    {
+        if (values.size() !=  1)
+            error("Invalid directive arguments");
+        if (!isNumber(values.front()))
+            error("Invalid directive arguments");
+        this->_bodySize = std::make_pair(key, values);
+    }
     else if (key == "allowed_methods")
-        _allowed_methods = std::make_pair(key, values);
+        _allowedMethods = std::make_pair(key, values);
     else if (key == "auto_index")
     {
         if (values.size() != 1)
@@ -54,7 +62,7 @@ void Config::locationParse::setDirective(const std::string &key, std::vector<std
     {
         if (values.size() != 1)
             error("Invalid directive arguments");
-        _upload_path = std::make_pair(key, values);
+        _uploadPath = std::make_pair(key, values);
     }
     else if (key == "upload")
     {
@@ -143,6 +151,7 @@ void Config::locationParse::parseBlock()
     data.insert(this->_upload);
     data.insert(this->_root);
     data.insert(this->_index);
-    data.insert(this->_upload_path);
-    data.insert(this->_allowed_methods);
+    data.insert(this->_uploadPath);
+    data.insert(this->_allowedMethods);
+    data.insert(this->_bodySize);
 }
