@@ -36,7 +36,10 @@ void Server::initServerSocket(const char *port)
     int ret = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
     if (ret == -1)
         error("socket()");
+
     _serverSockets.push_back(ret);
+    int optval = 1;
+    setsockopt(_serverSockets.back(), SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
     fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
 
     if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
@@ -117,6 +120,69 @@ void Server::acceptConnection(int serverIndex)
     }
 }
 
+
+bool isChunkLine(const std::string &s)
+{
+    if (s.empty())
+        return false;
+    if (s.back() != '\r')
+    {
+        return false;
+    }
+    for (size_t i = 0; i < s.size(); ++i)
+    {
+        if (!std::isxdigit(s[i]) && (s[i] != '\r' && s[i] != '\n'))
+        {
+            return false;
+        }
+
+    }
+    return true;
+}
+
+
+bool is_chunk_line(const std::string& line) {
+    std::istringstream iss(line);
+    size_t chunk_size;
+    iss >> std::hex >> chunk_size;
+    return iss.eof() && !iss.fail() && chunk_size > 0;
+}
+
+requestParse convert_chunked_request(requestParse request) {
+    if (request.data["transfer-encoding"] != "chunked") {
+        return request;
+    }
+
+    std::istringstream f(request.body.content);
+    std::string new_body;
+    std::string line;
+
+    while (std::getline(f, line)) {
+        if (line == "0") {
+            break;
+        }
+
+        if (is_chunk_line(line)) {
+            size_t chunk_size;
+            std::istringstream iss(line);
+            iss >> std::hex >> chunk_size;
+            std::string chunk_data(chunk_size, '\0');
+            f.read(&chunk_data[0], chunk_size);
+            new_body += chunk_data;
+            // Skip the CRLF at the end of the chunk data
+            f.ignore(2);
+        } else {
+            new_body += line;
+            // Skip the CRLF at the end of the chunk header
+            f.ignore(2);
+        }
+    }
+
+    request.body.content = new_body;
+    request.data["content-length"] = std::to_string(new_body.size());
+
+    return request;
+}
 /*
     returns a requestParse object which contains the
     request of a given client parsed after reading it
@@ -139,8 +205,10 @@ requestParse Server::getRequest(const Client &_client)
     bytesLeft = atoi(request.data["content-length"].c_str());
     int BUFFER_SIZE = 512;
     float factor = 0;
-    if (bytesLeft == 0)
+    if (bytesLeft == 0 && request.data["transfer-encoding"] != "Chunked")
+    {
         return request;
+    }
     else if ((bytesLeft * 0.000001) <= 100)
         factor += 0.25;
     else if ((bytesLeft * 0.000001) <= 300)
@@ -160,8 +228,36 @@ recvAgain:
         request.body.content += std::string(c, bytesRead);
         i += bytesRead;
     }
-    if (request.body.content.size() < bytesLeft)
+    if (request.data["transfer-encoding"] == "Chunked")
+    {
+        if (request.body.content.find("\r\n0\r\n") == std::string::npos)
+            goto recvAgain;
+    }
+    else if (request.body.content.size() < bytesLeft)
         goto recvAgain;
+    if (!(request.data["transfer-encoding"] == "Chunked"))
+        return request;
+    std::istringstream f(request.body.content);
+    std::string newBody;
+    std::string line;
+    int count = 0;
+    while (std::getline(f, line))
+    {
+        if (line == "0\r")
+            break;
+        if (!isChunkLine(line) or line == "\r")
+        {
+            newBody += line;
+            // newBody += '\n';
+        }
+        else
+        {
+            std::cout << "|" << line << "|\n";
+            count++;
+        }
+    }
+    request.body.content = newBody;
+    request.data["content-length"] = std::to_string(newBody.size());
     return request;
 }
 
@@ -239,7 +335,6 @@ Server::Server(std::string file) : _configFile(file)
     }
     for (size_t i = 0; i < _serverSockets.size(); i++)
     {
-
         close(_serverSockets[i]);
     }
 }

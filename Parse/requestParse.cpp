@@ -148,11 +148,14 @@ requestParse::requestParse(std::string _requestParse)
         if (count == 2)
             break;
     }
+    if (this->data["content-length"].empty())
+        this->data["transfer-encoding"] = "Chunked";
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;
     _requestParse = _requestParse.erase(0, pos + 4);
     this->body.content = _requestParse;
+    
 }
 
 requestParse::~requestParse()

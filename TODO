@@ -1,7 +1,2 @@
 implement a request with transfer encoding chunked
 
-
--- othman
--> cgi run set env
--> return 301 '/'
-
