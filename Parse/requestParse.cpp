@@ -130,8 +130,6 @@ requestParse::requestParse(std::string _requestParse)
     }
     this->data["host"] = headerName;
     headerName.clear();
-    std::remove_if(data["host"].begin(), data["host"].end(), ::isspace);
-    std::cout << data["host"] << std::endl;
     int count = 0;
     while (getline(ss, headerName, ':') && getline(ss, headerValue))
     {

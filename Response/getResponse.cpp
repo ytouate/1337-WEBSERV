@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 00:37:16 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 00:44:37 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,6 @@ int    Response::validateRequest()
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
-    std::cout << "|" << host << "|\n";
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
@@ -68,7 +67,6 @@ int     Response::getIndexOfServerBlock(Config &config)
     else
     {
         std::string port = host.erase(0, host.rfind('/') + 1);
-        std::cout << port << std::endl;
         port = host.erase(0, host.rfind(':') + 1);
         for (size_t i = 0; i < config.servers.size() ; i++)
         {
