@@ -1,0 +1,12 @@
+remove the http version hard coded
+
+• You must never do a read or a write operation without going through poll() (or
+equivalent).
+
+• Limit client body size.
+
+◦ Define a HTTP redirection.
+
+• Support cookies and session management (prepare quick examples).
+
+• Handle multiple CGI.

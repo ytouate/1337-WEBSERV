@@ -1,19 +1,25 @@
-
 #include "../inc.hpp"
 #include "Server.hpp"
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
 #include "../Parse/serverParse.hpp"
 
+#include "../Parse/Config.hpp"
+
 #define MAX_REQUEST_SIZE 4096
 #define MAX_CHUNK_SIZE 4096
 
+// Write the last error happened in s method and exit
 static void error(const char *s)
 {
     perror(s);
     exit(1);
 }
 
+/*
+    initializing the socket and binding it to local address
+    and listening for new connections
+*/
 void Server::initServerSocket(const char *port)
 {
     struct addrinfo hints, *data;
@@ -27,28 +33,36 @@ void Server::initServerSocket(const char *port)
         std::cerr << gai_strerror(statusCode) << std::endl;
         std::exit(1);
     }
-    std::cout << "Creating the server socket\n";
-    _serverSocket = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
-    if (_serverSocket == -1)
+    int ret = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
+    if (ret == -1)
         error("socket()");
+    _serverSockets.push_back(ret);
+    fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
 
-    fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
-
-    std::cout << "Binding the server socket to local address\n";
-    if (bind(_serverSocket, data->ai_addr, data->ai_addrlen))
+    if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
         error("bind()");
-    std::cout << "Listening for requests\n";
-    if (listen(_serverSocket, 10))
+    if (listen(_serverSockets.back(), 10))
         error("listen()");
     freeaddrinfo(data);
 }
 
-void Server::getReadableClient()
+/*
+    adds new client to the _readyToWriteTo and _readyToReadFrom fd_sets
+    and handles communication with already connected clients using select
+*/
+void Server::waitForClients()
 {
     FD_ZERO(&_readyToReadFrom);
     FD_ZERO(&_readyToWriteTo);
-    FD_SET(_serverSocket, &_readyToReadFrom);
-    int maxSocket = _serverSocket;
+    int maxSocket = _serverSockets.front();
+    for (size_t i = 0; i < _serverSockets.size(); ++i)
+    {
+        FD_SET(_serverSockets[i], &_readyToReadFrom);
+        if (_serverSockets[i] > maxSocket)
+            maxSocket = _serverSockets[i];
+    }
+    // FD_SET(_serverSocket, &_readyToReadFrom);
+    // int maxSocket = _serverSocket;
     std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
@@ -62,11 +76,17 @@ void Server::getReadableClient()
         error("select()");
 }
 
+/*
+    Destructor that clears the _clients vector
+*/
 Server::~Server()
 {
     _clients.clear();
 }
 
+/*
+    returns the client's ip address in form of a string
+*/
 const std::string Client::getClientAddress()
 {
     char buff[100];
@@ -77,13 +97,18 @@ const std::string Client::getClientAddress()
     return save;
 }
 
-void Server::acceptConnection()
+/*
+    checks if the server socket able to be read from
+    if so a connection is accepted and a new client is
+    added to the _clients vector
+*/
+void Server::acceptConnection(int serverIndex)
 {
-    if (FD_ISSET(_serverSocket, &_readyToReadFrom))
+    if (FD_ISSET(_serverSockets[serverIndex], &_readyToReadFrom))
     {
         Client _newClient;
         _newClient.addressLenght = sizeof _newClient.clientAddress;
-        _newClient.socket = accept(_serverSocket,
+        _newClient.socket = accept(_serverSockets[serverIndex],
                                    (struct sockaddr *)&_newClient.clientAddress,
                                    &_newClient.addressLenght);
         if (_newClient.socket == -1)
@@ -92,6 +117,10 @@ void Server::acceptConnection()
     }
 }
 
+/*
+    returns a requestParse object which contains the
+    request of a given client parsed after reading it
+*/
 requestParse Server::getRequest(const Client &_client)
 {
     fcntl(_client.socket, F_SETFL, O_NONBLOCK);
@@ -135,6 +164,12 @@ recvAgain:
         goto recvAgain;
     return request;
 }
+
+/*
+    sends the response to all the clients that have requests
+    queued and able to write to their sockets the connection
+    is closed after the client have been served
+*/
 void Server::serveContent()
 {
     signal(SIGPIPE, SIG_IGN);
@@ -176,27 +211,41 @@ void Server::serveContent()
     }
 }
 
-Server::Server(std::string file, char **_env) : _configFile(file)
+/*
+    a constructor which calls all the helper methods
+    and starts the server main loop
+*/
+Server::Server(std::string file) : _configFile(file)
 {
-    env = _env;
     srand(time(NULL));
-    int port = (rand() % (65535 - 1024 + 1)) + 1024;
+    std::vector<std::string> _ports;
+    for (size_t i = 0; i < _configFile.servers.size(); ++i)
+    {
+    // int port = (rand() % (65535 - 1024 + 1)) + 1024;
+        initServerSocket(_configFile.servers[i].data["listen"].front().c_str());
+        std::cout << "Server: " << i << " is listening on "
+                  << "http://localhost:"
+                  << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
+    }
 
-    initServerSocket(std::to_string(port).c_str());
-    std::cout << "http://localhost:" << port << std::endl;
     while (1)
     {
-        getReadableClient();
-        acceptConnection();
-        serveContent();
+        for (size_t i = 0; i < _serverSockets.size(); i++)
+        {
+            waitForClients();
+            acceptConnection(i);
+            serveContent();
+        }
     }
-    close(_serverSocket);
+    for (size_t i = 0; i < _serverSockets.size(); i++)
+    {
+
+        close(_serverSockets[i]);
+    }
 }
 
-Client::Client() : received(0), remaining(0), _waitingForBody(false) {}
-
-int main(int ac, char **av, char **env)
+int main(int ac, char **av)
 {
     if (ac == 2)
-        Server server(av[1], env);
+        Server server(av[1]);
 }

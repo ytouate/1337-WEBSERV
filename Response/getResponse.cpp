@@ -6,15 +6,15 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 00:46:48 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 01:04:10 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include <stdlib.h>
+#include "../Server/Server.hpp"
+#include "../Parse/Config.hpp"
 #include <sys/stat.h>
-#include <filesystem>
-#include <fstream>
 
 Response::~Response()
 {
@@ -127,12 +127,11 @@ bool    Response::getMatchedLocation(Config& config)
     return 0;
 }
 
-void    Response::errorPages(serverParse& server, int id, int statusCode)
+void    Response::errorPages(Config::serverParse& server, int id, int statusCode)
 {
     std::string path = "./index/";
     std::ifstream infile;
     std::string line;
-    std::cout << id << std::endl;
     size_t size = server.locations[id].errorPages[statusCode].size();
     if (size > 0)
     {
@@ -167,7 +166,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     }
 }
 
-bool    Response::methodAllowed(serverParse& server, int index)
+bool    Response::methodAllowed(Config::serverParse& server, int index)
 {
     if (server.locations[index].data["allowed_methods"].size() > 0)
     {
@@ -216,7 +215,7 @@ std::vector<std::string>    Response::setEnv()
 
 
 
-bool Response::executeCgi(serverParse& , int, int flag)
+bool Response::executeCgi(Config::serverParse& , int, int flag)
 {
     _flag = flag;
     std::vector<std::string> _env = setEnv();
@@ -243,7 +242,7 @@ bool Response::executeCgi(serverParse& , int, int flag)
         {
             if (write(fdw, request.body.content.c_str(), request.body.content.size()) < 0)
             {
-                std::cout << "can't write" << std::endl; 
+                perror("write()");
                 exit(1);
             }
             close(fdw);
@@ -283,7 +282,7 @@ bool Response::executeCgi(serverParse& , int, int flag)
     return true;
 }
 
-bool    Response::validFile(serverParse& server, int index, std::string path)
+bool    Response::validFile(Config::serverParse& server, int index, std::string path)
 {
     std::ifstream file;
     file.open(path.c_str(), std::ios::binary);
@@ -333,7 +332,8 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
 
 std::string checker;
 
-bool Response::checkPathIfValid(serverParse& server, int index, std::string line) {
+bool    Response::checkPathIfValid(Config::serverParse& server, int index , std::string line)
+{
     std::string path;
     static int i = 0;
     path = server.locations[index].data["root"][0] + line;
@@ -438,6 +438,8 @@ void    Response::faildResponse()
 
 bool    Response::validRequestFormat(Config &config)
 {
+    if (request.data["path"].size() > 2084)
+        errorPages(config.servers[0], 0, 414); return false;
     if (request.data["transfer-encoding"].size() > 0)
     {
         if (request.data["transfer-encoding"] != "chunked")
@@ -449,18 +451,21 @@ bool    Response::validRequestFormat(Config &config)
             errorPages(config.servers[0], 0, 400); return false;
     }
     std::string allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%";
-    // for (size_t i = 0; i < request.data["path"].size(); i++)
-    // {
-
-    // }
-    
+    for (size_t i = 0; i < request.data["path"].size(); i++)
+    {
+        for (size_t j = 0; j < allowedChar.size(); j++)
+        {
+            if (request.data["path"][i] != allowedChar[j])
+                errorPages(config.servers[0], 0, 400); return false;
+        }
+    }
+    return true;
 }
 
 int    Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
-    validRequestFroma(config);
-    if (getMatchedLocation(config) == 1 && _statusCode != 200)
+    if (validRequestFormat(config) and getMatchedLocation(config) == 1 and _statusCode != 200)
     {
         getContentType();
         faildResponse();

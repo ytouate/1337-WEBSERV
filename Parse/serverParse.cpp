@@ -1,6 +1,6 @@
-#include "serverParse.hpp"
+#include "Config.hpp"
 
-serverParse::serverParse(const std::vector<std::string> &__fileBuff, int __start)
+Config::serverParse::serverParse(const std::vector<std::string> &__fileBuff, int __start)
 {
     _lastKey = "";
     _serverIsOpened = _locationIsOpened = false;
@@ -14,7 +14,7 @@ bool isCurlyBracket(const std::string &s)
     return (s == "{" or s == "}");
 }
 
-void serverParse::handleErrors(const std::string &_fileBuff)
+void Config::serverParse::handleErrors(const std::string &_fileBuff)
 {
     if (isCurlyBracket(_fileBuff) or _fileBuff == "server")
     {
@@ -39,7 +39,7 @@ void serverParse::handleErrors(const std::string &_fileBuff)
     }
 }
 
-std::string serverParse::getKey(const std::string &_fileBuff, int &j)
+std::string Config::serverParse::getKey(const std::string &_fileBuff, int &j)
 {
     std::string key;
     while (_fileBuff[j] && !isWhiteSpace(_fileBuff[j]))
@@ -47,7 +47,7 @@ std::string serverParse::getKey(const std::string &_fileBuff, int &j)
     return key;
 }
 
-void serverParse::getValues(std::vector<std::string> &values,
+void Config::serverParse::getValues(std::vector<std::string> &values,
                             const std::string &_fileBuff, int &j)
 {
     std::string val;
@@ -65,7 +65,7 @@ void serverParse::getValues(std::vector<std::string> &values,
     }
 }
 
-size_t serverParse::parseBlock()
+size_t Config::serverParse::parseBlock()
 {
     size_t i = _start;
 
@@ -108,7 +108,7 @@ size_t serverParse::parseBlock()
     return i;
 }
 
-void serverParse::insertDirectives(void)
+void Config::serverParse::insertDirectives(void)
 {
     data.insert(_cgiPath);
     data.insert(_upload);
@@ -120,7 +120,7 @@ void serverParse::insertDirectives(void)
     data.insert(_upload_path);
 }
 
-void serverParse::fillEmptyRequiredDirectives(void)
+void Config::serverParse::fillEmptyRequiredDirectives(void)
 {
     for (size_t i = 0; i < locations.size(); i++)
     {
@@ -139,18 +139,18 @@ void serverParse::fillEmptyRequiredDirectives(void)
     }
 }
 
-bool serverParse::isWhiteSpace(char c)
+bool Config::serverParse::isWhiteSpace(char c)
 {
     return (c == ' ' or c == '\t');
 }
 
-void serverParse::error(const std::string &s) const
+void Config::serverParse::error(const std::string &s) const
 {
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
 
-bool serverParse::isNumber(const std::string &s)
+bool Config::serverParse::isNumber(const std::string &s)
 {
     for (size_t i = 0; i < s.size(); i++)
     {
@@ -160,7 +160,7 @@ bool serverParse::isNumber(const std::string &s)
     return true;
 }
 
-void serverParse::fillDirective(const std::string &key,
+void Config::serverParse::fillDirective(const std::string &key,
                                 const std::vector<std::string> &values)
 {
     if (key == "listen")
@@ -232,7 +232,7 @@ void serverParse::fillDirective(const std::string &key,
     }
 }
 
-std::string serverParse::trim(const std::string &s)
+std::string Config::serverParse::trim(const std::string &s)
 {
     std::string trimmed;
     int _start = 0;
@@ -248,7 +248,7 @@ std::string serverParse::trim(const std::string &s)
     return trimmed;
 }
 
-serverParse::~serverParse()
+Config::serverParse::~serverParse()
 {
     std::map<std::string, std::vector<std::string> >::iterator it = this->data.begin();
     while (it != data.end())

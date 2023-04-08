@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 00:04:48 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/07 23:56:40 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 std::string _checker;
-int     Response::checkPathOfPostmethod(serverParse& server, std::string line, int index)
+int     Response::checkPathOfPostmethod(Config::serverParse& server, std::string line, int index)
 {
     std::string path;
     path = line;
@@ -109,8 +109,6 @@ int     Response::postMethod(Config& config)
                     executeCgi(config.servers[_indexServer], 0, 1);
                     postResponse();
                     return 0;
-                    //request.data["path"] = _postPath;
-                    //request.body.content = _body;
                 }
             }
             if (request.body.content.size() > 0 && request.body.contentName.size() == 0)

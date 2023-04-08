@@ -74,7 +74,6 @@ void Body::trimUnwantedLines()
     {
         content.erase(t, content.size());
     }
-
 }
 
 void Body::setUp()
@@ -122,17 +121,32 @@ requestParse::requestParse(std::string _requestParse)
     ss >> this->data["method"] >> this->data["path"] >> this->data["protocol"] >> this->data["host"];
     std::string headerName, headerValue;
     getline(ss, this->data["host"]);
-    std::remove_if(data["host"].begin(), data["host"].end(), ::isspace);
+    for (size_t i = 0; i < this->data["host"].size(); ++i)
+    {
+        if (this->data["host"][i] != '\r' && this->data["host"][i] != '\n' &&
+            this->data["host"][i] != ' ' && this->data["host"][i] != '\t')
+            headerName += this->data["host"][i];
+
+    }
+    this->data["host"] = headerName;
+    headerName.clear();
+    int count = 0;
     while (getline(ss, headerName, ':') && getline(ss, headerValue))
     {
         if (headerValue.size() > 3)
             headerValue = headerValue.substr(1, headerValue.size() - 2);
         if (headerName == "Content-Length")
+        {
             this->data["content-length"] = headerValue;
+            ++count;
+        }
         else if (headerName == "Content-Type")
+        {
             this->data["content-type"] = headerValue;
-        else if (headerName == "Transfer-Encoding")
-            this->data["transfer-encoding"] = headerValue;
+            ++count;
+        }
+        if (count == 2)
+            break;
     }
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
