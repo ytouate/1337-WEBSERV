@@ -134,7 +134,6 @@ requestParse::requestParse(std::string _requestParse)
         }
         else if (headerName == "Host" || headerName == "\r")
         {
-            std::cout << headerName << std::endl;
             this->data["host"]= headerValue;
             ++count;
         }
