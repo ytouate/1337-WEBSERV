@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 21:23:05 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 21:39:26 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int    Response::validateRequest()
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
-    
+    std::cout << "|" << host << "|" << std::endl;
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
@@ -94,7 +94,7 @@ bool    Response::getMatchedLocation(Config& config)
     char *save;
     int indexServer = getIndexOfServerBlock(config);
     std::string line = request.data["path"];
-    std::cout << line << std::endl;
+    std::cout << "line = " << line << std::endl;
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
         _indexServer = indexServer;
@@ -123,11 +123,11 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
-    if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
-    {
-        if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
-            return 1;
-    }
+    // if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
+    // {
+    //     if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
+    //         return 1;
+    // }
     if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, finalPath);
     if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, finalPath);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
@@ -137,7 +137,7 @@ bool    Response::getMatchedLocation(Config& config)
 
 void    Response::errorPages(Config::serverParse& server, int id, int statusCode)
 {
-    std::string path = "./index/";
+    std::string path = "./errorPages/";
     std::ifstream infile;
     std::string line;
     size_t size = server.locations[id].errorPages[statusCode].size();
@@ -342,12 +342,14 @@ std::string checker;
 bool    Response::checkPathIfValid(Config::serverParse& server, int index , std::string line)
 {
     std::string path;
-    static int i = 0;
+    // static int i = 0;
     path = server.locations[index].data["root"][0] + line;
-    if (i == 0)
-        checker = line;
-    if (checker != line)
-        path = line;
+        std::cout << "Path = " <<  path << std::endl;
+    // if (i == 0)
+    //     checker = line;
+    // if (checker != line)
+    //     path = line;
+    std::cout << "Path = " <<  path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -387,7 +389,7 @@ bool    Response::checkPathIfValid(Config::serverParse& server, int index , std:
             return false;
         }
     }
-    i++;
+    // i++;
     return true;
 }
 
