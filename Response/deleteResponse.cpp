@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 16:08:00 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 16:13:09 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ int deleteDirectory(const std::string& path)
             {
                 if (remove(filepath.c_str()) != 0)
                 {
-                    std::cout << "errot";
+                    
                 }
             }
         }
@@ -118,7 +118,7 @@ int     Response::deleteMethod(Config& config)
                         if (S_ISDIR(statbuf.st_mode))
                         {
                             if (deleteDirectory(filepath) != 0)
-                                std::cerr << "Error deleting directory " << filepath << std::endl;
+                               {}
                         }
                         else
                             remove(filepath.c_str());
