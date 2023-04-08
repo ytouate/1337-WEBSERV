@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 16:25:20 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 18:29:10 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ Response::~Response()
 Response::Response(Config &config, requestParse& _request) : request(_request)
 {
     _indexLocation = -1;
+    std::cout << request.data["method"] << std::endl;
     if (request.data["method"] == "GET")
         getMethod(config);
     if (request.data["method"] == "DELETE")
@@ -283,6 +284,7 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
     while ((bytes = read(fd[0], buffer, 100)) > 0)
     {
         std::string line(buffer, bytes);
+        if (line.find("status") )
         _body += line;
     }
     close(fd[0]);

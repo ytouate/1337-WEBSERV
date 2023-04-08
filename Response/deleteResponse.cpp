@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 16:17:42 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 19:38:22 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,18 +69,12 @@ int deleteDirectory(const std::string& path)
             std::string filepath = path + "/" + entry->d_name;
         
             stat(filepath.c_str(), &statbuf);
-            std::cout << filepath << std::endl;
             if (S_ISDIR(statbuf.st_mode))
             {
                 deleteDirectory(filepath);
             }
             else
-            {
-                if (remove(filepath.c_str()) != 0)
-                {
-                    
-                }
-            }
+                remove(filepath.c_str());
         }
     }
     closedir(dir);
@@ -110,15 +104,15 @@ int     Response::deleteMethod(Config& config)
                 {
                     if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
                     {
-                        std::string filepath = _deletePath + "/" + entry->d_name;
+                        std::string filepath = _deletePath  + entry->d_name;
                         struct stat statbuf;
                         if (stat(filepath.c_str(), &statbuf) == -1)
-                            std::cerr << "Error get stat of =  " << filepath << std::endl;
+                            std::cout << "errro\n";
     
                         if (S_ISDIR(statbuf.st_mode))
                         {
                             if (deleteDirectory(filepath) != 0)
-                               {}
+                               {errorPages(config.servers[0], 0, 401); postResponse(); return false;}
                         }
                         else
                             remove(filepath.c_str());
