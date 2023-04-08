@@ -6,14 +6,15 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 03:01:02 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 00:46:48 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include <stdlib.h>
-#include "../Server/Server.hpp"
-
+#include <sys/stat.h>
+#include <filesystem>
+#include <fstream>
 
 Response::~Response()
 {
@@ -157,6 +158,8 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
             path += "501.html";
         if (statusCode == 403)
             path += "403.html";
+        if (statusCode == 401)
+            path += "401.html";
         infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
@@ -285,11 +288,22 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
     std::ifstream file;
     file.open(path.c_str(), std::ios::binary);
     int fd = open(path.c_str() , O_RDWR);
+    struct stat fileStat;
     _getPath = path;
-    if(file)
+    if (stat(path.c_str(), &fileStat) == 0) {
+        // if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0) {}
+        // else
+        // {
+        //     errorPages(server, index, 401);
+        //     return false;
+        // }
+    }
+    if(file.is_open())
     {
         if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi_path"].size() > 0)
+        {
             return executeCgi(server, index, 2);
+        }
         if (methodAllowed(server, index) == true)
         {
             file.seekg(0, std::ios::end);
@@ -350,11 +364,7 @@ bool Response::checkPathIfValid(serverParse& server, int index, std::string line
             std::string prev = "..";
             while ((test = readdir(dir)) != NULL) {
                 content += "<a href=\"";
-                if (test->d_name == prev) {
-                    std::string _test = path + test->d_name;
-                    if (_test.size() > server.locations[index].data["root"][0].size())
-                        content += path + test->d_name;
-                } else
+                if (test->d_name != prev)
                     content += path + test->d_name;
                 content += "\">";
                 content += test->d_name ;
@@ -426,9 +436,30 @@ void    Response::faildResponse()
     this->_response += _body;
 }
 
+bool    Response::validRequestFormat(Config &config)
+{
+    if (request.data["transfer-encoding"].size() > 0)
+    {
+        if (request.data["transfer-encoding"] != "chunked")
+            errorPages(config.servers[0], 0 , 501); return false;
+    }
+    if (request.data["transfer-encoding"].size() == 0)
+    {
+        if (request.data["content-length"].size() == 0)
+            errorPages(config.servers[0], 0, 400); return false;
+    }
+    std::string allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%";
+    // for (size_t i = 0; i < request.data["path"].size(); i++)
+    // {
+
+    // }
+    
+}
+
 int    Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
+    validRequestFroma(config);
     if (getMatchedLocation(config) == 1 && _statusCode != 200)
     {
         getContentType();
