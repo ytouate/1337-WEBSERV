@@ -24,6 +24,7 @@ private:
     void    getHost(std::string &s);
 
 public:
+    void    converChunkedRequest();
     std::map<std::string, std::string>      data;
     Body                                    body;
     requestParse(std::string);

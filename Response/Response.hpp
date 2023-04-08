@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 23:56:30 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 00:48:47 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class Response
         void    postResponse(void);
         void    success();
         void    postType(std::string path);
+        bool    validRequestFormat(Config &config);
         std::vector<std::string>    setEnv();
     public:
         char **g_env;

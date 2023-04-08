@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 23:56:51 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 15:19:48 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,58 @@ void    Response::success()
 
 }
 
+int deleteDirectory(const std::string& path)
+{
+    DIR* dir = opendir(path.c_str());
+    if (!dir)
+    {
+        return -1;
+    }
+    
+    dirent* entry;
+    struct stat statbuf;
+    
+    while ((entry = readdir(dir)))
+    {
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+        {
+            std::string filepath = path + "/" + entry->d_name;
+        
+        
+            stat(filepath.c_str(), &statbuf);
+            std::cout << filepath << std::endl;
+            if (S_ISDIR(statbuf.st_mode))
+            {
+                deleteDirectory(filepath);
+            }
+            else
+            {
+                if (remove(filepath.c_str()) != 0)
+                {
+                    std::cout << "errot";
+                }
+            }
+        }
+    }
+    
+    closedir(dir);
+    
+    if (rmdir(path.c_str()) != 0)
+    {
+                    std::cout << "errot";
+    }
+    
+    return 0;
+}
+
 int     Response::deleteMethod(Config& config)
 {
     struct stat filestat;
     if (getMatchedLocation(config) == false)
+    {
+        errorPages(config.servers[0], 0, 404);
         return 0;
+    }
     DIR *dir = opendir(_deletePath.c_str());
     if (dir)
     {
@@ -85,19 +132,29 @@ int     Response::deleteMethod(Config& config)
             }
             name = readdir(dir);
         }
-        if (_ok == 0)
-        {
-            dir = opendir(_deletePath.c_str());
-            dirent *name = readdir(dir);
-            while (name != NULL)
-            {
-                std::string file = _deletePath + name->d_name;
-                remove(file.c_str());
-                name = readdir(dir);
-            }
-            success();
-            return 0;
-        }
+        // if (_ok == 0)
+        // {
+        //     dir = opendir(_deletePath.c_str());
+        //       dirent* entry;
+
+        //         while ((entry = readdir(dir)))
+        //         {
+        //             std::string filepath = path + "/" + entry->d_name;
+        //             struct stat statbuf;
+        //             if (stat(filepath.c_str(), &statbuf) == -1)
+        //                 std::cerr << "Error get stat of =  " << filepath << std::endl;
+ 
+        //             if (S_ISDIR(statbuf.st_mode))
+        //             {
+        //                 if (deleteDirectory(filepath) != 0)
+        //                     std::cerr << "Error deleting directory " << filepath << std::endl;
+        //             }
+        //             else
+        //                 remove(filepath.c_str();
+        //         }
+        //     success();
+        //     return 0;
+        // }
         errorPages(config.servers[_indexServer], _indexLocation, 403);
         postResponse();
         return 0;

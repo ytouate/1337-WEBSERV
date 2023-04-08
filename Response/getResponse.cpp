@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 00:44:37 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 02:57:03 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include "../Server/Server.hpp"
 #include "../Parse/Config.hpp"
+#include <sys/stat.h>
 
 Response::~Response()
 {
@@ -52,6 +53,7 @@ int    Response::validateRequest()
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
+    
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
@@ -119,8 +121,13 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
-    if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, index);
-    if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, index);
+    if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
+    {
+        if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
+            return 1;
+    }
+    if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, finalPath);
+    if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, finalPath);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -156,6 +163,8 @@ void    Response::errorPages(Config::serverParse& server, int id, int statusCode
             path += "501.html";
         if (statusCode == 403)
             path += "403.html";
+        if (statusCode == 401)
+            path += "401.html";
         infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
@@ -284,11 +293,22 @@ bool    Response::validFile(Config::serverParse& server, int index, std::string 
     std::ifstream file;
     file.open(path.c_str(), std::ios::binary);
     int fd = open(path.c_str() , O_RDWR);
+    struct stat fileStat;
     _getPath = path;
-    if(file)
+    if (stat(path.c_str(), &fileStat) == 0) {
+        // if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0) {}
+        // else
+        // {
+        //     errorPages(server, index, 401);
+        //     return false;
+        // }
+    }
+    if(file.is_open())
     {
         if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi_path"].size() > 0)
+        {
             return executeCgi(server, index, 2);
+        }
         if (methodAllowed(server, index) == true)
         {
             file.seekg(0, std::ios::end);
@@ -330,31 +350,28 @@ bool    Response::checkPathIfValid(Config::serverParse& server, int index , std:
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
-    else
-    {
+    else {
         if (methodAllowed(server, index) == false)
             return false;
         _statusCode = 200;
-        if (path[path.size() - 1] != '/')
-        {
+        if (path[path.size() - 1] != '/') {
             path += "/";
             std::cout << "301 moved -> path = " << path << std::endl;
         }
-        if (server.locations[index].data["index"].size() > 0 )
-        {
+        if (server.locations[index].data["index"].size() > 0 ) {
             path += server.locations[index].data["index"][0];
             this->_requestPath = path;
             return validFile(server, index, path);
         }
-        if (server.locations[index].autoIndex == true)
-        {
+        if (server.locations[index].autoIndex == true) {
             dirent *test ;
             std::string line;
             std::string content = "";
-            while ((test = readdir(dir)) != NULL)
-            {
+            std::string prev = "..";
+            while ((test = readdir(dir)) != NULL) {
                 content += "<a href=\"";
-                content += path + test->d_name;
+                if (test->d_name != prev)
+                    content += path + test->d_name;
                 content += "\">";
                 content += test->d_name ;
                 content += "</a>";
@@ -362,16 +379,17 @@ bool    Response::checkPathIfValid(Config::serverParse& server, int index , std:
                 content += "<br>";
             }
             _contentType = "text/html";
+            content = "<html><head><title>Index of " + path + "</title><style>body {background-color: #f2f2f2; font-family: Arial, sans-serif;} h1 {background-color: #4CAF50; color: white; padding: 10px;} table {border-collapse: collapse; width: 100%; margin-top: 20px;} th, td {text-align: left; padding: 8px;} th {background-color: #4CAF50; color: white;} tr:nth-child(even) {background-color: #f2f2f2;} a {text-decoration: none; color: #333;} a:hover {text-decoration: underline;}</style></head><body><h1>Index of " + path + "</h1>" + content + "</body></html>";
             _body += content;
-        }
-        else
-        {
-            errorPages(server, index, 404); return false;
+        } else {
+            errorPages(server, index, 404);
+            return false;
         }
     }
     i++;
     return true;
 }
+
 
 void   Response::getContentType()
 {
@@ -424,10 +442,43 @@ void    Response::faildResponse()
     this->_response += _body;
 }
 
+bool    Response::validRequestFormat(Config &config)
+{
+    if (request.data["path"].size() > 2084)
+    {
+        errorPages(config.servers[0], 0, 414); return false;
+    }
+    if (request.data["transfer-encoding"].size() > 0)
+    {
+        if (request.data["transfer-encoding"] != "chunked")
+            errorPages(config.servers[0], 0 , 501); return false;
+    }
+    if (request.data["transfer-encoding"].size() == 0)
+    {
+        // if (request.data["content-length"].size() == 0)
+        //     errorPages(config.servers[0], 0, 400); return false;
+    }
+    std::string allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%";
+    int k = 0;
+    for (size_t i = 0; i < request.data["path"].size(); i++)
+    {
+        for (size_t j = 0; j < allowedChar.size(); j++)
+        {
+            if (request.data["path"][i] == allowedChar[j])
+                k = 1;
+        }
+        if (k != 1)
+            errorPages(config.servers[0], 0, 400); return false;
+        k = 0;
+    }
+    return true;
+}
+
 int    Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
-    if (getMatchedLocation(config) == 1 && _statusCode != 200)
+    validRequestFormat(config);
+    if ( getMatchedLocation(config) == 1 and _statusCode != 200)
     {
         getContentType();
         faildResponse();

@@ -1,6 +1,4 @@
 #include "requestParse.hpp"
-#include <string>
-#include <sstream>
 
 void requestParse::parseRequestLine(std::string &s, const std::string &delimiter)
 {
@@ -78,8 +76,6 @@ void Body::trimUnwantedLines()
 
 void Body::setUp()
 {
-    // getFileName();
-    // getContentType();
 }
 
 void Body::getFileName()
@@ -118,16 +114,8 @@ void Body::getContentType()
 requestParse::requestParse(std::string _requestParse)
 {
     std::stringstream ss(_requestParse);
-    ss >> this->data["method"] >> this->data["path"] >> this->data["protocol"] >> this->data["host"];
+    ss >> this->data["method"] >> this->data["path"] >> this->data["protocol"];
     std::string headerName, headerValue;
-    getline(ss, this->data["host"]);
-    for (size_t i = 0; i < this->data["host"].size(); ++i)
-    {
-        if (this->data["host"][i] != '\r' && this->data["host"][i] != '\n' &&
-            this->data["host"][i] != ' ' && this->data["host"][i] != '\t')
-            headerName += this->data["host"][i];
-
-    }
     this->data["host"] = headerName;
     headerName.clear();
     int count = 0;
@@ -140,16 +128,23 @@ requestParse::requestParse(std::string _requestParse)
             this->data["content-length"] = headerValue;
             ++count;
         }
+        else if (headerName == "Host")
+        {
+            this->data["host"]= headerValue;
+            ++count;
+        }
         else if (headerName == "Content-Type")
         {
             this->data["content-type"] = headerValue;
             ++count;
         }
-        if (count == 2)
+        if (count == 3)
             break;
     }
-    if (this->data["content-length"].empty())
+    if (this->data["content-length"].empty() && this->data["method"] != "GET")
+    {
         this->data["transfer-encoding"] = "Chunked";
+    }
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;

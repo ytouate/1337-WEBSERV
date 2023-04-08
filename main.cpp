@@ -63,3 +63,11 @@ void printDrective(directive &a)
 //     // std::cout << request.data["content-length"] << std::endl;
 //     // std::cout << request.data["body"] << std::endl;
 // }
+
+
+// int main(int , char **av)
+// {
+//     Config config(av[1]);
+//     std::cout << config.servers.at(0).data["root"].front() << std::endl; 
+//     std::cout << config.servers.at(1).data["root"].front() << std::endl; 
+// }
