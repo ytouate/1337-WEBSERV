@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 21:39:26 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 22:41:48 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ bool    Response::getMatchedLocation(Config& config)
     int indexServer = getIndexOfServerBlock(config);
     std::string line = request.data["path"];
     std::cout << "line = " << line << std::endl;
+    
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
         _indexServer = indexServer;
@@ -342,14 +343,18 @@ std::string checker;
 bool    Response::checkPathIfValid(Config::serverParse& server, int index , std::string line)
 {
     std::string path;
-    // static int i = 0;
+    static int i = 0;
+    std::string test = line;
+    
+    std::cout << "Pathrequ = " <<  request.data["path"] << std::endl;
+    std::cout << "line = " <<  line << std::endl;
+    std::cout << "root = " <<  server.locations[index].data["root"][0] << std::endl;
+    path  = server.locations[index].data["root"][0] + line.erase(0, line.find(server.locations[index].data["root"][0]));
+    std::string server_root_path = server.locations[index].data["root"][0];
+    if (line.find(server_root_path) == 0) {
+        line.erase(0, server_root_path.length());
+    }
     path = server.locations[index].data["root"][0] + line;
-        std::cout << "Path = " <<  path << std::endl;
-    // if (i == 0)
-    //     checker = line;
-    // if (checker != line)
-    //     path = line;
-    std::cout << "Path = " <<  path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -389,7 +394,7 @@ bool    Response::checkPathIfValid(Config::serverParse& server, int index , std:
             return false;
         }
     }
-    // i++;
+    i++;
     return true;
 }
 
