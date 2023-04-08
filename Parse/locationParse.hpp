@@ -4,8 +4,6 @@
 #include "../inc.hpp"
 #include "Config.hpp"
 
-#define  ON 1
-#define  OFF 0
 
 class locationParse
 {
@@ -27,7 +25,7 @@ private:
     void        parseBlock();
     void        fillDirective(const std::string &s, const std::string &key);
     bool        isNumber(const std::string &s);
-    friend class serverParse;
+    friend class Config;
 public:
     std::string                                         path;
     std::map<std::string, std::vector<std::string> >    data;

@@ -6,13 +6,13 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 02:42:06 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/07 23:56:40 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 std::string _checker;
-int     Response::checkPathOfPostmethod(serverParse& server, std::string line, int index)
+int     Response::checkPathOfPostmethod(Config::serverParse& server, std::string line, int index)
 {
     std::string path;
     path = line;

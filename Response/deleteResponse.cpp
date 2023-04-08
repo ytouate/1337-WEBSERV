@@ -6,14 +6,14 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/03 14:56:45 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/07 23:56:51 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include <sys/stat.h>
 
-int     Response::checkPathOfDeletemethod(serverParse& server, std::string line, int index)
+int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::string line, int index)
 {
     std::string path;
     _indexLocation = index;

@@ -6,14 +6,14 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/07 02:41:55 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 00:37:16 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include <stdlib.h>
 #include "../Server/Server.hpp"
-
+#include "../Parse/Config.hpp"
 
 Response::~Response()
 {
@@ -52,6 +52,7 @@ int    Response::validateRequest()
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
+    std::cout << "|" << host << "|\n";
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
@@ -67,6 +68,7 @@ int     Response::getIndexOfServerBlock(Config &config)
     else
     {
         std::string port = host.erase(0, host.rfind('/') + 1);
+        std::cout << port << std::endl;
         port = host.erase(0, host.rfind(':') + 1);
         for (size_t i = 0; i < config.servers.size() ; i++)
         {
@@ -126,7 +128,7 @@ bool    Response::getMatchedLocation(Config& config)
     return 0;
 }
 
-void    Response::errorPages(serverParse& server, int id, int statusCode)
+void    Response::errorPages(Config::serverParse& server, int id, int statusCode)
 {
     std::string path = "./index/";
     std::ifstream infile;
@@ -163,7 +165,7 @@ void    Response::errorPages(serverParse& server, int id, int statusCode)
     }
 }
 
-bool    Response::methodAllowed(serverParse& server, int index)
+bool    Response::methodAllowed(Config::serverParse& server, int index)
 {
     if (server.locations[index].data["allowed_methods"].size() > 0)
     {
@@ -212,7 +214,7 @@ std::vector<std::string>    Response::setEnv()
 
 
 
-bool Response::executeCgi(serverParse& , int, int flag)
+bool Response::executeCgi(Config::serverParse& , int, int flag)
 {
     _flag = flag;
     std::vector<std::string> _env = setEnv();
@@ -279,7 +281,7 @@ bool Response::executeCgi(serverParse& , int, int flag)
     return true;
 }
 
-bool    Response::validFile(serverParse& server, int index, std::string path)
+bool    Response::validFile(Config::serverParse& server, int index, std::string path)
 {
     std::ifstream file;
     file.open(path.c_str(), std::ios::binary);
@@ -318,7 +320,7 @@ bool    Response::validFile(serverParse& server, int index, std::string path)
 
 std::string checker;
 
-bool    Response::checkPathIfValid(serverParse& server, int index , std::string line)
+bool    Response::checkPathIfValid(Config::serverParse& server, int index , std::string line)
 {
     std::string path;
     static int i = 0;

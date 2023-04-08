@@ -27,8 +27,9 @@ struct Client
 class Server
 {
 private:
+    size_t nbServers;
     // the server socket
-    int                         _serverSocket;
+    std::vector<int>             _serverSockets;
     // vector of clients
     std::vector<Client>         _clients; 
     // the sockets/fds that are ready to be read from
@@ -41,7 +42,7 @@ private:
     std::string     getRequestBuffer(Client &);
     void            checkCientCases();
     void            waitForClients();
-    void            acceptConnection();
+    void            acceptConnection(int serverIndex);
     void            serveContent();
     void            initServerSocket(const char *port);
 public:

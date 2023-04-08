@@ -1,6 +1,6 @@
-#include "locationParse.hpp"
+#include "Config.hpp"
 
-void locationParse::collectPath(const std::string &s)
+void Config::locationParse::collectPath(const std::string &s)
 {
     size_t i = 0;
     while (s[i] && !isWhiteSpace(s[i]))
@@ -11,21 +11,21 @@ void locationParse::collectPath(const std::string &s)
         path += s[i++];
 }
 
-bool locationParse::isWhiteSpace(char c)
+bool Config::locationParse::isWhiteSpace(char c)
 {
     return (c == ' ' or c == '\t');
 }
 
-void locationParse::error(const std::string &s) const
+void Config::locationParse::error(const std::string &s) const
 {
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
 }
 
-locationParse::locationParse(const std::vector<std::string> &a, int i)
+Config::locationParse::locationParse(const std::vector<std::string> &a, int i)
     : _start(i), _fileBuff(a), autoIndex(OFF) {}
 
-void locationParse::setDirective(const std::string &key, std::vector<std::string> &values)
+void Config::locationParse::setDirective(const std::string &key, std::vector<std::string> &values)
 {
     if (key == "root")
         _root = std::make_pair(key, values);
@@ -65,7 +65,7 @@ void locationParse::setDirective(const std::string &key, std::vector<std::string
         _upload = std::make_pair(key, values);
     }
 }
-void locationParse::fillDirective(const std::string &s, const std::string &key)
+void Config::locationParse::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
     std::string val;
@@ -90,7 +90,7 @@ void locationParse::fillDirective(const std::string &s, const std::string &key)
     setDirective(key, values);
 }
 
-locationParse::~locationParse()
+Config::locationParse::~locationParse()
 {
     std::map<std::string, std::vector<std::string> >::iterator it = this->data.begin();
     while (it != data.end())
@@ -101,7 +101,7 @@ locationParse::~locationParse()
     this->data.clear();
 }
 
-bool locationParse::isNumber(const std::string &s)
+bool Config::locationParse::isNumber(const std::string &s)
 {
     for (size_t i = 0; i < s.size(); i++)
     {
@@ -111,7 +111,7 @@ bool locationParse::isNumber(const std::string &s)
     return true;
 }
 
-void locationParse::parseBlock()
+void Config::locationParse::parseBlock()
 {
     size_t i = _start;
     size_t j = 0;

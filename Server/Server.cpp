@@ -4,6 +4,8 @@
 #include "../Response/Response.hpp"
 #include "../Parse/serverParse.hpp"
 
+#include "../Parse/Config.hpp"
+
 #define MAX_REQUEST_SIZE 4096
 #define MAX_CHUNK_SIZE 4096
 
@@ -31,18 +33,15 @@ void Server::initServerSocket(const char *port)
         std::cerr << gai_strerror(statusCode) << std::endl;
         std::exit(1);
     }
-    std::cout << "Creating the server socket\n";
-    _serverSocket = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
-    if (_serverSocket == -1)
+    int ret = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
+    if (ret == -1)
         error("socket()");
+    _serverSockets.push_back(ret);
+    fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
 
-    fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
-
-    std::cout << "Binding the server socket to local address\n";
-    if (bind(_serverSocket, data->ai_addr, data->ai_addrlen))
+    if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
         error("bind()");
-    std::cout << "Listening for requests\n";
-    if (listen(_serverSocket, 10))
+    if (listen(_serverSockets.back(), 10))
         error("listen()");
     freeaddrinfo(data);
 }
@@ -55,8 +54,15 @@ void Server::waitForClients()
 {
     FD_ZERO(&_readyToReadFrom);
     FD_ZERO(&_readyToWriteTo);
-    FD_SET(_serverSocket, &_readyToReadFrom);
-    int maxSocket = _serverSocket;
+    int maxSocket = _serverSockets.front();
+    for (size_t i = 0; i < _serverSockets.size(); ++i)
+    {
+        FD_SET(_serverSockets[i], &_readyToReadFrom);
+        if (_serverSockets[i] > maxSocket)
+            maxSocket = _serverSockets[i];
+    }
+    // FD_SET(_serverSocket, &_readyToReadFrom);
+    // int maxSocket = _serverSocket;
     std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
@@ -96,13 +102,13 @@ const std::string Client::getClientAddress()
     if so a connection is accepted and a new client is
     added to the _clients vector
 */
-void Server::acceptConnection()
+void Server::acceptConnection(int serverIndex)
 {
-    if (FD_ISSET(_serverSocket, &_readyToReadFrom))
+    if (FD_ISSET(_serverSockets[serverIndex], &_readyToReadFrom))
     {
         Client _newClient;
         _newClient.addressLenght = sizeof _newClient.clientAddress;
-        _newClient.socket = accept(_serverSocket,
+        _newClient.socket = accept(_serverSockets[serverIndex],
                                    (struct sockaddr *)&_newClient.clientAddress,
                                    &_newClient.addressLenght);
         if (_newClient.socket == -1)
@@ -159,9 +165,8 @@ recvAgain:
     return request;
 }
 
-
 /*
-    sends the response to all the clients that have requests 
+    sends the response to all the clients that have requests
     queued and able to write to their sockets the connection
     is closed after the client have been served
 */
@@ -206,7 +211,6 @@ void Server::serveContent()
     }
 }
 
-
 /*
     a constructor which calls all the helper methods
     and starts the server main loop
@@ -214,17 +218,30 @@ void Server::serveContent()
 Server::Server(std::string file) : _configFile(file)
 {
     srand(time(NULL));
-    int port = (rand() % (65535 - 1024 + 1)) + 1024;
+    std::vector<std::string> _ports;
+    for (size_t i = 0; i < _configFile.servers.size(); ++i)
+    {
+    // int port = (rand() % (65535 - 1024 + 1)) + 1024;
+        initServerSocket(_configFile.servers[i].data["listen"].front().c_str());
+        std::cout << "Server: " << i << " is listening on "
+                  << "http://localhost:"
+                  << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
+    }
 
-    initServerSocket(std::to_string(port).c_str());
-    std::cout << "http://localhost:" << port << std::endl;
     while (1)
     {
-        waitForClients();
-        acceptConnection();
-        serveContent();
+        for (size_t i = 0; i < _serverSockets.size(); i++)
+        {
+            waitForClients();
+            acceptConnection(i);
+            serveContent();
+        }
     }
-    close(_serverSocket);
+    for (size_t i = 0; i < _serverSockets.size(); i++)
+    {
+
+        close(_serverSockets[i]);
+    }
 }
 
 int main(int ac, char **av)
