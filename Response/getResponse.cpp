@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 21:47:57 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 23:41:22 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ bool    Response::getMatchedLocation(Config& config)
 
 void    Response::errorPages(Config::serverParse& server, int id, int statusCode)
 {
-    std::string path = "./index/";
+    std::string path = "./errorPages/";
     std::ifstream infile;
     std::string line;
     size_t size = server.locations[id].errorPages[statusCode].size();
@@ -480,6 +480,7 @@ int    Response::getMethod(Config &config)
     {
         getContentType();
         faildResponse();
+        std::cout << _response << std::endl;
         return (1);
     }
     if (_flag == 2 || _flag == 1)
@@ -513,5 +514,6 @@ int    Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
+    std::cout << _response << std::endl;
    return 0; 
 }
