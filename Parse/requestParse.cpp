@@ -116,20 +116,25 @@ requestParse::requestParse(std::string _requestParse)
     std::stringstream ss(_requestParse);
     ss >> this->data["method"] >> this->data["path"] >> this->data["version"];
     std::string headerName, headerValue;
-    this->data["host"] = headerName;
     headerName.clear();
     int count = 0;
     while (getline(ss, headerName, ':') && getline(ss, headerValue))
     {
         if (headerValue.size() > 3)
             headerValue = headerValue.substr(1, headerValue.size() - 2);
+        size_t i;
+        for (i = 0; i < headerName.size(); ++i)
+            if (headerName[i] != '\n' && headerName[i] != '\r' && headerName[i] != ' ')
+                break;
+        headerName = headerName.substr(i);
         if (headerName == "Content-Length")
         {
             this->data["content-length"] = headerValue;
             ++count;
         }
-        else if (headerName == "Host")
+        else if (headerName == "Host" || headerName == "\r")
         {
+            std::cout << headerName << std::endl;
             this->data["host"]= headerValue;
             ++count;
         }

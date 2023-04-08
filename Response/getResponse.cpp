@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 17:40:39 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 21:19:46 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int    Response::validateRequest()
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
-    
+    std::cout << "|" << host << "|" << std::endl;
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
@@ -121,6 +121,7 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
+    std::cout << "line: " << line << std::endl;
     if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
     {
         if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
