@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 22:41:48 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 23:38:23 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ int    Response::validateRequest()
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
-    std::cout << "|" << host << "|" << std::endl;
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
@@ -124,11 +123,11 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
-    // if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
-    // {
-    //     if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
-    //         return 1;
-    // }
+    if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
+    {
+        if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
+            return 1;
+    }
     if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, finalPath);
     if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, finalPath);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
@@ -346,15 +345,16 @@ bool    Response::checkPathIfValid(Config::serverParse& server, int index , std:
     static int i = 0;
     std::string test = line;
     
-    std::cout << "Pathrequ = " <<  request.data["path"] << std::endl;
-    std::cout << "line = " <<  line << std::endl;
-    std::cout << "root = " <<  server.locations[index].data["root"][0] << std::endl;
+    // std::cout << "Pathrequ = " <<  request.data["path"] << std::endl;
+    // std::cout << "line = " <<  line << std::endl;
+    // std::cout << "root = " <<  server.locations[index].data["root"][0] << std::endl;
     path  = server.locations[index].data["root"][0] + line.erase(0, line.find(server.locations[index].data["root"][0]));
     std::string server_root_path = server.locations[index].data["root"][0];
     if (line.find(server_root_path) == 0) {
         line.erase(0, server_root_path.length());
     }
     path = server.locations[index].data["root"][0] + line;
+    std::cout << "path = " << path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -523,5 +523,6 @@ int    Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
+    // std::cout << _response << std::endl;
    return 0; 
 }
