@@ -64,10 +64,8 @@ void printDrective(directive &a)
 //     // std::cout << request.data["body"] << std::endl;
 // }
 
-
-// int main(int , char **av)
-// {
-//     Config config(av[1]);
-//     std::cout << config.servers.at(0).data["root"].front() << std::endl; 
-//     std::cout << config.servers.at(1).data["root"].front() << std::endl; 
-// }
+int f1(std::string path)
+{
+    std::cout << path << std::endl;
+    return 0;
+}

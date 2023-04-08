@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 15:19:48 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/08 16:16:35 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ void    Response::success()
     while (getline(infile,  line))
         _body += line;
     postResponse();
-
 }
 
 int deleteDirectory(const std::string& path)
@@ -69,7 +68,6 @@ int deleteDirectory(const std::string& path)
         {
             std::string filepath = path + "/" + entry->d_name;
         
-        
             stat(filepath.c_str(), &statbuf);
             std::cout << filepath << std::endl;
             if (S_ISDIR(statbuf.st_mode))
@@ -85,14 +83,8 @@ int deleteDirectory(const std::string& path)
             }
         }
     }
-    
     closedir(dir);
-    
-    if (rmdir(path.c_str()) != 0)
-    {
-                    std::cout << "errot";
-    }
-    
+    rmdir(path.c_str());
     return 0;
 }
 
@@ -102,59 +94,39 @@ int     Response::deleteMethod(Config& config)
     if (getMatchedLocation(config) == false)
     {
         errorPages(config.servers[0], 0, 404);
+        postResponse();
         return 0;
     }
     DIR *dir = opendir(_deletePath.c_str());
     if (dir)
     {
         dirent *name = readdir(dir);
-        int _ok = 0;
         while (name != NULL)
         {
-            std::string file = _deletePath + name->d_name;
-            if (stat(file.c_str(), &filestat) == 0) 
-            {
-                if ((S_ISDIR(filestat.st_mode)))
+            dir = opendir(_deletePath.c_str());
+              dirent* entry;
+
+                while ((entry = readdir(dir)))
                 {
-                    if (filestat.st_mode & S_IREAD)
-                        {}
-                    else
+                    if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
                     {
-                        _ok = 1;
-                        break;
+                        std::string filepath = _deletePath + "/" + entry->d_name;
+                        struct stat statbuf;
+                        if (stat(filepath.c_str(), &statbuf) == -1)
+                            std::cerr << "Error get stat of =  " << filepath << std::endl;
+    
+                        if (S_ISDIR(statbuf.st_mode))
+                        {
+                            if (deleteDirectory(filepath) != 0)
+                                std::cerr << "Error deleting directory " << filepath << std::endl;
+                        }
+                        else
+                            remove(filepath.c_str());
                     }
                 }
-                if (!(filestat.st_mode & S_IWUSR))
-                {
-                    _ok = 1;
-                    break;
-                }
-            }
-            name = readdir(dir);
+            success();
+            return 0;
         }
-        // if (_ok == 0)
-        // {
-        //     dir = opendir(_deletePath.c_str());
-        //       dirent* entry;
-
-        //         while ((entry = readdir(dir)))
-        //         {
-        //             std::string filepath = path + "/" + entry->d_name;
-        //             struct stat statbuf;
-        //             if (stat(filepath.c_str(), &statbuf) == -1)
-        //                 std::cerr << "Error get stat of =  " << filepath << std::endl;
- 
-        //             if (S_ISDIR(statbuf.st_mode))
-        //             {
-        //                 if (deleteDirectory(filepath) != 0)
-        //                     std::cerr << "Error deleting directory " << filepath << std::endl;
-        //             }
-        //             else
-        //                 remove(filepath.c_str();
-        //         }
-        //     success();
-        //     return 0;
-        // }
         errorPages(config.servers[_indexServer], _indexLocation, 403);
         postResponse();
         return 0;
