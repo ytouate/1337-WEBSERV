@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   deleteResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 16:17:42 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 19:38:51 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ int deleteDirectory(const std::string& path)
             std::string filepath = path + "/" + entry->d_name;
         
             stat(filepath.c_str(), &statbuf);
-            std::cout << filepath << std::endl;
             if (S_ISDIR(statbuf.st_mode))
             {
                 deleteDirectory(filepath);

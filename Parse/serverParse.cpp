@@ -185,6 +185,8 @@ void Config::serverParse::fillDirective(const std::string &key,
         {
             if (values.size() != 1)
                 error("Invalid arguments");
+            if (!isNumber(values.front()))
+                error("Invalid directive arguments"); 
             _bodySize = std::make_pair(key, values);
         }
     }

@@ -7,4 +7,6 @@ nginx.conf
 ./main.cpp
 webserv
 upload
-index/
+
+index/22.tiff
+index/mia_farouk.mp4

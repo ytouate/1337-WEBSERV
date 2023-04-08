@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 16:25:20 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 17:40:39 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,7 +276,6 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
     int bytes;
     if (flag != 1)
     {
-        // if (request.data["version"].empty())
         sprintf(buffer, "%s 200 OK\r\n", request.data["version"].c_str());
         _body += buffer;
     }
