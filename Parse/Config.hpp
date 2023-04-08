@@ -6,11 +6,7 @@
 #define  OFF 0
 
 #include "../inc.hpp"
-// #include "serverParse.hpp"
 
-class locationParse;
-
-// #include "locationParse.hpp"
 class Config
 {
 private:

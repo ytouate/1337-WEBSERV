@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 01:04:10 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 02:57:03 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ int    Response::validateRequest()
 int     Response::getIndexOfServerBlock(Config &config)
 {
     std::string host = request.data["host"];
+    
     host.erase(std::remove_if(host.begin(), host.end(), ::isspace));
     if (host.rfind('/') == std::string::npos and host.rfind(':') == std::string::npos)
     {
@@ -120,8 +121,13 @@ bool    Response::getMatchedLocation(Config& config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
-    if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, index);
-    if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, index);
+    if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
+    {
+        if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
+            return 1;
+    }
+    if (request.data["method"] == "POST") return checkPathOfPostmethod(config.servers[indexServer], line, finalPath);
+    if (request.data["method"] == "DELETE") return checkPathOfDeletemethod(config.servers[indexServer], line, finalPath);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
         return 1;
     return 0;
@@ -439,7 +445,9 @@ void    Response::faildResponse()
 bool    Response::validRequestFormat(Config &config)
 {
     if (request.data["path"].size() > 2084)
+    {
         errorPages(config.servers[0], 0, 414); return false;
+    }
     if (request.data["transfer-encoding"].size() > 0)
     {
         if (request.data["transfer-encoding"] != "chunked")
@@ -447,17 +455,21 @@ bool    Response::validRequestFormat(Config &config)
     }
     if (request.data["transfer-encoding"].size() == 0)
     {
-        if (request.data["content-length"].size() == 0)
-            errorPages(config.servers[0], 0, 400); return false;
+        // if (request.data["content-length"].size() == 0)
+        //     errorPages(config.servers[0], 0, 400); return false;
     }
     std::string allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%";
+    int k = 0;
     for (size_t i = 0; i < request.data["path"].size(); i++)
     {
         for (size_t j = 0; j < allowedChar.size(); j++)
         {
-            if (request.data["path"][i] != allowedChar[j])
-                errorPages(config.servers[0], 0, 400); return false;
+            if (request.data["path"][i] == allowedChar[j])
+                k = 1;
         }
+        if (k != 1)
+            errorPages(config.servers[0], 0, 400); return false;
+        k = 0;
     }
     return true;
 }
@@ -465,7 +477,8 @@ bool    Response::validRequestFormat(Config &config)
 int    Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
-    if (validRequestFormat(config) and getMatchedLocation(config) == 1 and _statusCode != 200)
+    validRequestFormat(config);
+    if ( getMatchedLocation(config) == 1 and _statusCode != 200)
     {
         getContentType();
         faildResponse();

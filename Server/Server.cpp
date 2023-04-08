@@ -36,8 +36,11 @@ void Server::initServerSocket(const char *port)
     int ret = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
     if (ret == -1)
         error("socket()");
+    
     _serverSockets.push_back(ret);
     fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
+   int optval = 1;
+    setsockopt(_serverSockets.back(), SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
 
     if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
         error("bind()");
