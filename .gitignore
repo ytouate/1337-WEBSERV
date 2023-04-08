@@ -3,7 +3,6 @@
 *.txt
 *.out
 webserv
-demos/server.cpp
 nginx.conf
 ./main.cpp
 webserv
