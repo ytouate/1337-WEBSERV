@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 02:57:03 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/08 15:35:27 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,7 +227,10 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
     std::vector<std::string> _env = setEnv();
     char *env[_env.size()  + 1];
     for (size_t i = 0; i < _env.size(); i++)
+    {
         env[i] = (char *)_env[i].c_str();
+        std::cout << env[i] << std::endl;
+    }
     env[_env.size()] = NULL;
     int fd[2];
     //int _fd[2];
@@ -257,7 +260,6 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
             dup2(fd[1], 1);
             close(fd[0]);
             close(fd[1]);
-            commad[1] = (char *)"/Users/otmallah/Desktop/1337-WebServ/script.php";
             execve(commad[0], commad, env);
             perror("execve()");
             exit(1);
