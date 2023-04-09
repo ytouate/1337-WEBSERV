@@ -131,8 +131,8 @@ void Config::serverParse::fillEmptyRequiredDirectives(void)
             locations[i].data["index"] = this->data["index"];
         if (locations[i].data["allowed_methods"].size() == 0)
             locations[i].data["allowed_methods"] = this->data["allowed_methods"];
-        if (locations[i].data["cgi_path"].size() == 0)
-            locations[i].data["cgi_path"] = this->data["cgi_path"];
+        if (locations[i].data["cgi"].size() == 0)
+            locations[i].data["cgi"] = this->data["cgi"];
         if (locations[i].data["upload"].size() == 0)
             locations[i].data["upload"] = this->data["upload"];
         if (locations[i].data["upload_path"].size() == 0)
@@ -199,8 +199,17 @@ void Config::serverParse::fillDirective(const std::string &key,
             _upload_path = std::make_pair(key, values);
         }
     }
-    else if (key == "cgi_path")
-        _cgiPath = std::make_pair(key, values);
+    else if (key == "cgi")
+    {
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("invalid directive arguments");
+            if (values.front() != "on" && values.front() != "off")
+                error("invalid directive arguments");
+            _cgiPath = std::make_pair(key, values);
+        }
+    }
     else if (key == "root")
     {
         if (!_locationIsOpened)
