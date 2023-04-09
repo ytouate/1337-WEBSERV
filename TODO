@@ -1,6 +1,7 @@
 • You must never do a read or a write operation without going through poll() (or
 equivalent).
 
+2 servers same port ?
 - while true inside script php
 
 • Limit client body size.

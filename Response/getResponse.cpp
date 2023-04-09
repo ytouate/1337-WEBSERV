@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 01:57:30 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 02:06:04 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ Response::~Response()
 Response::Response(Config &config, requestParse& _request) : request(_request)
 {
     _indexLocation = -1;
-    std::cout << request.data["method"] << std::endl;
     if (request.data["method"] == "GET")
         getMethod(config);
     if (request.data["method"] == "DELETE")
@@ -353,7 +352,7 @@ bool    Response::validFile(Config::serverParse& server, int index, std::string 
     }
     else
     {
-        errorPages(server, index, 404);
+       //errorPages(server, index, 404);
         return false;
     }
     return true;
@@ -372,7 +371,6 @@ bool    Response::checkPathIfValid(Config::serverParse& server, int index , std:
         line.erase(0, server_root_path.length());
     }
     path = server.locations[index].data["root"][0] + line;
-    std::cout << "path = " << path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -502,7 +500,6 @@ bool    Response::validRequestFormat(Config &config)
 
 bool    Response::noLocations(Config& config, int index)
 {
-    std::cout << index << std::endl;
     if (config.servers[index].locations.size() == 0)
     {
         std::string path;
@@ -510,7 +507,6 @@ bool    Response::noLocations(Config& config, int index)
         
         std::string server_root_path = config.servers[index].data["root"][0];
         path = server_root_path;
-        std::cout << path << std::endl;
         DIR *dir = opendir(path.c_str());
         if (!dir)
             return validFile(config.servers[index], index, path);
@@ -561,7 +557,7 @@ int    Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
     if (validRequestFormat(config) == false)
-        std::cout << "yes" << std::endl;
+        // std::cout << "yes" << std::endl;
     if (!validRequestFormat(config) and getMatchedLocation(config) == 1 and _statusCode != 200)
     {
         getContentType();
