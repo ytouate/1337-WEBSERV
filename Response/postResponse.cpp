@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 16:24:51 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 16:36:36 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,10 +128,10 @@ int     Response::postMethod(Config& config)
             {
                 DIR *dir = opendir(_uploadPath.c_str());
                 if (!dir)
-                    _uploadPath = "../upload/";
+                    _uploadPath = "./upload/";
             }
             else
-                _uploadPath = "../upload/";
+                _uploadPath = "./upload/";
             _statusCode = 201;
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
@@ -150,6 +150,7 @@ int     Response::postMethod(Config& config)
             }
             _body += "<h1> kolchi daze </h1>";
             postResponse();
+
             return 0;
         }
         _indexLocation = 0;

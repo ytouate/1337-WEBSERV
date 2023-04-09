@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 16:31:31 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 16:32:48 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -387,7 +387,6 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         line.erase(0, server_root_path.length());
     }
     path = server.locations[index].data["root"][0] + line;
-    std::cout << path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -618,7 +617,6 @@ int Response::getMethod(Config &config)
     {
         getContentType();
         faildResponse();
-        std::cout << _response << std::endl;
         return (1);
     }
     if (_flag == 2 || _flag == 1)
