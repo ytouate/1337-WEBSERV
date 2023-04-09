@@ -1,12 +1,13 @@
+[core]
+    ignorecase = true
+
 *.o
 *.tldr
 *.txt
 *.out
 webserv
 nginx.conf
-./main.cpp
 webserv
 upload
-
 index/22.tiff
 index/mia_farouk.mp4
