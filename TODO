@@ -1,6 +1,8 @@
 • You must never do a read or a write operation without going through poll() (or
 equivalent).
 
+- while true inside script php
+
 • Limit client body size.
 
 ◦ Define a HTTP redirection.

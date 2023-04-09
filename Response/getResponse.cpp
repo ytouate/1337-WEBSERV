@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 23:41:22 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/09 00:24:36 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,7 @@ bool    Response::getMatchedLocation(Config& config)
     char *save;
     int indexServer = getIndexOfServerBlock(config);
     std::string line = request.data["path"];
+    
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
         _indexServer = indexServer;
@@ -229,7 +230,6 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
         env[i] = (char *)_env[i].c_str();
     env[_env.size()] = NULL;
     int fd[2];
-    //int _fd[2];
     int fdw = open("/tmp/test1", O_CREAT | O_RDWR | O_TRUNC , 0644);
     std::string path1 = "./cgi_bin/php-cgi";
     std::string path2 = _getPath;
@@ -267,6 +267,7 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
         perror("execve()");
         exit(1);
     }
+    wait(NULL);
     close(fd[1]);
     char buffer[100];
     int bytes;
@@ -278,10 +279,10 @@ bool Response::executeCgi(Config::serverParse& , int, int flag)
     while ((bytes = read(fd[0], buffer, 100)) > 0)
     {
         std::string line(buffer, bytes);
+        if (line.find("status") )
         _body += line;
     }
     close(fd[0]);
-    wait(NULL);
     unlink("/tmp/test1");
     return true;
 }
@@ -340,11 +341,12 @@ bool    Response::checkPathIfValid(Config::serverParse& server, int index , std:
 {
     std::string path;
     static int i = 0;
+    std::string test = line;
+    std::string server_root_path = server.locations[index].data["root"][0];
+    if (line.find(server_root_path) == 0) {
+        line.erase(0, server_root_path.length());
+    }
     path = server.locations[index].data["root"][0] + line;
-    if (i == 0)
-        checker = line;
-    if (checker != line)
-        path = line;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -480,7 +482,6 @@ int    Response::getMethod(Config &config)
     {
         getContentType();
         faildResponse();
-        std::cout << _response << std::endl;
         return (1);
     }
     if (_flag == 2 || _flag == 1)
@@ -514,6 +515,5 @@ int    Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
-    std::cout << _response << std::endl;
    return 0; 
 }
