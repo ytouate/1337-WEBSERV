@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 20:29:05 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/09 22:13:49 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,20 +158,19 @@ int Response::postMethod(Config &config)
             _uploadPath += request.body.contentName;
             _fd = open(_uploadPath.c_str(), O_CREAT | O_TRUNC | O_RDWR, 0644);
             fdIsOpened = true;
-            // int sent = 0;
-            // int remaining = request.body.content.size();
-            // while (sent < (int)request.body.content.size())
-            // {
-            //     int bytes = std::min(remaining, CHUNK);
-            //     const char *chunkedStr = request.body.content.c_str() + sent;
-            //     int ret = write(_fd, chunkedStr, bytes);
-            //     if (ret == -1)
-            //         break;
-            //     remaining -= ret;
-            //     sent += ret;
-            // }
-            // close(_fd);
-            // fdIsOpened = false;
+            int sent = 0;
+            int remaining = request.body.content.size();
+            while (sent < (int)request.body.content.size())
+            {
+                int bytes = std::min(remaining, CHUNK);
+                const char *chunkedStr = request.body.content.c_str() + sent;
+                int ret = write(_fd, chunkedStr, bytes);
+                if (ret == -1)
+                    break;
+                remaining -= ret;
+                sent += ret;
+            }
+            close(_fd);
             _body += "<h1> kolchi daze </h1>";
             postResponse();
             return 0;

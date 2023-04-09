@@ -190,6 +190,11 @@ void Config::serverParse::fillDirective(const std::string &key,
             _bodySize = std::make_pair(key, values);
         }
     }
+    else if (key == "redirect")
+    {
+        if (!_locationIsOpened)
+        error("invalid or misplaced directive");
+    }
     else if (key == "upload_path")
     {
         if (!_locationIsOpened)

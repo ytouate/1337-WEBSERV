@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 21:04:14 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/09 21:59:56 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Response::~Response()
 {
 }
 
-Response::Response(): fdIsOpened(false)
+Response::Response(): _fd(-1), fdIsOpened(false)
 {
 }
 Response::Response(Config &config, requestParse &_request) : request(_request)

@@ -66,7 +66,7 @@ void Server::waitForClients()
     {
         FD_SET(it->socket, &_readyToReadFrom);
         FD_SET(it->socket, &_readyToWriteTo);
-        if (it->response.fdIsOpened)
+        if (it->response.fdIsOpened || it->response._fd != -1)
         {
             FD_SET(it->response._fd, &_readyToWriteTo);
             if (it->response._fd > maxSocket)
@@ -255,27 +255,6 @@ void Server::serveContent()
             fcntl(it->socket, F_SETFL, O_NONBLOCK);
             it->request = getRequest(*it);
             it->response.setUp(_configFile, it->request);
-            if (it->response.fdIsOpened)
-            {
-                if (FD_ISSET(it->response._fd, &_readyToWriteTo))
-                {
-                    it->remaining = it->request.body.content.size();
-                    it->received = 0;
-                    int sent = 0;
-                    while (it->remaining > 0)
-                    {
-                        int bytes = std::min(it->remaining, 100);
-                        const char *chunkedStr = it->request.body.content.c_str() + sent;
-                        int ret = write(it->response._fd, chunkedStr, bytes);
-                        if (ret == -1)
-                            break;
-                        it->remaining -= ret;
-                        sent += ret;
-                    }
-                }
-                close(it->response._fd);
-                it->response.fdIsOpened = false;
-            }
             int ret;
             int i = 0;
             it->remaining = it->response._response.size();
@@ -285,10 +264,7 @@ void Server::serveContent()
                 int chunk = std::min(it->remaining, MAX_CHUNK_SIZE);
                 char buff[chunk];
                 for (int j = 0; j < chunk; ++j)
-                {
-                    buff[j] = it->response._response[i];
-                    ++i;
-                }
+                    buff[j] = it->response._response[i++];
                 if (FD_ISSET(it->socket, &_readyToWriteTo))
                 {
                     ret = send(it->socket, buff, chunk, 0);
@@ -327,9 +303,9 @@ Server::Server(std::string file) : _configFile(file)
     {
         for (size_t i = 0; i < _serverSockets.size(); i++)
         {
-            waitForClients();
             acceptConnection(i);
             serveContent();
+            waitForClients();
         }
     }
     for (size_t i = 0; i < _serverSockets.size(); i++)
