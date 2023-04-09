@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 02:59:13 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 15:55:03 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -614,12 +614,8 @@ bool Response::noLocations(Config &config, int index)
 int Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
-    int ret = getMatchedLocation(config);
-    std::cout << "ret == : " <<  ret << std::endl; 
-    std::cout << "status code: " << _statusCode << std::endl;
-    if (ret == 1 and _statusCode != 200)
+    if (getMatchedLocation(config) == 1 and _statusCode != 200)
     {
-        puts("hana");
         getContentType();
         faildResponse();
         std::cout << _response << std::endl;
@@ -656,6 +652,5 @@ int Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
-    // std::cout << _response << std::endl;
     return 0;
 }
