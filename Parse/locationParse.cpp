@@ -72,7 +72,13 @@ void Config::locationParse::setDirective(const std::string &key, std::vector<std
             error("Invalid directive Arguments");
         _upload = std::make_pair(key, values);
     }
+    else
+    {
+        if (key != "{" && key != "}")
+            error("miplaced or invalid directive");
+    }
 }
+
 void Config::locationParse::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
