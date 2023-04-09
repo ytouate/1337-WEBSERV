@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 15:55:03 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 16:31:31 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -343,10 +343,8 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     }
     if (file.is_open())
     {
-        if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi_path"].size() > 0)
-        {
+        if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi"].size() > 0)
             return executeCgi(server, index, 2);
-        }
         if (methodAllowed(server, index) == true)
         {
             file.seekg(0, std::ios::end);
@@ -368,7 +366,8 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     }
     else
     {
-        // errorPages(server, index, 404);
+        if (_body.size() == 0)
+            errorPages(server, index, 404);
         return false;
     }
     return true;
@@ -388,6 +387,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         line.erase(0, server_root_path.length());
     }
     path = server.locations[index].data["root"][0] + line;
+    std::cout << path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
