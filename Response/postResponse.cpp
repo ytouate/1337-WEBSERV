@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 16:25:58 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 03:13:50 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,10 +128,10 @@ int     Response::postMethod(Config& config)
             {
                 DIR *dir = opendir(_uploadPath.c_str());
                 if (!dir)
-                    _uploadPath = "./upload/";
+                    _uploadPath = "../upload/";
             }
             else
-                _uploadPath = "./upload/";
+                _uploadPath = "../upload/";
             _statusCode = 201;
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
@@ -176,10 +176,10 @@ int     Response::postMethod(Config& config)
             errorPages(config.servers[_indexServer], _indexLocation, 403);
         }
     }
-    else
-    {
-        errorPages(config.servers[_indexServer], _indexLocation, 404);
-    }
+    // else
+    // {
+    //     errorPages(config.servers[_indexServer], _indexLocation, 404);
+    // }
     postResponse();
     return 0;
 }
