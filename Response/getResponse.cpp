@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 16:38:10 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/09 21:04:14 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@ Response::~Response()
 {
 }
 
+Response::Response(): fdIsOpened(false)
+{
+}
 Response::Response(Config &config, requestParse &_request) : request(_request)
 {
     _indexLocation = -1;
@@ -34,6 +37,17 @@ Response::Response(Config &config, requestParse &_request) : request(_request)
         postMethod(config);
 }
 
+void Response::setUp(Config &config, requestParse &_request)
+{
+    request = _request;
+    _indexLocation = -1;
+    if (request.data["method"] == "GET")
+        getMethod(config);
+    if (request.data["method"] == "DELETE")
+        deleteMethod(config);
+    if (request.data["method"] == "POST")
+        postMethod(config);
+}
 int Response::validateRequest()
 {
     int i = 0;
@@ -133,7 +147,7 @@ bool Response::getMatchedLocation(Config &config)
             size_t serverBodySize = atoi(config.servers[indexServer].locations[finalPath].data["body_size"][0].c_str());
             if (request.data["content-length"].size() > 0 && requestBodySize > serverBodySize)
             {
-                errorPages(config.servers[indexServer], 0, 413); 
+                errorPages(config.servers[indexServer], 0, 413);
                 return false;
             }
         }
@@ -331,7 +345,9 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     _getPath = path;
     if (stat(path.c_str(), &fileStat) == 0)
     {
-        // if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0) {}
+        // if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0) {
+        //     // to be done
+        // }
         // else
         // {
         //     errorPages(server, index, 401);

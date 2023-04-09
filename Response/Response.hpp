@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 00:48:58 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:09:55 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,10 +59,13 @@ class Response
         bool    noLocations(Config& config, int index);
         std::vector<std::string>    setEnv();
     public:
-        char **g_env;
+        int         _fd;
+        bool        fdIsOpened;
         std::string _header;
         std::string _response;
         Response(Config &config, requestParse& _request);
+        Response();
+        void setUp(Config &config, requestParse& _request);
         ~Response();
 };
 
