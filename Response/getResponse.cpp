@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 16:32:48 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 21:55:09 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <sys/stat.h>
 #include <unordered_map>
 
-#define URL_MAX 2084
+#define URL_MAX 2048
 
 Response::~Response()
 {
@@ -127,18 +127,16 @@ bool Response::getMatchedLocation(Config &config)
     }
     if (request.data["method"] == "POST")
     {
-        // if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
-        // {
-        //     size_t requestBodySize = atoi(request.data["content-length"].c_str());
-        //     size_t serverBodySize = atoi(config.servers[indexServer].locations[finalPath].data["body_size"][0].c_str());
-        //     std::cout << "request body size: " << requestBodySize << std::endl;
-        //     std::cout << "server body size: " << serverBodySize << std::endl;
-        //     if (request.data["content-length"].size() > 0 && requestBodySize > serverBodySize)
-        //     {
-        //         errorPages(config.servers[indexServer], 0, 413); 
-        //         return false;
-        //     }
-        // }
+        if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
+        {
+            size_t requestBodySize = atoi(request.data["content-length"].c_str());
+            size_t serverBodySize = atoi(config.servers[indexServer].locations[finalPath].data["body_size"][0].c_str());
+            if (request.data["content-length"].size() > 0 && requestBodySize > serverBodySize)
+            {
+                errorPages(config.servers[indexServer], 0, 413); 
+                return false;
+            }
+        }
         return checkPathOfPostmethod(config.servers[indexServer], line, finalPath);
     }
     if (request.data["method"] == "DELETE")
@@ -334,12 +332,11 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     _getPath = path;
     if (stat(path.c_str(), &fileStat) == 0)
     {
-        // if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0) {}
-        // else
-        // {
-        //     errorPages(server, index, 401);
-        //     return false;
-        // }
+        if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0)
+        {
+            errorPages(server, index, 401);
+            return false;   
+        }
     }
     if (file.is_open())
     {
@@ -387,6 +384,10 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         line.erase(0, server_root_path.length());
     }
     path = server.locations[index].data["root"][0] + line;
+    if (server.locations[index].data["redirect"].size() > 0)
+    {
+        
+    }
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
