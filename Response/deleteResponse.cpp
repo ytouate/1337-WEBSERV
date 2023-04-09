@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   deleteResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/08 21:13:02 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 01:47:59 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,8 +79,7 @@ int     Response::deleteMethod(Config& config)
     if (getMatchedLocation(config) == false)
     {
         errorPages(config.servers[0], 0, 404);
-        postResponse();
-        std::cout << _response << std::endl;        
+        postResponse();     
         return 0;
     }
     DIR *dir = opendir(_deletePath.c_str());
@@ -99,7 +98,9 @@ int     Response::deleteMethod(Config& config)
                         std::string filepath = _deletePath  + entry->d_name;
                         struct stat statbuf;
                         if (stat(filepath.c_str(), &statbuf) == -1)
-                            std::cout << "errro\n";
+                        {
+                            perror("stat()");
+                        }
     
                         if (S_ISDIR(statbuf.st_mode))
                         {
@@ -117,19 +118,6 @@ int     Response::deleteMethod(Config& config)
                                 postResponse();
                                 return 1;
                             }
-                            // if (access(filepath.c_str(), R_OK | W_OK) != 0)
-                            // {
-                            //     puts("hana");
-                            //     std::cout << filepath << std::endl;
-                            // }
-                            // else
-                            // {
-                            //     puts("hana");
-                            //     std::cout << filepath << std::endl;
-                            //     errorPages(config.servers[0], 0, 401);
-                            //     postResponse();
-                            //     return 1;
-                            // }
                         }
                     }
                 }
