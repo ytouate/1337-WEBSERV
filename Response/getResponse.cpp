@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 02:16:08 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/09 02:59:13 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,13 +125,22 @@ bool Response::getMatchedLocation(Config &config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
-    if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
-    {
-        if (request.data["body_size"].size() > 0 and request.data["body_size"] > config.servers[indexServer].locations[finalPath].data["body_size"][0])
-            return 1;
-    }
     if (request.data["method"] == "POST")
+    {
+        // if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
+        // {
+        //     size_t requestBodySize = atoi(request.data["content-length"].c_str());
+        //     size_t serverBodySize = atoi(config.servers[indexServer].locations[finalPath].data["body_size"][0].c_str());
+        //     std::cout << "request body size: " << requestBodySize << std::endl;
+        //     std::cout << "server body size: " << serverBodySize << std::endl;
+        //     if (request.data["content-length"].size() > 0 && requestBodySize > serverBodySize)
+        //     {
+        //         errorPages(config.servers[indexServer], 0, 413); 
+        //         return false;
+        //     }
+        // }
         return checkPathOfPostmethod(config.servers[indexServer], line, finalPath);
+    }
     if (request.data["method"] == "DELETE")
         return checkPathOfDeletemethod(config.servers[indexServer], line, finalPath);
     if (!checkPathIfValid(config.servers[indexServer], finalPath, line))
@@ -145,10 +154,13 @@ void Response::errorPages(Config::serverParse &server, int id, int statusCode)
     std::ifstream infile;
     std::string line;
     size_t size;
+    if (id < 0)
+        id = 0;
     if (server.locations.size() > 0)
         size = server.locations[id].errorPages[statusCode].size();
     else
         size = server.errorPages[statusCode].size();
+    std::cout << size << std::endl;
     if (size > 0)
     {
         if (server.locations.size() > 0)
@@ -602,11 +614,15 @@ bool Response::noLocations(Config &config, int index)
 int Response::getMethod(Config &config)
 {
     std::string line = request.data["path"];
-    if (getMatchedLocation(config) == 1 and _statusCode != 200)
+    int ret = getMatchedLocation(config);
+    std::cout << "ret == : " <<  ret << std::endl; 
+    std::cout << "status code: " << _statusCode << std::endl;
+    if (ret == 1 and _statusCode != 200)
     {
-        puts("hanaww");
+        puts("hana");
         getContentType();
         faildResponse();
+        std::cout << _response << std::endl;
         return (1);
     }
     if (_flag == 2 || _flag == 1)
@@ -640,5 +656,6 @@ int Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
+    // std::cout << _response << std::endl;
     return 0;
 }
