@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 21:55:09 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 23:51:28 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@ Response::~Response()
 {
 }
 
+Response::Response(): _fd(-1), fdIsOpened(false)
+{
+}
 Response::Response(Config &config, requestParse &_request) : request(_request)
 {
     _indexLocation = -1;
@@ -34,6 +37,17 @@ Response::Response(Config &config, requestParse &_request) : request(_request)
         postMethod(config);
 }
 
+void Response::setUp(Config &config, requestParse &_request)
+{
+    request = _request;
+    _indexLocation = -1;
+    if (request.data["method"] == "GET")
+        getMethod(config);
+    if (request.data["method"] == "DELETE")
+        deleteMethod(config);
+    if (request.data["method"] == "POST")
+        postMethod(config);
+}
 int Response::validateRequest()
 {
     int i = 0;
@@ -125,6 +139,7 @@ bool Response::getMatchedLocation(Config &config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
+    _indexLocation = finalPath;
     if (request.data["method"] == "POST")
     {
         if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
@@ -158,7 +173,6 @@ void Response::errorPages(Config::serverParse &server, int id, int statusCode)
         size = server.locations[id].errorPages[statusCode].size();
     else
         size = server.errorPages[statusCode].size();
-    std::cout << size << std::endl;
     if (size > 0)
     {
         if (server.locations.size() > 0)
@@ -249,7 +263,7 @@ std::vector<std::string> Response::setEnv()
     if (_flag == 1)
         vec[4] += "=" + _postPath;
     else
-        vec[4] += "=" + _getPath;
+        vec[4] += "=" + _getPath ;
     vec[3] += "=" + request.data["content-length"];
     vec[2] += "=" + request.data["content-type"];
     vec[5] += "=" + request.data["method"];
@@ -315,8 +329,16 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     while ((bytes = read(fd[0], buffer, 100)) > 0)
     {
         std::string line(buffer, bytes);
-        if (line.find("status"))
-            _body += line;
+        std::cout << line << std::endl;
+        if (line.find("Status") != std::string::npos)
+        {
+            _body = "";
+            sprintf(buffer, "%s 500\r\n\r\n", request.data["version"].c_str());
+            _body += buffer;
+            _body += "<H1>500 Internal Server Error</H1>";
+            break;
+        }
+        _body += line;
     }
     close(fd[0]);
     unlink("/tmp/test1");
@@ -385,9 +407,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
     }
     path = server.locations[index].data["root"][0] + line;
     if (server.locations[index].data["redirect"].size() > 0)
-    {
-        
-    }
+        path = server.locations[index].data["redirect"][1];
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -430,7 +450,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         }
         else
         {
-            errorPages(server, index, 404);
+            errorPages(server, index, 403);
             return false;
         }
     }
@@ -620,6 +640,8 @@ int Response::getMethod(Config &config)
         faildResponse();
         return (1);
     }
+    if (config.servers[_indexServer].locations[_indexLocation].data["redirect"].size() > 0)
+        _statusCode = std::stoi(config.servers[_indexServer].locations[_indexLocation].data["redirect"][0]);
     if (_flag == 2 || _flag == 1)
         _response += _body;
     if (_response.size() == 0)

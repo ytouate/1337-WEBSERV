@@ -6,13 +6,15 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 16:36:36 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/09 23:40:02 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
+#define CHUNK 1024
+
 std::string _checker;
-int     Response::checkPathOfPostmethod(Config::serverParse& server, std::string line, int index)
+int Response::checkPathOfPostmethod(Config::serverParse &server, std::string line, int index)
 {
     std::string path;
     path = line;
@@ -45,7 +47,7 @@ int     Response::checkPathOfPostmethod(Config::serverParse& server, std::string
     return true;
 }
 
-void    Response::postResponse(void)
+void Response::postResponse(void)
 {
     char buffer[100];
     if (_flag == 1)
@@ -55,7 +57,7 @@ void    Response::postResponse(void)
     }
     else
     {
-        
+
         sprintf(buffer, "%s %d\r\n", request.data["version"].c_str(), _statusCode);
         this->_response += buffer;
         _header += buffer;
@@ -66,38 +68,57 @@ void    Response::postResponse(void)
     this->_response += _body;
 }
 
-void    Response::postType(std::string path)
+void Response::postType(std::string path)
 {
-    if (path == "text/css") this->_contentType = ".css";
-    else if (path == "text/csv") this->_contentType = ".csv";
-    else if (path == "image/gif") this->_contentType = ".gif";
-    else if (path == "text/html") this->_contentType = ".htm";
-    else if (path == "text/html" || path == ".php") this->_contentType = ".html";
-    else if (path == "image/x-icon") this->_contentType = ".ico";
-    else if (path == "image/jpeg") this->_contentType = ".jpeg";
-    else if (path == "image/jpeg") this->_contentType = ".jpg";
-    else if (path == "application/javascript")  this->_contentType = ".js";
-    else if (path == "application/json") this->_contentType = ".json";
-    else if (path == "image/png")  this->_contentType = ".png";
-    else if (path == "application/pdf")  this->_contentType = ".pdf";
-    else if (path == "image/svg+xml")  this->_contentType = ".svg";
-    else if (path == "text/plain")  this->_contentType = ".txt";
-    else if (path == "video/mp4")  this->_contentType = ".mp4";
-    else if (path == "video/webm")  this->_contentType = ".WebM";
-    else if (path == "video/ogg")  this->_contentType = ".Ogg";
-    else if (path == "video/x-msvideo")  this->_contentType = ".AVI";
-    else if (path == "video/mpeg")  this->_contentType = ".MPEG";
-    else if (path == "application/zip")  this->_contentType = ".zip";
-    else if (path == "image/tiff") this->_contentType = ".tiff";
+    if (path == "text/css")
+        this->_contentType = ".css";
+    else if (path == "text/csv")
+        this->_contentType = ".csv";
+    else if (path == "image/gif")
+        this->_contentType = ".gif";
+    else if (path == "text/html")
+        this->_contentType = ".htm";
+    else if (path == "text/html" || path == ".php")
+        this->_contentType = ".html";
+    else if (path == "image/x-icon")
+        this->_contentType = ".ico";
+    else if (path == "image/jpeg")
+        this->_contentType = ".jpeg";
+    else if (path == "image/jpeg")
+        this->_contentType = ".jpg";
+    else if (path == "application/javascript")
+        this->_contentType = ".js";
+    else if (path == "application/json")
+        this->_contentType = ".json";
+    else if (path == "image/png")
+        this->_contentType = ".png";
+    else if (path == "application/pdf")
+        this->_contentType = ".pdf";
+    else if (path == "image/svg+xml")
+        this->_contentType = ".svg";
+    else if (path == "text/plain")
+        this->_contentType = ".txt";
+    else if (path == "video/mp4")
+        this->_contentType = ".mp4";
+    else if (path == "video/webm")
+        this->_contentType = ".WebM";
+    else if (path == "video/ogg")
+        this->_contentType = ".Ogg";
+    else if (path == "video/x-msvideo")
+        this->_contentType = ".AVI";
+    else if (path == "video/mpeg")
+        this->_contentType = ".MPEG";
+    else if (path == "application/zip")
+        this->_contentType = ".zip";
+    else if (path == "image/tiff")
+        this->_contentType = ".tiff";
 }
 
-#define CHUNK 1024
-
-int     Response::postMethod(Config& config)
+int Response::postMethod(Config &config)
 {
     srand(time(0));
     int number = rand() / 3;
-    std::string line ;
+    std::string line;
     if (getMatchedLocation(config) == true)
     {
         if (_indexLocation != -1)
@@ -135,22 +156,23 @@ int     Response::postMethod(Config& config)
             _statusCode = 201;
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
-            int fd = open(_uploadPath.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0644);
+            _fd = open(_uploadPath.c_str(), O_CREAT | O_TRUNC | O_RDWR, 0644);
+            fdIsOpened = true;
             int sent = 0;
             int remaining = request.body.content.size();
             while (sent < (int)request.body.content.size())
             {
                 int bytes = std::min(remaining, CHUNK);
                 const char *chunkedStr = request.body.content.c_str() + sent;
-                int ret = write(fd, chunkedStr, bytes);
+                int ret = write(_fd, chunkedStr, bytes);
                 if (ret == -1)
-                    break ;
+                    break;
                 remaining -= ret;
                 sent += ret;
             }
+            close(_fd);
             _body += "<h1> kolchi daze </h1>";
             postResponse();
-
             return 0;
         }
         _indexLocation = 0;
@@ -177,10 +199,11 @@ int     Response::postMethod(Config& config)
             errorPages(config.servers[_indexServer], _indexLocation, 403);
         }
     }
-    // else
-    // {
-    //     errorPages(config.servers[_indexServer], _indexLocation, 404);
-    // }
+    else
+    {
+        if (_body.size() == 0)
+            errorPages(config.servers[_indexServer], _indexLocation, 404);
+    }
     postResponse();
     return 0;
 }

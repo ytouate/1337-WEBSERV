@@ -30,6 +30,7 @@ public:
         directive _upload;
         directive _uploadPath;
         directive _bodySize;
+        directive _redirect;
         int _start;
         std::vector<std::string> _fileBuff;
 

@@ -61,13 +61,17 @@ void Server::waitForClients()
         if (_serverSockets[i] > maxSocket)
             maxSocket = _serverSockets[i];
     }
-    // FD_SET(_serverSocket, &_readyToReadFrom);
-    // int maxSocket = _serverSocket;
     std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
         FD_SET(it->socket, &_readyToReadFrom);
         FD_SET(it->socket, &_readyToWriteTo);
+        if (it->response.fdIsOpened || it->response._fd != -1)
+        {
+            FD_SET(it->response._fd, &_readyToWriteTo);
+            if (it->response._fd > maxSocket)
+                maxSocket = it->response._fd;
+        }
         if (it->socket > maxSocket)
             maxSocket = it->socket;
         ++it;
@@ -117,7 +121,6 @@ void Server::acceptConnection(int serverIndex)
     }
 }
 
-
 /*
     returns true if the passed string is a hexadecimal number
     representing the chunk line
@@ -140,7 +143,6 @@ bool isChunkLine(const std::string &s)
     return true;
 }
 
-
 /*
     in case the request header contains transfer-encoding: chunked
     the chuned line that contains the chunk size are removed from the
@@ -149,7 +151,7 @@ bool isChunkLine(const std::string &s)
 void requestParse::converChunkedRequest(void)
 {
     if (this->data["transfer-encoding"] != "Chunked")
-        return ;
+        return;
 
     std::istringstream f(this->body.content);
     std::string new_body;
@@ -179,7 +181,6 @@ void requestParse::converChunkedRequest(void)
 
     this->body.content = new_body;
     this->data["content-length"] = std::to_string(new_body.size());
-
 }
 
 /*
@@ -199,8 +200,8 @@ requestParse Server::getRequest(const Client &_client)
         header.append(std::string(buff, bytesRead));
         totalSize += bytesRead;
     }
-
-    requestParse request(header);
+    requestParse request;
+    request.setUp(header);
     bytesLeft = atoi(request.data["content-length"].c_str());
     int BUFFER_SIZE = 512;
     float factor = 0;
@@ -252,21 +253,18 @@ void Server::serveContent()
         if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
             fcntl(it->socket, F_SETFL, O_NONBLOCK);
-            requestParse request = getRequest(*it);
-            Response response(_configFile, request);
-            it->remaining = response._response.size();
-            it->received = 0;
+            it->request = getRequest(*it);
+            it->response.setUp(_configFile, it->request);
             int ret;
             int i = 0;
+            it->remaining = it->response._response.size();
+            it->received = 0;
             while (it->remaining > 0)
             {
                 int chunk = std::min(it->remaining, MAX_CHUNK_SIZE);
                 char buff[chunk];
                 for (int j = 0; j < chunk; ++j)
-                {
-                    buff[j] = response._response[i];
-                    ++i;
-                }
+                    buff[j] = it->response._response[i++];
                 if (FD_ISSET(it->socket, &_readyToWriteTo))
                 {
                     ret = send(it->socket, buff, chunk, 0);
@@ -305,15 +303,13 @@ Server::Server(std::string file) : _configFile(file)
     {
         for (size_t i = 0; i < _serverSockets.size(); i++)
         {
-            waitForClients();
             acceptConnection(i);
             serveContent();
+            waitForClients();
         }
     }
     for (size_t i = 0; i < _serverSockets.size(); i++)
-    {
         close(_serverSockets[i]);
-    }
 }
 
 int main(int ac, char **av)

@@ -1,5 +1,9 @@
 #include "requestParse.hpp"
 
+void requestParse::setRequest(std::string s)
+{
+    this->requestString = s;
+}
 void requestParse::parseRequestLine(std::string &s, const std::string &delimiter)
 {
     size_t pos = 0;
@@ -111,8 +115,9 @@ void Body::getContentType()
     }
 }
 
-requestParse::requestParse(std::string _requestParse)
+void requestParse::setUp(std::string _requestParse)
 {
+    requestString = _requestParse;
     std::stringstream ss(_requestParse);
     ss >> this->data["method"] >> this->data["path"] >> this->data["version"];
     std::string headerName, headerValue;
@@ -134,7 +139,7 @@ requestParse::requestParse(std::string _requestParse)
         }
         else if (headerName == "Host" || headerName == "\r")
         {
-            this->data["host"]= headerValue;
+            this->data["host"] = headerValue;
             ++count;
         }
         else if (headerName == "Content-Type")
@@ -154,7 +159,9 @@ requestParse::requestParse(std::string _requestParse)
         return;
     _requestParse = _requestParse.erase(0, pos + 4);
     this->body.content = _requestParse;
-    
+}
+requestParse::requestParse()
+{
 }
 
 requestParse::~requestParse()

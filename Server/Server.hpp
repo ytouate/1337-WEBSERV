@@ -4,6 +4,7 @@
 #include "../inc.hpp"
 #include "../Parse/Config.hpp"
 #include "../Parse/requestParse.hpp"
+#include "../Response/Response.hpp"
 
 /*
     a struct which identifies each connected
@@ -16,6 +17,8 @@ struct Client
     int socket;
     size_t received;
     int remaining;
+    requestParse request;
+    Response response;
     const std::string getClientAddress();
 
 };

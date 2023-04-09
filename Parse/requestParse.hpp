@@ -22,12 +22,14 @@ class requestParse
 private:
     void    parseRequestLine(std::string &s, const std::string &delimiter);
     void    getHost(std::string &s);
-
 public:
-    void    converChunkedRequest();
+void    converChunkedRequest();
+    std::string                             requestString;
+    void setRequest(std::string);
     std::map<std::string, std::string>      data;
     Body                                    body;
-    requestParse(std::string);
+    requestParse();
+    void setUp(std::string);
     ~requestParse();
 };
 

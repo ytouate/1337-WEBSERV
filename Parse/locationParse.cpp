@@ -72,7 +72,21 @@ void Config::locationParse::setDirective(const std::string &key, std::vector<std
             error("Invalid directive Arguments");
         _upload = std::make_pair(key, values);
     }
+    else if (key == "redirect")
+    {
+        if (values.size() != 2)
+            error("Invalid directive arguments");
+        if (!isNumber(values.front()))
+            error("Invalid directive arguments");
+        _redirect = std::make_pair(key, values);
+    }
+    else
+    {
+        if (key != "{" && key != "}")
+            error("miplaced or invalid directive");
+    }
 }
+
 void Config::locationParse::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
@@ -154,4 +168,5 @@ void Config::locationParse::parseBlock()
     data.insert(this->_uploadPath);
     data.insert(this->_allowedMethods);
     data.insert(this->_bodySize);
+    data.insert(this->_redirect);
 }
