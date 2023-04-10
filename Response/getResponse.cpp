@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 00:52:32 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 00:59:31 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ bool Response::getMatchedLocation(Config &config)
     size_t sec_matchPath = 0;
     char *save;
     int indexServer = getIndexOfServerBlock(config);
-    if (noLocations(config, indexServer) == true)
+    if (noLocations(config, indexServer) == false)
         return 1;
     std::string line = request.data["path"];
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
@@ -631,10 +631,10 @@ bool Response::noLocations(Config &config, int index)
             }
         }
         i++;
-        return true;
+        return false;
     }
     else
-        return false;
+        return true;
 }
 
 int Response::getMethod(Config &config)
@@ -647,7 +647,7 @@ int Response::getMethod(Config &config)
         std::cout << _response << std::endl;
         return (1);
     }
-    if (config.servers[_indexServer].locations[_indexLocation].data["redirect"].size() > 0)
+    if (_indexLocation >= 0 && config.servers[_indexServer].locations[_indexLocation].data["redirect"].size() > 0)
         _statusCode = std::stoi(config.servers[_indexServer].locations[_indexLocation].data["redirect"][0]);
     if (_flag == 2 || _flag == 1)
         _response += _body;
