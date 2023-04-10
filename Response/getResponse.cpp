@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 01:08:13 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 01:10:25 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -584,7 +584,8 @@ bool Response::noLocations(Config &config, int index)
 
         if (config.servers[index].data["root"].size() == 0)
         {
-            errorPages(config.servers[index], index, 403); return true;
+            errorPages(config.servers[index], index, 403);
+            return false;
         }
         std::string server_root_path = config.servers[index].data["root"][0];
         path = server_root_path;
@@ -648,7 +649,6 @@ int Response::getMethod(Config &config)
     {
         getContentType();
         faildResponse();
-        std::cout << _response << std::endl;
         return (1);
     }
     if (_indexLocation >= 0 && config.servers[_indexServer].locations[_indexLocation].data["redirect"].size() > 0)

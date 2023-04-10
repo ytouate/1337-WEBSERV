@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 00:17:14 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 01:10:56 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,11 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
 {
     std::string path;
     _indexLocation = index;
+    if (server.locations[index].data["root"].size() == 0)
+    {
+        errorPages(server, index, 403);
+        return false;
+    }
     path = server.locations[index].data["root"][0] + line;
     _deletePath = path;
     std::cout << _deletePath << std::endl;
