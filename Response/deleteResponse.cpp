@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 01:10:56 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 14:55:41 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,17 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
         return false;
     }
     path = server.locations[index].data["root"][0] + line;
+    if (server.locations[index].data["redirect"].size() > 0)
+    {
+        int status = atoi(server.locations[index].data["redirect"][0].c_str());
+        if (status >= 300 && status < 400)
+            path = server.locations[index].data["redirect"][1];
+        else
+        {
+            _body += server.locations[index].data["redirect"][1];
+            return true;
+        }
+    }
     _deletePath = path;
     std::cout << _deletePath << std::endl;
     DIR *dir = opendir(path.c_str());

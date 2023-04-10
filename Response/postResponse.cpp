@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 00:08:23 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 14:55:15 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,17 @@ int Response::checkPathOfPostmethod(Config::serverParse &server, std::string lin
         if (server.data["upload_path"].size() > 0)
             _uploadPath = server.data["upload_path"].front();
         _indexLocation = index;
+    }
+    if (server.locations[index].data["redirect"].size() > 0)
+    {
+        int status = atoi(server.locations[index].data["redirect"][0].c_str());
+        if (status >= 300 && status < 400)
+            path = server.locations[index].data["redirect"][1];
+        else
+        {
+            _body += server.locations[index].data["redirect"][1];
+            return true;
+        }
     }
     DIR *dir = opendir(path.c_str());
     if (!dir)

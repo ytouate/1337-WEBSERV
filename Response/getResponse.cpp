@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 01:10:25 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 15:20:08 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,7 +352,6 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     int fd = open(path.c_str(), O_RDWR);
     struct stat fileStat;
     _getPath = path;
-    std::cout << _getPath << std::endl;
     if (stat(path.c_str(), &fileStat) == 0)
     {
         if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0)
@@ -413,7 +412,20 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
     }
     path = server.locations[index].data["root"][0] + line;
     if (server.locations[index].data["redirect"].size() > 0)
-        path = server.locations[index].data["redirect"][1];
+    {
+        int status = atoi(server.locations[index].data["redirect"][0].c_str());
+        std::cout << status << std::endl;
+        if (status >= 300 && status < 400)
+            path = server.locations[index].data["redirect"][1];
+        else
+        {
+            _body += server.locations[index].data["redirect"][1];
+            _contentLength = atoi(request.data["content-length"].c_str());
+            if (_contentLength == 0)
+                _contentLength = _body.size();
+            return true;
+        }
+    }
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -589,6 +601,17 @@ bool Response::noLocations(Config &config, int index)
         }
         std::string server_root_path = config.servers[index].data["root"][0];
         path = server_root_path;
+        if (config.servers[index].data["redirect"].size() > 0)
+        {
+            int status = atoi(config.servers[index].data["redirect"][0].c_str());
+            if (status >= 300 && status < 400)
+                path = config.servers[index].data["redirect"][1];
+            else
+            {
+                _body += config.servers[index].data["redirect"][1];
+                return false;
+            }
+        }
         DIR *dir = opendir(path.c_str());
         if (!dir)
             return validFile(config.servers[index], index, path);
@@ -657,8 +680,8 @@ int Response::getMethod(Config &config)
         _response += _body;
     if (_response.size() == 0)
     {
-
-        this->_statusCode = 200;
+        if (_statusCode < 0)
+            this->_statusCode = 200;
         char buffer[100];
         sprintf(buffer, "%s %d OK\r\n", request.data["version"].c_str(), this->_statusCode);
         this->_response += buffer;
@@ -684,5 +707,6 @@ int Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
+    std::cout << _response << std::endl;
     return 0;
 }
