@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 23:40:02 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 00:08:23 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ void Response::postResponse(void)
         _header += buffer;
     }
     this->_response += _body;
+    std::cout << _response << std::endl;
 }
 
 void Response::postType(std::string path)
