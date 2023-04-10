@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   deleteResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 01:47:59 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/10 00:12:54 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
     _indexLocation = index;
     path = server.locations[index].data["root"][0] + line;
     _deletePath = path;
+    std::cout << _deletePath << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
     {
@@ -65,6 +66,14 @@ int deleteDirectory(const std::string& path)
                 deleteDirectory(filepath);
             }
             else
+            {
+                if (statbuf.st_mode & S_IWUSR)
+                    remove(filepath.c_str());
+                else
+                {
+                    return 1;
+                }
+            }
                 remove(filepath.c_str());
         }
     }
@@ -104,7 +113,6 @@ int     Response::deleteMethod(Config& config)
     
                         if (S_ISDIR(statbuf.st_mode))
                         {
-                            puts("8989");
                             if (deleteDirectory(filepath) != 0)
                                {errorPages(config.servers[0], 0, 401); postResponse(); return 1;}
                         }

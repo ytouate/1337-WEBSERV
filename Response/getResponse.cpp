@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 00:42:07 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/10 00:43:44 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <sys/stat.h>
 #include <unordered_map>
 
-#define URL_MAX 2084
+#define URL_MAX 2048
 
 Response::~Response()
 {
@@ -139,6 +139,7 @@ bool Response::getMatchedLocation(Config &config)
         errorPages(config.servers[indexServer], 0, 404);
         return 1;
     }
+    _indexLocation = finalPath;
     if (request.data["method"] == "POST")
     {
         if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
@@ -147,7 +148,7 @@ bool Response::getMatchedLocation(Config &config)
             size_t serverBodySize = atoi(config.servers[indexServer].locations[finalPath].data["body_size"][0].c_str());
             if (request.data["content-length"].size() > 0 && requestBodySize > serverBodySize)
             {
-                errorPages(config.servers[indexServer], 0, 413);
+                errorPages(config.servers[indexServer], 0, 413); 
                 return false;
             }
         }
@@ -262,7 +263,7 @@ std::vector<std::string> Response::setEnv()
     if (_flag == 1)
         vec[4] += "=" + _postPath;
     else
-        vec[4] += "=" + _getPath;
+        vec[4] += "=" + _getPath ;
     vec[3] += "=" + request.data["content-length"];
     vec[2] += "=" + request.data["content-type"];
     vec[5] += "=" + request.data["method"];
@@ -328,8 +329,16 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     while ((bytes = read(fd[0], buffer, 100)) > 0)
     {
         std::string line(buffer, bytes);
-        if (line.find("status"))
-            _body += line;
+        std::cout << line << std::endl;
+        if (line.find("Status") != std::string::npos)
+        {
+            _body = "";
+            sprintf(buffer, "%s 500\r\n\r\n", request.data["version"].c_str());
+            _body += buffer;
+            _body += "<H1>500 Internal Server Error</H1>";
+            break;
+        }
+        _body += line;
     }
     close(fd[0]);
     unlink("/tmp/test1");
@@ -345,14 +354,11 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     _getPath = path;
     if (stat(path.c_str(), &fileStat) == 0)
     {
-        // if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0) {
-        //     // to be done
-        // }
-        // else
-        // {
-        //     errorPages(server, index, 401);
-        //     return false;
-        // }
+        if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0)
+        {
+            errorPages(server, index, 401);
+            return false;   
+        }
     }
     if (file.is_open())
     {
@@ -400,6 +406,8 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         line.erase(0, server_root_path.length());
     }
     path = server.locations[index].data["root"][0] + line;
+    if (server.locations[index].data["redirect"].size() > 0)
+        path = server.locations[index].data["redirect"][1];
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
@@ -442,7 +450,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         }
         else
         {
-            errorPages(server, index, 404);
+            errorPages(server, index, 403);
             return false;
         }
     }
@@ -632,6 +640,8 @@ int Response::getMethod(Config &config)
         faildResponse();
         return (1);
     }
+    if (config.servers[_indexServer].locations[_indexLocation].data["redirect"].size() > 0)
+        _statusCode = std::stoi(config.servers[_indexServer].locations[_indexLocation].data["redirect"][0]);
     if (_flag == 2 || _flag == 1)
         _response += _body;
     if (_response.size() == 0)

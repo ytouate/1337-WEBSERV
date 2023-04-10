@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 22:13:49 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/10 00:08:23 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ void Response::postResponse(void)
         _header += buffer;
     }
     this->_response += _body;
+    std::cout << _response << std::endl;
 }
 
 void Response::postType(std::string path)
@@ -201,7 +202,8 @@ int Response::postMethod(Config &config)
     }
     else
     {
-        errorPages(config.servers[_indexServer], _indexLocation, 404);
+        if (_body.size() == 0)
+            errorPages(config.servers[_indexServer], _indexLocation, 404);
     }
     postResponse();
     return 0;
