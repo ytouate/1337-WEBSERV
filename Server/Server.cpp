@@ -290,13 +290,17 @@ Server::Server(std::string file) : _configFile(file)
 {
     srand(time(NULL));
     std::vector<std::string> _ports;
+    std::cout << this->_configFile.servers[4].autoIndex << std::endl;
     for (size_t i = 0; i < _configFile.servers.size(); ++i)
     {
+        if (_configFile.servers[i].data["listen"].size() >= 1)
+        {
+            initServerSocket(_configFile.servers[i].data["listen"].front().c_str());
+            std::cout << "Server: " << i << " is listening on "
+                      << "http://localhost:"
+                      << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
+        }
         // int port = (rand() % (65535 - 1024 + 1)) + 1024;
-        initServerSocket(_configFile.servers[i].data["listen"].front().c_str());
-        std::cout << "Server: " << i << " is listening on "
-                  << "http://localhost:"
-                  << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
     }
 
     while (1)

@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 00:44:35 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 00:52:32 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,11 +271,6 @@ std::vector<std::string> Response::setEnv()
     return vec;
 }
 
-void    handle(int)
-{
-    std::cout << "haa" << std::endl;
-}
-
 bool Response::executeCgi(Config::serverParse &, int, int flag)
 {
     _flag = flag;
@@ -322,10 +317,7 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
         perror("execve()");
         exit(1);
     }
-    signal(SIGALRM, handle);
-    alarm(10);
     wait(NULL);
-    alarm(0);
     close(fd[1]);
     char buffer[100];
     int bytes;
@@ -586,6 +578,10 @@ bool Response::noLocations(Config &config, int index)
         std::string path;
         static int i = 0;
 
+        if (config.servers[index].data["root"].size() == 0)
+        {
+            errorPages(config.servers[index], index, 403); return true;
+        }
         std::string server_root_path = config.servers[index].data["root"][0];
         path = server_root_path;
         DIR *dir = opendir(path.c_str());
@@ -648,6 +644,7 @@ int Response::getMethod(Config &config)
     {
         getContentType();
         faildResponse();
+        std::cout << _response << std::endl;
         return (1);
     }
     if (config.servers[_indexServer].locations[_indexLocation].data["redirect"].size() > 0)
