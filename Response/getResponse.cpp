@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 00:59:31 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 01:08:13 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,6 +352,7 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     int fd = open(path.c_str(), O_RDWR);
     struct stat fileStat;
     _getPath = path;
+    std::cout << _getPath << std::endl;
     if (stat(path.c_str(), &fileStat) == 0)
     {
         if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0)
@@ -401,7 +402,10 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
     std::string test = line;
 
     if (server.locations[index].data["root"].size() == 0)
-        errorPages(server, index, 403); return false;
+    {
+        errorPages(server, index, 403);
+        return false;
+    }
     std::string server_root_path = server.locations[index].data["root"][0];
     if (line.find(server_root_path) == 0)
     {
