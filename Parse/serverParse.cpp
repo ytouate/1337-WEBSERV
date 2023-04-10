@@ -9,11 +9,6 @@ Config::serverParse::serverParse(const std::vector<std::string> &__fileBuff, int
     _start = __start;
 }
 
-bool isCurlyBracket(const std::string &s)
-{
-    return (s == "{" or s == "}");
-}
-
 void Config::serverParse::handleErrors(const std::string &_fileBuff)
 {
     if (isCurlyBracket(_fileBuff) or _fileBuff == "server")
@@ -142,27 +137,6 @@ void Config::serverParse::fillEmptyRequiredDirectives(void)
     }
 }
 
-bool Config::serverParse::isWhiteSpace(char c)
-{
-    return (c == ' ' or c == '\t');
-}
-
-void Config::serverParse::error(const std::string &s) const
-{
-    std::cerr << s << std::endl;
-    exit(EXIT_FAILURE);
-}
-
-bool Config::serverParse::isNumber(const std::string &s)
-{
-    for (size_t i = 0; i < s.size(); i++)
-    {
-        if (!isdigit(s[i]))
-            return false;
-    }
-    return true;
-}
-
 void Config::serverParse::fillDirective(const std::string &key,
                                 const std::vector<std::string> &values)
 {
@@ -193,7 +167,9 @@ void Config::serverParse::fillDirective(const std::string &key,
     else if (key == "redirect")
     {
         if (!_locationIsOpened)
-        error("invalid or misplaced directive");
+        {
+            error("invalid or misplaced directive");
+        }
     }
     else if (key == "upload_path")
     {
@@ -260,22 +236,6 @@ void Config::serverParse::fillDirective(const std::string &key,
     }
 }
 
-std::string Config::serverParse::trim(const std::string &s)
-{
-    std::string trimmed;
-    int _start = 0;
-    int end = s.size() - 1;
-    if (end < 0)
-        return "";
-    while (s[_start] && isWhiteSpace(s[_start]))
-        _start++;
-    while (end > 0 && isWhiteSpace(s[end]))
-        end--;
-    while (_start <= end)
-        trimmed += s[_start++];
-    return trimmed;
-}
-
 Config::serverParse::~serverParse()
 {
     std::map<std::string, std::vector<std::string> >::iterator it = this->data.begin();
@@ -284,5 +244,7 @@ Config::serverParse::~serverParse()
         it->second.clear();
         ++it;
     }
+    this->errorPages.clear();
+    this->locations.clear();
     this->data.clear();
 }

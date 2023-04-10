@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   deleteResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 14:55:41 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 19:48:21 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
         }
     }
     _deletePath = path;
-    std::cout << _deletePath << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
     {

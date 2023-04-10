@@ -9,11 +9,6 @@
 #define MAX_CHUNK_SIZE 4096
 
 // Write the last error happened in s method and exit
-static void error(const char *s)
-{
-    perror(s);
-    exit(1);
-}
 
 /*
     initializing the socket and binding it to local address
@@ -34,15 +29,15 @@ void Server::initServerSocket(const char *port)
     }
     int ret = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
     if (ret == -1)
-        error("socket()");
+        error_fatal("socket()");
     _serverSockets.push_back(ret);
     int optval = 1;
     setsockopt(_serverSockets.back(), SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
     fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
     if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
-        error("bind()");
+        error_fatal("bind()");
     if (listen(_serverSockets.back(), 10))
-        error("listen()");
+        error_fatal("listen()");
     freeaddrinfo(data);
 }
 
@@ -290,7 +285,6 @@ Server::Server(std::string file) : _configFile(file)
 {
     srand(time(NULL));
     std::vector<std::string> _ports;
-    std::cout << this->_configFile.servers[4].autoIndex << std::endl;
     for (size_t i = 0; i < _configFile.servers.size(); ++i)
     {
         if (_configFile.servers[i].data["listen"].size() >= 1)
@@ -300,7 +294,6 @@ Server::Server(std::string file) : _configFile(file)
                       << "http://localhost:"
                       << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
         }
-        // int port = (rand() % (65535 - 1024 + 1)) + 1024;
     }
 
     while (1)

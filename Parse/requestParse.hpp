@@ -3,34 +3,25 @@
 
 #include "../inc.hpp"
 
-
 struct Body
 {
     std::string content;
-    std::string contentType;
     std::string contentName;
-    void setUp();
-
-    private:
-    void getFileName();
-    void getContentType();
-    void trimUnwantedLines();
 };
 
 class requestParse
 {
 private:
-    void    parseRequestLine(std::string &s, const std::string &delimiter);
-    void    getHost(std::string &s);
+    void parseRequestLine(std::string &s, const std::string &delimiter);
+    void getHost(std::string &s);
+    void collectCookies(std::string &headerValues);
 public:
-void    converChunkedRequest();
-    std::string                             requestString;
-    std::set<std::string>                   cookies;
-    void setRequest(std::string);
-    std::map<std::string, std::string>      data;
-    Body                                    body;
-    requestParse();
+    void converChunkedRequest();
     void setUp(std::string);
+    std::set<std::string> cookies;
+    std::map<std::string, std::string> data;
+    Body body;
+    requestParse();
     ~requestParse();
 };
 

@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 20:47:48 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 20:51:00 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -759,9 +759,5 @@ int Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
-    std::cout << "----------------------\n";
-    std::cout << _response << std::endl;
-    std::cout << "----------------------\n";
-
     return 0;
 }

@@ -1,6 +1,7 @@
 NAME = webserv
 
 FILES = \
+	./StaticMethods/Static.cpp		\
 	./Parse/Config.cpp				\
 	./Parse/serverParse.cpp			\
 	./Parse/locationParse.cpp		\
@@ -8,7 +9,7 @@ FILES = \
 	./Response/getResponse.cpp		\
 	./Response/postResponse.cpp		\
 	./Response/deleteResponse.cpp	\
-	./Server/Server.cpp				
+	./Server/Server.cpp				\
 
 CC = c++ 
 CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
@@ -24,6 +25,7 @@ clean:
 	rm -rf Parse/*.o
 	rm -rf Response/*.o
 	rm -rf Server/*.o
+	rm -rf StaticMethods/*.o
 	rm -rf *.o
 
 fclean: clean
