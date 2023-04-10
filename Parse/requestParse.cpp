@@ -61,6 +61,12 @@ void requestParse::setUp(std::string _requestParse)
                 headerValue = headerValue.substr(start, end);
                 this->cookies.insert(headerValue);
             }
+            std::set<std::string>::iterator it = cookies.begin();
+            while (it != cookies.end())
+            {
+                std::cout << *it << std::endl;
+                ++it;
+            }
         }
         if (headerName == "Content-Length")
         {
