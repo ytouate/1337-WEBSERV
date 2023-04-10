@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 15:20:08 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 19:48:09 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -329,7 +329,6 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     while ((bytes = read(fd[0], buffer, 100)) > 0)
     {
         std::string line(buffer, bytes);
-        std::cout << line << std::endl;
         if (line.find("Status") != std::string::npos)
         {
             _body = "";
@@ -414,7 +413,6 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
     if (server.locations[index].data["redirect"].size() > 0)
     {
         int status = atoi(server.locations[index].data["redirect"][0].c_str());
-        std::cout << status << std::endl;
         if (status >= 300 && status < 400)
             path = server.locations[index].data["redirect"][1];
         else
@@ -707,6 +705,5 @@ int Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
-    std::cout << _response << std::endl;
     return 0;
 }

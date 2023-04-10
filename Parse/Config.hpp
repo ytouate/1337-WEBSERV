@@ -14,9 +14,6 @@ private:
     std::vector<std::string> _fileBuff;
 
     void readFileIntoBuff(const std::string &s);
-    void error(const std::string &a) const;
-    bool isWhiteSpace(char c);
-    std::string trim(const std::string &s);
 
 public:
     class locationParse
@@ -24,30 +21,28 @@ public:
     private:
         typedef std::pair<std::string, std::vector<std::string> > directive;
 
-        directive _root;
-        directive _index;
-        directive _allowedMethods;
-        directive _upload;
-        directive _uploadPath;
-        directive _bodySize;
-        directive _redirect;
-        int _start;
-        std::vector<std::string> _fileBuff;
+        directive                   _root;
+        directive                   _index;
+        directive                   _allowedMethods;
+        directive                   _upload;
+        directive                   _uploadPath;
+        directive                   _bodySize;
+        directive                   _redirect;
+        int                         _start;
+        std::vector<std::string>    _fileBuff;
 
         void setDirective(const std::string &key, std::vector<std::string> &values);
-        bool isWhiteSpace(char c);
-        void error(const std::string &a) const;
         void collectPath(const std::string &s);
         void parseBlock();
         void fillDirective(const std::string &s, const std::string &key);
-        bool isNumber(const std::string &s);
+        
         friend class Config;
 
     public:
         std::string path;
+        bool autoIndex;
         std::map<std::string, std::vector<std::string> > data;
         std::map<int, std::string> errorPages;
-        bool autoIndex;
         locationParse(const std::vector<std::string> &, int);
         ~locationParse();
     };
@@ -72,17 +67,13 @@ public:
         std::vector<std::string> _fileBuff;
         std::vector<std::string> _locationBuff;
 
-        bool isNumber(const std::string &s);
         void insertDirectives(void);
         void fillEmptyRequiredDirectives(void);
-        void error(const std::string &a) const;
         void fillDirective(const std::string &, const std::vector<std::string> &);
         void handleErrors(const std::string &);
         void setFileBuff(const std::vector<std::string> &);
         void getValues(std::vector<std::string> &values, const std::string &fileBuff, int &j);
-        bool isWhiteSpace(char c);
         size_t parseBlock();
-        std::string trim(const std::string &s);
         std::string getKey(const std::string &fileBuff, int &j);
 
         friend class Config;
@@ -96,7 +87,6 @@ public:
         ~serverParse();
     };
     std::vector<serverParse> servers;
-
     Config(std::string s);
     ~Config();
 };

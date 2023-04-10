@@ -1,5 +1,10 @@
 #include "Config.hpp"
 
+/*
+    gets the path of the location
+    if the path is missing an error is written to stderr
+    and the programme is exited
+*/
 void Config::locationParse::collectPath(const std::string &s)
 {
     size_t i = 0;
@@ -9,22 +14,22 @@ void Config::locationParse::collectPath(const std::string &s)
         i++;
     while (s[i])
         path += s[i++];
+    if (path.empty())
+        error("Empty location path");
 }
 
-bool Config::locationParse::isWhiteSpace(char c)
-{
-    return (c == ' ' or c == '\t');
-}
 
-void Config::locationParse::error(const std::string &s) const
-{
-    std::cerr << s << std::endl;
-    exit(EXIT_FAILURE);
-}
-
+/*
+    a constructor that initialize the needed data
+*/
 Config::locationParse::locationParse(const std::vector<std::string> &a, int i)
     : _start(i), _fileBuff(a), autoIndex(OFF) {}
 
+/*
+    checks if passed key matches any known directives 
+    if yes the corresponding pair is set to <key, values> with values set to 
+    the passed argument if the key does not match an error is thrown
+*/
 void Config::locationParse::setDirective(const std::string &key, std::vector<std::string> &values)
 {
     if (key == "root")
@@ -87,6 +92,10 @@ void Config::locationParse::setDirective(const std::string &key, std::vector<std
     }
 }
 
+/*
+    the logic implementation of filling the directives
+    here where the collection of key and values is gathered
+*/
 void Config::locationParse::fillDirective(const std::string &s, const std::string &key)
 {
     size_t i = 0;
@@ -112,6 +121,9 @@ void Config::locationParse::fillDirective(const std::string &s, const std::strin
     setDirective(key, values);
 }
 
+/*
+    a destructor that frees the data
+*/
 Config::locationParse::~locationParse()
 {
     std::map<std::string, std::vector<std::string> >::iterator it = this->data.begin();
@@ -123,16 +135,9 @@ Config::locationParse::~locationParse()
     this->data.clear();
 }
 
-bool Config::locationParse::isNumber(const std::string &s)
-{
-    for (size_t i = 0; i < s.size(); i++)
-    {
-        if (!isdigit(s[i]))
-            return false;
-    }
-    return true;
-}
-
+/*
+    the logic implementation of parsing a location block
+*/
 void Config::locationParse::parseBlock()
 {
     size_t i = _start;
