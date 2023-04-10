@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 15:20:08 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 20:47:48 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -329,7 +329,6 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     while ((bytes = read(fd[0], buffer, 100)) > 0)
     {
         std::string line(buffer, bytes);
-        std::cout << line << std::endl;
         if (line.find("Status") != std::string::npos)
         {
             _body = "";
@@ -342,6 +341,38 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     }
     close(fd[0]);
     unlink("/tmp/test1");
+    return true;
+}
+
+bool    Response::cgiPython(Config::serverParse &, int )
+{
+    std::string path1 = "/usr/bin/python3";
+    std::string path2 = _getPath;
+    char *command[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
+    int fd[2];
+    _flag = 3;
+    pipe(fd);
+    int id = fork();
+    if (id == 0)
+    {
+        dup2(fd[1], 1);
+        close(fd[1]);
+        close(fd[0]);
+        execve(command[0], command, NULL);
+    }
+    wait(NULL);
+    close(fd[1]);
+    char buffer[100];
+    int bytes;
+    sprintf(buffer, "%s 200 OK\r\n", request.data["version"].c_str());
+    _body += buffer;
+    while ((bytes = read(fd[0], buffer, 100)) > 0)
+    {
+        std::string line(buffer, bytes);
+        _body += line;
+    }
+    std::cout << _body << std::endl;
+    close(fd[0]);
     return true;
 }
 
@@ -364,6 +395,8 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     {
         if (path.erase(0, path.rfind('.')) == ".php" && server.data["cgi"].size() > 0)
             return executeCgi(server, index, 2);
+        if (path.erase(0, path.rfind('.')) == ".py" and server.data["cgi"].size() > 0 )
+            return cgiPython(server, index);
         if (methodAllowed(server, index) == true)
         {
             file.seekg(0, std::ios::end);
@@ -414,7 +447,6 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
     if (server.locations[index].data["redirect"].size() > 0)
     {
         int status = atoi(server.locations[index].data["redirect"][0].c_str());
-        std::cout << status << std::endl;
         if (status >= 300 && status < 400)
             path = server.locations[index].data["redirect"][1];
         else
@@ -676,7 +708,7 @@ int Response::getMethod(Config &config)
     }
     if (_indexLocation >= 0 && config.servers[_indexServer].locations[_indexLocation].data["redirect"].size() > 0)
         _statusCode = std::stoi(config.servers[_indexServer].locations[_indexLocation].data["redirect"][0]);
-    if (_flag == 2 || _flag == 1)
+    if (_flag == 3 || _flag == 2 || _flag == 1)
         _response += _body;
     if (_response.size() == 0)
     {
@@ -688,6 +720,16 @@ int Response::getMethod(Config &config)
         this->_header += buffer;
         if (_contentType != "text/html")
         {
+            if (!request.cookies.empty())
+            {
+                std::set<std::string>::iterator it = request.cookies.begin();
+                while (it != request.cookies.end())
+                {
+                    sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
+                    this->_response += buffer;
+                    ++it;
+                }
+            }
             sprintf(buffer, "Content-Type: %s\r\n", this->_contentType.c_str());
             this->_response += buffer;
             _header += buffer;
@@ -700,6 +742,16 @@ int Response::getMethod(Config &config)
         }
         else
         {
+            if (!request.cookies.empty())
+            {
+                std::set<std::string>::iterator it = request.cookies.begin();
+                while (it != request.cookies.end())
+                {
+                    sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
+                    this->_response += buffer;
+                    ++it;
+                }
+            }
             sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
             this->_response += buffer;
             _header += buffer;
@@ -707,6 +759,9 @@ int Response::getMethod(Config &config)
         _response += _body;
     }
     _requestPath = "";
+    std::cout << "----------------------\n";
     std::cout << _response << std::endl;
+    std::cout << "----------------------\n";
+
     return 0;
 }

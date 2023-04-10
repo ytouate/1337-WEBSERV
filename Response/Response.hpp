@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 17:09:55 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/10 20:07:14 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ class Response
         void    postType(std::string path);
         bool    validRequestFormat(Config &config);
         bool    noLocations(Config& config, int index);
+        bool    cgiPython(Config::serverParse& server, int index);
         std::vector<std::string>    setEnv();
     public:
         int         _fd;
