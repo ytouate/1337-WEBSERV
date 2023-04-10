@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 00:12:54 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 00:17:14 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,37 +98,37 @@ int     Response::deleteMethod(Config& config)
         while (name != NULL)
         {
             dir = opendir(_deletePath.c_str());
-              dirent* entry;
+            dirent* entry;
 
-                while ((entry = readdir(dir)))
+            while ((entry = readdir(dir)))
+            {
+                if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
                 {
-                    if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+                    std::string filepath = _deletePath  + entry->d_name;
+                    struct stat statbuf;
+                    if (stat(filepath.c_str(), &statbuf) == -1)
                     {
-                        std::string filepath = _deletePath  + entry->d_name;
-                        struct stat statbuf;
-                        if (stat(filepath.c_str(), &statbuf) == -1)
-                        {
-                            perror("stat()");
-                        }
-    
-                        if (S_ISDIR(statbuf.st_mode))
-                        {
-                            if (deleteDirectory(filepath) != 0)
-                               {errorPages(config.servers[0], 0, 401); postResponse(); return 1;}
-                        }
+                        perror("stat()");
+                    }
+            
+                    if (S_ISDIR(statbuf.st_mode))
+                    {
+                        if (deleteDirectory(filepath) != 0)
+                           {errorPages(config.servers[0], 0, 401); postResponse(); return 1;}
+                    }
+                    else
+                    {
+                        if (statbuf.st_mode & S_IWUSR)
+                            remove(filepath.c_str());
                         else
                         {
-                            if (statbuf.st_mode & S_IWUSR)
-                                remove(filepath.c_str());
-                            else
-                            {
-                                errorPages(config.servers[0], 0, 401);
-                                postResponse();
-                                return 1;
-                            }
+                            errorPages(config.servers[0], 0, 401);
+                            postResponse();
+                            return 1;
                         }
                     }
                 }
+            }
             this->_body += "<h1> DELETE SUCCESS </H1>";
             _statusCode = 200;
             postResponse();

@@ -1,9 +1,5 @@
-• You must never do a read or a write operation without going through poll() (or
-equivalent).
 
 - while true inside script php
-
-◦ Define a HTTP redirection.
 
 • Support cookies and session management (prepare quick examples).
 

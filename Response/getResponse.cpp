@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/09 23:51:28 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/10 00:44:35 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,6 +271,11 @@ std::vector<std::string> Response::setEnv()
     return vec;
 }
 
+void    handle(int)
+{
+    std::cout << "haa" << std::endl;
+}
+
 bool Response::executeCgi(Config::serverParse &, int, int flag)
 {
     _flag = flag;
@@ -317,7 +322,10 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
         perror("execve()");
         exit(1);
     }
+    signal(SIGALRM, handle);
+    alarm(10);
     wait(NULL);
+    alarm(0);
     close(fd[1]);
     char buffer[100];
     int bytes;
@@ -400,6 +408,8 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
     static int i = 0;
     std::string test = line;
 
+    if (server.locations[index].data["root"].size() == 0)
+        errorPages(server, index, 403); return false;
     std::string server_root_path = server.locations[index].data["root"][0];
     if (line.find(server_root_path) == 0)
     {
