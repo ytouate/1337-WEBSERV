@@ -17,5 +17,6 @@
 #include <cstdlib> // for exit()
 #include <cstring> // for memset()
 #include <sstream>
+#include <set>
 
 #endif // INC_HPP

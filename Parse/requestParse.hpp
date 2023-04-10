@@ -25,6 +25,7 @@ private:
 public:
 void    converChunkedRequest();
     std::string                             requestString;
+    std::set<std::string>                   cookies;
     void setRequest(std::string);
     std::map<std::string, std::string>      data;
     Body                                    body;
