@@ -14,8 +14,8 @@ class requestParse
 private:
     void parseRequestLine(std::string &s, const std::string &delimiter);
     void getHost(std::string &s);
-    void collectCookies(std::string &headerValues);
 public:
+    void collectCookies(std::string &headerValues);
     void converChunkedRequest();
     void setUp(std::string);
     std::set<std::string> cookies;

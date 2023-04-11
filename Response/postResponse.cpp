@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 19:48:14 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/10 22:06:16 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,14 @@ int Response::checkPathOfPostmethod(Config::serverParse &server, std::string lin
             return true;
         }
     }
+    size_t pos = path.find("?");
+    if (pos != std::string::npos)
+    {
+        std::string cookie = path.substr(pos + 1);
+        path.erase(pos);
+        request.collectCookies(cookie);
+    }
+    std::cout << path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
     {

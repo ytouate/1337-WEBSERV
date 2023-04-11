@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 20:51:00 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/11 00:16:49 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ Response::Response(): _fd(-1), fdIsOpened(false)
 }
 Response::Response(Config &config, requestParse &_request) : request(_request)
 {
+    std::cout << request.data["method"] << std::endl;
     _indexLocation = -1;
     if (request.data["method"] == "GET")
         getMethod(config);
@@ -142,6 +143,7 @@ bool Response::getMatchedLocation(Config &config)
     _indexLocation = finalPath;
     if (request.data["method"] == "POST")
     {
+        puts("hana");
         if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
         {
             size_t requestBodySize = atoi(request.data["content-length"].c_str());
@@ -259,7 +261,7 @@ std::vector<std::string> Response::setEnv()
         else
             vec.push_back(temp);
     }
-    vec[1] += "=" + request.data["path"].erase(0, request.data["path"].rfind("?"));
+    vec[1] += "=" + request.data["path"].erase(0, request.data["path"].rfind("?") + 1);
     if (_flag == 1)
         vec[4] += "=" + _postPath;
     else
@@ -277,7 +279,10 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     std::vector<std::string> _env = setEnv();
     char *env[_env.size() + 1];
     for (size_t i = 0; i < _env.size(); i++)
+    {
         env[i] = (char *)_env[i].c_str();
+        std::cout << env[i] << std::endl;
+    }
     env[_env.size()] = NULL;
     int fd[2];
     int fdw = open("/tmp/test1", O_CREAT | O_RDWR | O_TRUNC, 0644);
@@ -348,6 +353,7 @@ bool    Response::cgiPython(Config::serverParse &, int )
 {
     std::string path1 = "/usr/bin/python3";
     std::string path2 = _getPath;
+    std::cout << path2 << std::endl;
     char *command[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     int fd[2];
     _flag = 3;
@@ -383,6 +389,13 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     int fd = open(path.c_str(), O_RDWR);
     struct stat fileStat;
     _getPath = path;
+    size_t pos = _getPath.find("?");
+    if (pos != std::string::npos)
+    {
+        std::string cookie = _getPath.substr(pos + 1);
+        _getPath.erase(pos);
+        request.collectCookies(cookie);
+    }
     if (stat(path.c_str(), &fileStat) == 0)
     {
         if ((fileStat.st_mode & S_IRUSR & S_IEXEC) != 0)
@@ -458,6 +471,15 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
             return true;
         }
     }
+    size_t pos = path.find("?");
+    if (pos != std::string::npos)
+    {
+        std::string cookie = path.substr(pos + 1);
+        std::cout << cookie << std::endl;
+        path.erase(pos);
+        request.collectCookies(cookie);
+    }
+    std::cout << "pth = " << path << std::endl;
     DIR *dir = opendir(path.c_str());
     if (!dir)
         return validFile(server, index, path);
