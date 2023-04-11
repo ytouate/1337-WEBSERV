@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/11 01:03:55 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/11 21:01:41 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,10 +278,7 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     std::vector<std::string> _env = setEnv();
     char *env[_env.size() + 1];
     for (size_t i = 0; i < _env.size(); i++)
-    {
         env[i] = (char *)_env[i].c_str();
-        std::cout << env[i] << std::endl;
-    }
     env[_env.size()] = NULL;
     int fd[2];
     int fdw = open("/tmp/test1", O_CREAT | O_RDWR | O_TRUNC, 0644);
@@ -353,6 +350,11 @@ bool    Response::cgiPython(Config::serverParse &, int )
     std::string path1 = "/usr/bin/python3";
     std::string path2 = _getPath;
     std::cout << path2 << std::endl;
+    std::vector<std::string> _env = setEnv();
+    char *env[_env.size() + 1];
+    for (size_t i = 0; i < _env.size(); i++)
+        env[i] = (char *)_env[i].c_str();
+    env[_env.size()] = NULL;
     char *command[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     int fd[2];
     _flag = 3;
@@ -363,13 +365,14 @@ bool    Response::cgiPython(Config::serverParse &, int )
         dup2(fd[1], 1);
         close(fd[1]);
         close(fd[0]);
-        execve(command[0], command, NULL);
+        execve(command[0], command, env);
     }
     wait(NULL);
     close(fd[1]);
     char buffer[100];
     int bytes;
     sprintf(buffer, "%s 200 OK\r\n", request.data["version"].c_str());
+    //sprintf(buffer, "%s 200 OK\r\n\r\n", request.data["version"].c_str());
     _body += buffer;
     while ((bytes = read(fd[0], buffer, 100)) > 0)
     {
@@ -416,13 +419,14 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
             file.seekg(0, std::ios::beg);
             _fd = fd;
             fdIsOpened = true;
-            // char buffer[1000];
-            // int bytes;
-            // while ((bytes = read(fd, buffer, 1000)) > 0)
-            // {
-            //     std::string line(buffer, bytes);
-            //     _body += line;
-            // }
+            std::cout << _fd << std::endl;
+            char buffer[1000];
+            int bytes;
+            while ((bytes = read(fd, buffer, 1000)) > 0)
+            {
+                std::string line(buffer, bytes);
+                _body += line;
+            }
             _statusCode = 200;
             this->_requestPath = path;
             getContentType();
@@ -767,13 +771,13 @@ int Response::getMethod(Config &config)
         {
             if (!request.cookies.empty())
             {
-                std::set<std::string>::iterator it = request.cookies.begin();
-                while (it != request.cookies.end())
-                {
-                    sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
-                    this->_response += buffer;
-                    ++it;
-                }
+                // std::set<std::string>::iterator it = request.cookies.begin();
+                // while (it != request.cookies.end())
+                // {
+                //     sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
+                //     this->_response += buffer;
+                //     ++it;
+                // }
             }
             sprintf(buffer, "Content-Type: %s\r\n\r\n", this->_contentType.c_str());
             this->_response += buffer;
