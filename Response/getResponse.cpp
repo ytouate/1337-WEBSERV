@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/11 00:16:49 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/11 01:03:55 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,6 @@ bool Response::getMatchedLocation(Config &config)
     _indexLocation = finalPath;
     if (request.data["method"] == "POST")
     {
-        puts("hana");
         if (config.servers[indexServer].locations[finalPath].data["body_size"].size() > 0)
         {
             size_t requestBodySize = atoi(request.data["content-length"].c_str());
@@ -415,13 +414,15 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
             file.seekg(0, std::ios::end);
             _contentLength = file.tellg();
             file.seekg(0, std::ios::beg);
-            char buffer[1000];
-            int bytes;
-            while ((bytes = read(fd, buffer, 1000)) > 0)
-            {
-                std::string line(buffer, bytes);
-                _body += line;
-            }
+            _fd = fd;
+            fdIsOpened = true;
+            // char buffer[1000];
+            // int bytes;
+            // while ((bytes = read(fd, buffer, 1000)) > 0)
+            // {
+            //     std::string line(buffer, bytes);
+            //     _body += line;
+            // }
             _statusCode = 200;
             this->_requestPath = path;
             getContentType();
