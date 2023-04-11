@@ -20,7 +20,6 @@ struct Client
     size_t received;
     int remaining;
     std::string requestString;
-    char buff[MAX_CHUNK_SIZE];
     requestParse request;
     Response response;
     const std::string getClientAddress();

@@ -61,20 +61,16 @@ void Server::waitForClients()
     {
         FD_SET(it->socket, &_readyToReadFrom);
         FD_SET(it->socket, &_readyToWriteTo);
-        if (it->response.fdIsOpened || it->response._fd != -1)
-        {
-            FD_SET(it->response._fd, &_readyToWriteTo);
-            if (it->response._fd > maxSocket)
-            {
-                maxSocket = it->response._fd;
-            }
-        }
+        // if (it->response.fdIsOpened)
+        // {
+        //     FD_SET(it->response._fd, &_readyToReadFrom);
+        //     if (it->response._fd > maxSocket)
+        //         maxSocket = it->response._fd;
+        // }
         if (it->socket > maxSocket)
             maxSocket = it->socket;
         ++it;
     }
-    // std::cout << "==============" << maxSocket<< "=========================\n";
-
     if (select(maxSocket + 1, &_readyToReadFrom, &_readyToWriteTo, 0, 0) == -1)
         error_fatal("select()");
 }
@@ -241,8 +237,7 @@ recvAgain:
     return request;
 }
 
-
-Client::Client(): received(0), requestString(2000, '\0') {}
+Client::Client() : received(0), remaining(0), requestString(MAX_CHUNK_SIZE, '\0') {}
 /*
     sends the response to all the clients that have requests
     queued and able to write to their sockets the connection
@@ -254,41 +249,91 @@ void Server::serveContent()
     std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
+        // bool headerSent = false;
+        fcntl(it->socket, F_SETFL, O_NONBLOCK);
+        int i = 0;
         if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
-            fcntl(it->socket, F_SETFL, O_NONBLOCK);
-            int ret = recv(it->socket, &it->requestString[0] + it->received, MAX_CHUNK_SIZE - it->received, 0);
-            int i = 0;
+            int ret = recv(it->socket, &it->requestString[0] + it->received,
+                           MAX_CHUNK_SIZE - it->received, 0);
             if (ret < 0)
             {
                 close(it->socket);
                 it = _clients.erase(it);
+                continue;
             }
             else
             {
-                std::cout << "it->buff: " << it->requestString << std::endl;;
-                // it->request = getRequest(*it);
                 it->request.setUp(it->requestString);
-                // it->response.setUp(_configFile, it->request);
-                it->remaining = it->response._response.size();
-                it->received = 0;
-                while (it->remaining > 0)
+                it->response.setUp(_configFile, it->request);
+                // if (!headerSent)
+                // {
+                if (FD_ISSET(it->socket, &_readyToWriteTo))
                 {
-                    int chunk = std::min(it->remaining, MAX_CHUNK_SIZE);
-                    char buff[chunk];
-                    for (int j = 0; j < chunk; ++j)
-                        buff[j] = it->response._response[i++];
-                    if (FD_ISSET(it->socket, &_readyToWriteTo))
+                    int ret = send(it->socket, it->response._response.c_str(),
+                                   it->response._response.size(), 0);
+                    if (ret < 1)
                     {
-                        ret = send(it->socket, buff, chunk, 0);
-                        if (ret <= 0)
-                            break;
-                        it->remaining -= ret;
-                        it->received += ret;
+                        perror("send()");
+                        close(it->socket);
+                        it = _clients.erase(it);
+                        continue;
                     }
+                    // headerSent = true;
                 }
-                close(it->socket);
-                it = _clients.erase(it);
+                // }
+                if (it->response.fdIsOpened)
+                {
+                    std::string buff(it->response._contentLength, '\0');
+                    int ret = read(it->response._fd, &buff[0] + it->received, it->response._contentLength - it->received);
+
+                    if (ret < 0) // close and break;
+                    {
+                        perror("read()");
+                        close(it->response._fd);
+                        it->response.fdIsOpened = false;
+                        close(it->socket);
+                        it = _clients.erase(it);
+                        break;
+                    }
+
+                    it->received += ret;
+                    while (it->received > 0)
+                    {
+                        int chunk = std::min((int)it->received, MAX_CHUNK_SIZE);
+                        char _buff[chunk];
+                        for (int j = 0; j < chunk; ++j)
+                            _buff[j] = buff[i++];
+                        if (FD_ISSET(it->socket, &_readyToWriteTo))
+                        {
+                            int ret = send(it->socket, _buff, chunk, 0);
+
+                            if (ret < 1) // close and break;
+                            {
+                                perror("send()");
+                                close(it->response._fd);
+                                it->response.fdIsOpened = false;
+                                close(it->socket);
+                                it = _clients.erase(it);
+                                break;
+                            }
+
+                            it->remaining += ret;
+                            it->received -= ret;
+                        }
+                    } // end sending loop
+                }
+            }
+            if (it < _clients.end()) // if not a function failed;
+            {
+                if (it->response.fdIsOpened)
+                {
+                    close(it->response._fd);
+                    it->response.fdIsOpened = false;
+                    close(it->socket);
+
+                    it = _clients.erase(it);
+                }
             }
         }
         else
@@ -323,9 +368,9 @@ Server::Server(std::string file) : _configFile(file)
             acceptConnection(i);
             serveContent();
         }
-        // for (size_t i = 0; i < _serverSockets.size(); i++)
-        //     close(_serverSockets[i]);
     }
+    for (size_t i = 0; i < _serverSockets.size(); i++)
+        close(_serverSockets[i]);
 }
 
 int main(int ac, char **av)

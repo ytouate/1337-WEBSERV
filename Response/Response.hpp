@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 20:07:14 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/11 01:30:01 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 class Response
 {
     private:
-        long        _contentLength;
         int         _statusCode;
         int         _fdFile;
         std::string _contentType;
@@ -60,6 +59,7 @@ class Response
         bool    cgiPython(Config::serverParse& server, int index);
         std::vector<std::string>    setEnv();
     public:
+        long        _contentLength;
         int         _fd;
         bool        fdIsOpened;
         std::string _header;
