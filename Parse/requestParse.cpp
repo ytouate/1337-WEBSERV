@@ -48,7 +48,8 @@ void requestParse::setUp(std::string _requestParse)
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;
-    _requestParse = _requestParse.erase(0, pos + 4);
+    _requestParse.erase(0, pos + 4);
+    std::cout << _requestParse << std::endl;
     this->body.content = _requestParse;
 }
 

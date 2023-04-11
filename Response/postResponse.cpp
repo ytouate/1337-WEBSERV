@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/11 01:51:29 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/11 18:33:16 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,18 +156,18 @@ int Response::postMethod(Config &config)
                     return 0;
                 }
             }
-            if (request.body.content.size() > 0 && request.body.contentName.size() == 0)
-            {
+            // if (request.body.content.size() > 0 && request.body.contentName.size() == 0)
+            // {
                 postType(request.data["content-type"]);
                 request.body.contentName = std::to_string(number) + _contentType;
-            }
-            if (request.body.content.size() < 4)
-            {
-                _statusCode = 403;
-                _body += "<h1> BODY KHAWI </h1>";
-                postResponse();
-                return 0;
-            }
+            // }
+            // if (request.body.content.size() < 4)
+            // {
+            //     _statusCode = 403;
+            //     _body += "<h1> BODY KHAWI </h1>";
+            //     postResponse();
+            //     return 0;
+            // }
             if (_uploadPath.size() > 0)
             {
                 DIR *dir = opendir(_uploadPath.c_str());
@@ -179,21 +179,13 @@ int Response::postMethod(Config &config)
             _statusCode = 201;
             _uploadPath += "upload_";
             _uploadPath += request.body.contentName;
-            _fd = open(_uploadPath.c_str(), O_CREAT | O_TRUNC | O_RDWR, 0644);
-            fdIsOpened = true;
-            int sent = 0;
-            int remaining = request.body.content.size();
-            while (sent < (int)request.body.content.size())
-            {
-                int bytes = std::min(remaining, CHUNK);
-                const char *chunkedStr = request.body.content.c_str() + sent;
-                int ret = write(_fd, chunkedStr, bytes);
-                if (ret == -1)
-                    break;
-                remaining -= ret;
-                sent += ret;
-            }
-            close(_fd);
+            // if (!fdIsOpened)
+            // {
+                std::cout << "FD OPENED\n";
+                _fd = open(_uploadPath.c_str(), O_CREAT | O_TRUNC | O_RDWR, 0644);
+                fdIsOpened = true;
+            // }
+
             _body += "<h1> kolchi daze </h1>";
             postResponse();
             return 0;

@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/11 04:34:08 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/11 17:54:27 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,9 @@ void Response::setUp(Config &config, requestParse &_request)
     if (request.data["method"] == "DELETE")
         deleteMethod(config);
     if (request.data["method"] == "POST")
+    {
         postMethod(config);
+    }
 }
 int Response::validateRequest()
 {
@@ -387,9 +389,11 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     _fd = open(path.c_str(), O_RDWR);
     if (_fd == -1)
     {
+        perror("open()");
         // if the path not found return an error
     }
-    fdIsOpened = true;
+    else
+        fdIsOpened = true;
     struct stat fileStat;
     _getPath = path;
     size_t pos = _getPath.find("?");
