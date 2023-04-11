@@ -36,7 +36,7 @@ void Server::initServerSocket(const char *port)
     fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
     if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
         error_fatal("bind()");
-    if (listen(_serverSockets.back(), 10))
+    if (listen(_serverSockets.back(), 0))
         error_fatal("listen()");
     freeaddrinfo(data);
 }
@@ -65,14 +65,18 @@ void Server::waitForClients()
         {
             FD_SET(it->response._fd, &_readyToWriteTo);
             if (it->response._fd > maxSocket)
+            {
                 maxSocket = it->response._fd;
+            }
         }
         if (it->socket > maxSocket)
             maxSocket = it->socket;
         ++it;
     }
+    // std::cout << "==============" << maxSocket<< "=========================\n";
+
     if (select(maxSocket + 1, &_readyToReadFrom, &_readyToWriteTo, 0, 0) == -1)
-        error("select()");
+        error_fatal("select()");
 }
 
 /*
@@ -111,7 +115,7 @@ void Server::acceptConnection(int serverIndex)
                                    (struct sockaddr *)&_newClient.clientAddress,
                                    &_newClient.addressLenght);
         if (_newClient.socket == -1)
-            error("accept()");
+            error_fatal("accept()");
         _clients.push_back(_newClient);
     }
 }
@@ -217,7 +221,10 @@ recvAgain:
     while (true)
     {
         if ((bytesRead = recv(_client.socket, c, BUFFER_SIZE, 0)) < 0)
+        {
+            close(_client.socket);
             break;
+        }
         if (bytesRead == 0)
             return request;
         request.body.content += std::string(c, bytesRead);
@@ -234,6 +241,8 @@ recvAgain:
     return request;
 }
 
+
+Client::Client(): received(0), requestString(2000, '\0') {}
 /*
     sends the response to all the clients that have requests
     queued and able to write to their sockets the connection
@@ -248,29 +257,39 @@ void Server::serveContent()
         if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
             fcntl(it->socket, F_SETFL, O_NONBLOCK);
-            it->request = getRequest(*it);
-            it->response.setUp(_configFile, it->request);
-            int ret;
+            int ret = recv(it->socket, &it->requestString[0] + it->received, MAX_CHUNK_SIZE - it->received, 0);
             int i = 0;
-            it->remaining = it->response._response.size();
-            it->received = 0;
-            while (it->remaining > 0)
+            if (ret < 0)
             {
-                int chunk = std::min(it->remaining, MAX_CHUNK_SIZE);
-                char buff[chunk];
-                for (int j = 0; j < chunk; ++j)
-                    buff[j] = it->response._response[i++];
-                if (FD_ISSET(it->socket, &_readyToWriteTo))
-                {
-                    ret = send(it->socket, buff, chunk, 0);
-                    if (ret < 0)
-                        break;
-                    it->remaining -= ret;
-                    it->received += ret;
-                }
+                close(it->socket);
+                it = _clients.erase(it);
             }
-            close(it->socket);
-            it = _clients.erase(it);
+            else
+            {
+                std::cout << "it->buff: " << it->requestString << std::endl;;
+                // it->request = getRequest(*it);
+                it->request.setUp(it->requestString);
+                // it->response.setUp(_configFile, it->request);
+                it->remaining = it->response._response.size();
+                it->received = 0;
+                while (it->remaining > 0)
+                {
+                    int chunk = std::min(it->remaining, MAX_CHUNK_SIZE);
+                    char buff[chunk];
+                    for (int j = 0; j < chunk; ++j)
+                        buff[j] = it->response._response[i++];
+                    if (FD_ISSET(it->socket, &_readyToWriteTo))
+                    {
+                        ret = send(it->socket, buff, chunk, 0);
+                        if (ret <= 0)
+                            break;
+                        it->remaining -= ret;
+                        it->received += ret;
+                    }
+                }
+                close(it->socket);
+                it = _clients.erase(it);
+            }
         }
         else
             it++;
@@ -300,13 +319,13 @@ Server::Server(std::string file) : _configFile(file)
     {
         for (size_t i = 0; i < _serverSockets.size(); i++)
         {
+            waitForClients();
             acceptConnection(i);
             serveContent();
-            waitForClients();
         }
+        // for (size_t i = 0; i < _serverSockets.size(); i++)
+        //     close(_serverSockets[i]);
     }
-    for (size_t i = 0; i < _serverSockets.size(); i++)
-        close(_serverSockets[i]);
 }
 
 int main(int ac, char **av)

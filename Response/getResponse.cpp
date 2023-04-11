@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 20:51:00 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/11 00:57:15 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ Response::~Response()
 Response::Response(): _fd(-1), fdIsOpened(false)
 {
 }
+
 Response::Response(Config &config, requestParse &_request) : request(_request)
 {
     _indexLocation = -1;
@@ -182,6 +183,7 @@ void Response::errorPages(Config::serverParse &server, int id, int statusCode)
         infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
+        infile.close();
         _statusCode = statusCode;
     }
     else
@@ -205,6 +207,7 @@ void Response::errorPages(Config::serverParse &server, int id, int statusCode)
         infile.open(path.c_str());
         while (getline(infile, line))
             _body += line;
+        infile.close();
         _statusCode = statusCode;
     }
 }
@@ -371,7 +374,6 @@ bool    Response::cgiPython(Config::serverParse &, int )
         std::string line(buffer, bytes);
         _body += line;
     }
-    std::cout << _body << std::endl;
     close(fd[0]);
     return true;
 }
@@ -414,7 +416,10 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
             getContentType();
         }
         else
+        {
+            file.close();
             return false;
+        }
     }
     else
     {
@@ -475,6 +480,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         {
             path += server.locations[index].data["index"][0];
             this->_requestPath = path;
+            closedir(dir);
             return validFile(server, index, path);
         }
         if (server.locations[index].autoIndex == true)
@@ -494,6 +500,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
                 content += "\n";
                 content += "<br>";
             }
+            closedir(dir);
             _contentType = "text/html";
             content = "<html><head><title>Index of " + path + "</title><style>body {background-color: #f2f2f2; font-family: Arial, sans-serif;} h1 {background-color: #4CAF50; color: white; padding: 10px;} table {border-collapse: collapse; width: 100%; margin-top: 20px;} th, td {text-align: left; padding: 8px;} th {background-color: #4CAF50; color: white;} tr:nth-child(even) {background-color: #f2f2f2;} a {text-decoration: none; color: #333;} a:hover {text-decoration: underline;}</style></head><body><h1>Index of " + path + "</h1>" + content + "</body></html>";
             _body += content;
@@ -661,6 +668,7 @@ bool Response::noLocations(Config &config, int index)
             {
                 path += config.servers[index].data["index"][0];
                 this->_requestPath = path;
+                closedir(dir);
                 return validFile(config.servers[index], index, path);
             }
             if (config.servers[index].autoIndex == true)
@@ -680,6 +688,7 @@ bool Response::noLocations(Config &config, int index)
                     content += "\n";
                     content += "<br>";
                 }
+                        closedir(dir);
                 _contentType = "text/html";
                 content = "<html><head><title>Index of " + path + "</title><style>body {background-color: #f2f2f2; font-family: Arial, sans-serif;} h1 {background-color: #4CAF50; color: white; padding: 10px;} table {border-collapse: collapse; width: 100%; margin-top: 20px;} th, td {text-align: left; padding: 8px;} th {background-color: #4CAF50; color: white;} tr:nth-child(even) {background-color: #f2f2f2;} a {text-decoration: none; color: #333;} a:hover {text-decoration: underline;}</style></head><body><h1>Index of " + path + "</h1>" + content + "</body></html>";
                 _body += content;

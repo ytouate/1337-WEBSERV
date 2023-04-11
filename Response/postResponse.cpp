@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 19:48:14 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/10 22:52:19 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,11 @@ int Response::checkPathOfPostmethod(Config::serverParse &server, std::string lin
         std::ifstream infile;
         infile.open(path.c_str());
         if (infile)
+        {
+            infile.close();
             return true;
+        }
+        infile.close();
         return false;
     }
     if (methodAllowed(server, index) == false)
@@ -55,6 +59,7 @@ int Response::checkPathOfPostmethod(Config::serverParse &server, std::string lin
         postResponse();
         return false;
     }
+    closedir(dir);
     return true;
 }
 
@@ -199,9 +204,11 @@ int Response::postMethod(Config &config)
                 }
             }
             errorPages(config.servers[_indexServer], _indexLocation, 403);
+            closedir(dir);
         }
         else
         {
+            closedir(dir);
             if (config.servers[_indexServer].locations[_indexLocation].data["cgi_path"].size() > 0)
             {
                 executeCgi(config.servers[_indexServer], _indexLocation, 1);

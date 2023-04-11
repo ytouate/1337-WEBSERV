@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 19:48:21 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/10 22:51:01 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,11 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
         std::ifstream infile;
         infile.open(path.c_str());
         if (infile)
+        {
+            infile.close();
             return true;
+        }
+        infile.close();
         return false;
     }
     if (methodAllowed(server, index) == false)
@@ -55,6 +59,7 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
         _deletePath = path;
         _statusCode = 301;
     }
+    closedir(dir);
     return true;
 }
 
