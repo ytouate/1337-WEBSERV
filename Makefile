@@ -12,7 +12,7 @@ FILES = \
 	./Server/Server.cpp				\
 
 CC = c++ 
-CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 -fsanitize=address -g
+CPPFLAGS = -Wall -Wextra -Werror  -std=c++98 #-fsanitize=address -g
 
 O_FILE = $(FILES:.cpp=.o)
 

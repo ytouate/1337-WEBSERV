@@ -61,12 +61,12 @@ void Server::waitForClients()
     {
         FD_SET(it->socket, &_readyToReadFrom);
         FD_SET(it->socket, &_readyToWriteTo);
-        // if (it->response.fdIsOpened)
-        // {
-        //     FD_SET(it->response._fd, &_readyToReadFrom);
-        //     if (it->response._fd > maxSocket)
-        //         maxSocket = it->response._fd;
-        // }
+        if (it->response.fdIsOpened && it->response._fd != -1)
+        {
+            FD_SET(it->response._fd, &_readyToReadFrom);
+            if (it->response._fd > maxSocket)
+                maxSocket = it->response._fd;
+        }
         if (it->socket > maxSocket)
             maxSocket = it->socket;
         ++it;
@@ -216,7 +216,7 @@ requestParse Server::getRequest(const Client &_client)
 recvAgain:
     while (true)
     {
-        if ((bytesRead = recv(_client.socket, c, BUFFER_SIZE, 0)) < 0)
+        if ((bytesRead = recv(_client.socket, c, BUFFER_SIZE, 0)) < 1)
         {
             close(_client.socket);
             break;
@@ -286,7 +286,7 @@ void Server::readHeader(Client &_client)
     char buff[MAX_REQUEST_SIZE];
     int ret = recv(_client.socket, buff + _client.received,
                    MAX_REQUEST_SIZE - _client.received, 0);
-    if (ret < 0)
+    if (ret < 1)
         _client.socketSuccess = false;
     else
     {
@@ -298,6 +298,7 @@ void Server::readHeader(Client &_client)
 void Server::postWithoutCGI(Client &_client)
 {
     size_t contentLength = atoi(_client.request.data["content-length"].c_str());
+    std::cout << "Content length: " << contentLength << std::endl;
     while (contentLength > 0)
     {
         if (!_client.response.uploded)
@@ -315,9 +316,14 @@ void Server::postWithoutCGI(Client &_client)
         ret = write(_client.response._fd, &_client.request.body.content[0] + _client.received,
                     _client.request.body.content.size() - _client.received);
         if (ret < 1)
+        {
             _client.socketSuccess = false;
-        contentLength -= ret;
-        _client.received += ret;
+        }
+        else
+        {
+            contentLength -= ret;
+            _client.received += ret;
+        }
     }
     int ret = send(_client.socket, &_client.response._response[0], _client.response._response.size(), 0);
     _client.socketSuccess = ret > 0 && _client.socketSuccess == true;
@@ -381,6 +387,13 @@ void Server::serveContent()
             if (it->request.data["method"] == "POST")
             {
                 readRequestBody(*it);
+                // if (it->request.data["transfer-encoding"] == "Chunked")
+                // {
+                //     std::cout << "AM HERE\n";
+                //     postWithoutCGI(*it);
+                //     std::cout << it->request.body.content.size() << std::endl;
+                //     it->response.uploded = true;
+                // }
                 if (!it->socketSuccess)
                 {
                     close(it->socket);
@@ -394,6 +407,7 @@ void Server::serveContent()
 
             if (it->request.data["method"] == "POST")
             {
+                std::cout << "AM HERE\n";
                 postWithoutCGI(*it);
                 if (!it->socketSuccess)
                     it = _clients.erase(it);
@@ -483,14 +497,24 @@ Server::Server(std::string file) : _configFile(file)
             waitForClients();
             acceptConnection(i);
             serveContent();
+            system("leaks webserv");
         }
     }
     for (size_t i = 0; i < _serverSockets.size(); i++)
         close(_serverSockets[i]);
 }
 
+void sighander(int sig)
+{
+    if (sig == SIGINT)
+    {
+        std::cout << "\n== Webserver Quit Succeffuly ==\n";
+        exit(0);
+    }
+}
 int main(int ac, char **av)
 {
+    signal(SIGINT, sighander);
     if (ac == 2)
         Server server(av[1]);
 }
