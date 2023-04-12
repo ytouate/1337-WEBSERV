@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   deleteResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/10 22:51:01 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/12 04:01:06 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,8 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
     }
     if (path[path.size() - 1] != '/')
     {
-        std::cout << "301 moved -> path = " << path << std::endl;
+        // 301 moved
+        // std::cout << "301 moved -> path = " << path << std::endl;
         path += "/";
         _deletePath = path;
         _statusCode = 301;
@@ -94,7 +95,7 @@ int deleteDirectory(const std::string& path)
                     return 1;
                 }
             }
-                remove(filepath.c_str());
+            //remove(filepath.c_str());
         }
     }
     closedir(dir);
@@ -130,7 +131,6 @@ int     Response::deleteMethod(Config& config)
                     {
                         perror("stat()");
                     }
-            
                     if (S_ISDIR(statbuf.st_mode))
                     {
                         if (deleteDirectory(filepath) != 0)
@@ -149,11 +149,13 @@ int     Response::deleteMethod(Config& config)
                     }
                 }
             }
+            closedir(dir);
             this->_body += "<h1> DELETE SUCCESS </H1>";
             _statusCode = 200;
             postResponse();
             return 0;
         }
+        closedir(dir);
         errorPages(config.servers[_indexServer], _indexLocation, 403);
         postResponse();
         return 1;
@@ -166,11 +168,12 @@ int     Response::deleteMethod(Config& config)
             this->_body += "<h1> DELETE SUCCESS </H1>";
             _statusCode = 200;
             postResponse();
+            return 0;
         }
         else
-            errorPages(config.servers[_indexServer], _indexLocation, 403); postResponse();
+            errorPages(config.servers[_indexServer], _indexLocation, 403); postResponse(); return 1;
     }
     else
-        errorPages(config.servers[_indexServer], _indexLocation, 403); postResponse();
+        errorPages(config.servers[_indexServer], _indexLocation, 403); postResponse(); return 1;
     return 0;
 }

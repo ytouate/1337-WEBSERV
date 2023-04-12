@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
+/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/12 01:51:01 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/12 04:01:17 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ void Response::setUp(Config &config, requestParse &_request)
     {
         postMethod(config);
     }
+    
 }
 int Response::validateRequest()
 {
@@ -283,9 +284,7 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     std::vector<std::string> _env = setEnv();
     char *env[_env.size() + 1];
     for (size_t i = 0; i < _env.size(); i++)
-    {
         env[i] = (char *)_env[i].c_str();
-    }
     env[_env.size()] = NULL;
     int fd[2];
     int fdw = open("/tmp/test1", O_CREAT | O_RDWR | O_TRUNC, 0644);
@@ -294,7 +293,7 @@ bool Response::executeCgi(Config::serverParse &, int, int flag)
     char *commad[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     if (fdw < 0)
     {
-        std::cerr << "faild to open" << std::endl;
+        perror("open()");
         return false;
     }
     pipe(fd);
@@ -356,6 +355,11 @@ bool    Response::cgiPython(Config::serverParse &, int )
 {
     std::string path1 = "/usr/bin/python3";
     std::string path2 = _getPath;
+    std::vector<std::string> _env = setEnv();
+    char *env[_env.size() + 1];
+    for (size_t i = 0; i < _env.size(); i++)
+        env[i] = (char *)_env[i].c_str();
+    env[_env.size()] = NULL;
     char *command[] = {(char *)path1.c_str(), (char *)path2.c_str(), NULL};
     int fd[2];
     _flag = 3;
@@ -366,7 +370,7 @@ bool    Response::cgiPython(Config::serverParse &, int )
         dup2(fd[1], 1);
         close(fd[1]);
         close(fd[0]);
-        execve(command[0], command, NULL);
+        execve(command[0], command, env);
     }
     wait(NULL);
     close(fd[1]);
@@ -423,14 +427,7 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
             file.seekg(0, std::ios::end);
             _contentLength = file.tellg();
             file.seekg(0, std::ios::beg);
-            
-            // char buffer[1000];
-            // int bytes;
-            // while ((bytes = read(fd, buffer, 1000)) > 0)
-            // {
-            //     std::string line(buffer, bytes);
-            //     _body += line;
-            // }
+            fdIsOpened = true;
             _statusCode = 200;
             this->_requestPath = path;
             getContentType();
@@ -465,7 +462,8 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         return false;
     }
     std::string server_root_path = server.locations[index].data["root"][0];;
-    if (line.find(server_root_path) == 0)
+
+    if (line.find(server_root_path) != std::string::npos)
     {
         line.erase(0, server_root_path.length());
     }
@@ -690,7 +688,8 @@ bool Response::noLocations(Config &config, int index)
             if (path[path.size() - 1] != '/')
             {
                 path += "/";
-                std::cout << "301 moved -> path = " << path << std::endl;
+                // 301 moved
+                // std::cout << "301 moved -> path = " << path << std::endl;
             }
             if (config.servers[index].data["index"].size() > 0)
             {
@@ -762,8 +761,8 @@ int Response::getMethod(Config &config)
                 std::set<std::string>::iterator it = request.cookies.begin();
                 while (it != request.cookies.end())
                 {
-                    sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
-                    this->_response += buffer;
+                    std::string temp = "Set-Cookie: "  + *it + "\r\n";
+                    this->_response += temp;
                     ++it;
                 }
             }
@@ -784,8 +783,8 @@ int Response::getMethod(Config &config)
                 std::set<std::string>::iterator it = request.cookies.begin();
                 while (it != request.cookies.end())
                 {
-                    sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
-                    this->_response += buffer;
+                    std::string temp = "Set-Cookie: "  + *it + "\r\n";
+                    this->_response += temp;
                     ++it;
                 }
             }
