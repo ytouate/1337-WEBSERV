@@ -11,7 +11,7 @@ void requestParse::collectCookies(std::string &headerValue)
         std::string cookie = headerValue.substr(0, pos);
         size_t start = cookie.find_first_not_of(" ");
         size_t end = cookie.find_last_not_of(" ");
-        cookie = cookie.substr(start, end);
+        cookie = cookie.substr(start, end + 1);
         this->cookies.insert(cookie);
         headerValue.erase(0, pos + 1);
     }
@@ -48,7 +48,8 @@ void requestParse::setUp(std::string _requestParse)
     size_t pos = _requestParse.find("\r\n\r\n");
     if (pos == std::string::npos)
         return;
-    _requestParse = _requestParse.erase(0, pos + 4);
+    _requestParse.erase(0, pos + 4);
+    std::cout << _requestParse << std::endl;
     this->body.content = _requestParse;
 }
 

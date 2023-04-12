@@ -6,6 +6,8 @@
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
 
+#define MAX_CHUNK_SIZE 4096
+
 /*
     a struct which identifies each connected
     client
@@ -17,9 +19,11 @@ struct Client
     int socket;
     size_t received;
     int remaining;
+    std::string requestString;
     requestParse request;
     Response response;
     const std::string getClientAddress();
+    Client();
 
 };
 

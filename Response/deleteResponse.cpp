@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/11 20:40:20 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/11 21:16:01 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
         _deletePath = path;
         _statusCode = 301;
     }
+    closedir(dir);
     return true;
 }
 

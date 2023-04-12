@@ -4,3 +4,6 @@
 • Support cookies and session management (prepare quick examples).
 
 • Handle multiple CGI.
+
+add default path
+handling signals

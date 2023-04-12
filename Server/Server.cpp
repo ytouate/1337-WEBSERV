@@ -36,7 +36,7 @@ void Server::initServerSocket(const char *port)
     fcntl(_serverSockets.back(), F_SETFL, O_NONBLOCK);
     if (bind(_serverSockets.back(), data->ai_addr, data->ai_addrlen))
         error_fatal("bind()");
-    if (listen(_serverSockets.back(), 10))
+    if (listen(_serverSockets.back(), 0))
         error_fatal("listen()");
     freeaddrinfo(data);
 }
@@ -61,18 +61,18 @@ void Server::waitForClients()
     {
         FD_SET(it->socket, &_readyToReadFrom);
         FD_SET(it->socket, &_readyToWriteTo);
-        if (it->response.fdIsOpened || it->response._fd != -1)
-        {
-            FD_SET(it->response._fd, &_readyToWriteTo);
-            if (it->response._fd > maxSocket)
-                maxSocket = it->response._fd;
-        }
+        // if (it->response.fdIsOpened)
+        // {
+        //     FD_SET(it->response._fd, &_readyToReadFrom);
+        //     if (it->response._fd > maxSocket)
+        //         maxSocket = it->response._fd;
+        // }
         if (it->socket > maxSocket)
             maxSocket = it->socket;
         ++it;
     }
     if (select(maxSocket + 1, &_readyToReadFrom, &_readyToWriteTo, 0, 0) == -1)
-        error("select()");
+        error_fatal("select()");
 }
 
 /*
@@ -111,7 +111,7 @@ void Server::acceptConnection(int serverIndex)
                                    (struct sockaddr *)&_newClient.clientAddress,
                                    &_newClient.addressLenght);
         if (_newClient.socket == -1)
-            error("accept()");
+            error_fatal("accept()");
         _clients.push_back(_newClient);
     }
 }
@@ -217,7 +217,10 @@ recvAgain:
     while (true)
     {
         if ((bytesRead = recv(_client.socket, c, BUFFER_SIZE, 0)) < 0)
+        {
+            close(_client.socket);
             break;
+        }
         if (bytesRead == 0)
             return request;
         request.body.content += std::string(c, bytesRead);
@@ -234,6 +237,7 @@ recvAgain:
     return request;
 }
 
+Client::Client() : received(0), remaining(0) {}
 /*
     sends the response to all the clients that have requests
     queued and able to write to their sockets the connection
@@ -245,32 +249,128 @@ void Server::serveContent()
     std::vector<Client>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
+        fcntl(it->socket, F_SETFL, O_NONBLOCK);
+        int i = 0;
         if (FD_ISSET(it->socket, &_readyToReadFrom))
         {
-            fcntl(it->socket, F_SETFL, O_NONBLOCK);
-            it->request = getRequest(*it);
-            it->response.setUp(_configFile, it->request);
-            int ret;
-            int i = 0;
-            it->remaining = it->response._response.size();
-            it->received = 0;
-            while (it->remaining > 0)
+            char buff[MAX_REQUEST_SIZE];
+            int ret = recv(it->socket, buff + it->received,
+                           MAX_CHUNK_SIZE - it->received, 0);
+            if (ret < 0)
             {
-                int chunk = std::min(it->remaining, MAX_CHUNK_SIZE);
-                char buff[chunk];
-                for (int j = 0; j < chunk; ++j)
-                    buff[j] = it->response._response[i++];
-                if (FD_ISSET(it->socket, &_readyToWriteTo))
+                close(it->socket);
+                it = _clients.erase(it);
+                continue;
+            }
+            else
+            { 
+                for (int idx = 0; idx < ret; idx++)
+                    it->requestString += buff[idx];
+                it->request.setUp(it->requestString);
+                it->response.setUp(_configFile, it->request);
+                size_t contentLength = atoi(it->request.data["content-length"].c_str());
+                if (it->request.data["method"] == "POST")
                 {
-                    ret = send(it->socket, buff, chunk, 0);
-                    if (ret < 0)
-                        break;
-                    it->remaining -= ret;
-                    it->received += ret;
+                    std::cout << "fdIsOpened: " << it->response.fdIsOpened << std::endl;
+                    std::cout << "fd == : " << it->response._fd << std::endl;
+                    char buff[MAX_REQUEST_SIZE];
+                    int ret;
+                    while (true)
+                    {
+                        ret = recv(it->socket, buff, MAX_REQUEST_SIZE, 0);
+                        if (ret < 1)
+                        {
+                            perror("recv()");
+                            // close(it->socket);
+                            // it = _clients.erase(it);
+                            break;
+                        }
+
+                        for (int idx = 0; idx < ret; idx++)
+                            it->request.body.content += buff[idx];
+                    }
+                    while (contentLength > 0)
+                    {
+                        ret = write(it->response._fd, &it->request.body.content[0] + it->received,
+                                    it->request.body.content.size() - it->received);
+                        if (ret < 1)
+                        {
+                            close(it->socket);
+                            it = _clients.erase(it);
+                            break;
+                        }
+                        contentLength -= ret;
+                        it->received += ret;
+                    }
+                }
+                else if (contentLength == 0)
+                {
+                    if (FD_ISSET(it->socket, &_readyToWriteTo))
+                    {
+                        int ret = send(it->socket, it->response._response.c_str(),
+                                       it->response._response.size(), 0);
+                        if (ret < 1)
+                        {
+                            perror("send()");
+                            close(it->socket);
+                            it = _clients.erase(it);
+                            continue;
+                        }
+                    }
+
+                    if (it->response.fdIsOpened)
+                    {
+                        std::string buff(it->response._contentLength, '\0');
+                        int ret = read(it->response._fd, &buff[0] + it->received, it->response._contentLength - it->received);
+
+                        if (ret < 0) // close and break;
+                        {
+                            close(it->response._fd);
+                            it->response.fdIsOpened = false;
+                            close(it->socket);
+                            it = _clients.erase(it);
+                            break;
+                        }
+
+                        it->received += ret;
+                        while (it->received > 0)
+                        {
+                            int chunk = std::min((int)it->received, MAX_CHUNK_SIZE);
+                            char _buff[chunk];
+                            for (int j = 0; j < chunk; ++j)
+                                _buff[j] = buff[i++];
+                            if (FD_ISSET(it->socket, &_readyToWriteTo))
+                            {
+                                int ret = send(it->socket, _buff, chunk, 0);
+
+                                if (ret < 1) // close and break;
+                                {
+                                    perror("send()");
+                                    close(it->response._fd);
+                                    it->response.fdIsOpened = false;
+                                    close(it->socket);
+                                    it = _clients.erase(it);
+                                    break;
+                                }
+
+                                it->remaining += ret;
+                                it->received -= ret;
+                            }
+                        } // end sending loop
+                    }
                 }
             }
-            close(it->socket);
-            it = _clients.erase(it);
+
+            if (it < _clients.end()) // if not a function failed;
+            {
+                if (it->response.fdIsOpened)
+                {
+                    close(it->response._fd);
+                    it->response.fdIsOpened = false;
+                }
+                close(it->socket);
+                it = _clients.erase(it);
+            }
         }
         else
             it++;
@@ -300,9 +400,9 @@ Server::Server(std::string file) : _configFile(file)
     {
         for (size_t i = 0; i < _serverSockets.size(); i++)
         {
+            waitForClients();
             acceptConnection(i);
             serveContent();
-            waitForClients();
         }
     }
     for (size_t i = 0; i < _serverSockets.size(); i++)
