@@ -6,7 +6,7 @@
 /*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/12 02:47:51 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/12 04:01:17 by otmallah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ Response::~Response()
 
 Response::Response(): _contentLength(0), _fd(-1), fdIsOpened(false)
 {
+        uploded = false;
 }
 
 Response::Response(Config &config, requestParse &_request) : request(_request)
@@ -50,6 +51,7 @@ void Response::setUp(Config &config, requestParse &_request)
     {
         postMethod(config);
     }
+    
 }
 int Response::validateRequest()
 {
@@ -392,7 +394,6 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     _fd = open(path.c_str(), O_RDWR);
     if (_fd == -1)
     {
-        std::cout << path << std::endl;
         perror("open()");
         // if the path not found return an error
     }
@@ -460,8 +461,9 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         errorPages(server, index, 403);
         return false;
     }
-    std::string server_root_path = server.locations[index].data["root"][0];
-    if (line.find(server_root_path) == 0)
+    std::string server_root_path = server.locations[index].data["root"][0];;
+
+    if (line.find(server_root_path) != std::string::npos)
     {
         line.erase(0, server_root_path.length());
     }
@@ -686,7 +688,8 @@ bool Response::noLocations(Config &config, int index)
             if (path[path.size() - 1] != '/')
             {
                 path += "/";
-                std::cout << "301 moved -> path = " << path << std::endl;
+                // 301 moved
+                // std::cout << "301 moved -> path = " << path << std::endl;
             }
             if (config.servers[index].data["index"].size() > 0)
             {
@@ -758,8 +761,8 @@ int Response::getMethod(Config &config)
                 std::set<std::string>::iterator it = request.cookies.begin();
                 while (it != request.cookies.end())
                 {
-                    sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
-                    this->_response += buffer;
+                    std::string temp = "Set-Cookie: "  + *it + "\r\n";
+                    this->_response += temp;
                     ++it;
                 }
             }
@@ -780,8 +783,8 @@ int Response::getMethod(Config &config)
                 std::set<std::string>::iterator it = request.cookies.begin();
                 while (it != request.cookies.end())
                 {
-                    sprintf(buffer, "Set-Cookie: %s\r\n", (*it).c_str());
-                    this->_response += buffer;
+                    std::string temp = "Set-Cookie: "  + *it + "\r\n";
+                    this->_response += temp;
                     ++it;
                 }
             }

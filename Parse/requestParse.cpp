@@ -49,7 +49,6 @@ void requestParse::setUp(std::string _requestParse)
     if (pos == std::string::npos)
         return;
     _requestParse.erase(0, pos + 4);
-    std::cout << _requestParse << std::endl;
     this->body.content = _requestParse;
 }
 
