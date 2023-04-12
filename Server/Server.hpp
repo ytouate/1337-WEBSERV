@@ -6,7 +6,6 @@
 #include "../Parse/requestParse.hpp"
 #include "../Response/Response.hpp"
 
-#define MAX_CHUNK_SIZE 4096
 
 /*
     a struct which identifies each connected
@@ -22,6 +21,7 @@ struct Client
     std::string requestString;
     requestParse request;
     Response response;
+    bool socketSuccess;
     const std::string getClientAddress();
     Client();
 
@@ -48,10 +48,14 @@ private:
     requestParse    getRequest(const Client &_client);
     std::string     getRequestBuffer(Client &);
     void            checkCientCases();
+    void            readHeader(Client &_client);
     void            waitForClients();
     void            acceptConnection(int serverIndex);
     void            serveContent();
+    void            readRestOfBody(Client &_client);
     void            initServerSocket(const char *port);
+    void            readRequestBody(Client &_client);
+    void            postWithoutCGI(Client &_client);
 public:
     Server(std::string file);
     ~Server();

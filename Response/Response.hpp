@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 18:03:24 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/11 01:30:01 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/12 01:44:17 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,6 @@ class Response
         std::string _deletePath;
         std::string _getPath;
         int         _flag;
-        int         _indexLocation;
-        int         _indexServer;
         bool    getMatchedLocation(Config& config);
         bool    checkPathIfValid(Config::serverParse& server, int index , std::string line);
         void    getContentType();
@@ -50,7 +48,6 @@ class Response
         int     checkPathOfPostmethod(Config::serverParse& server, std::string line, int index);
         int     checkPathOfDeletemethod(Config::serverParse& server, std::string line, int index);
         int    validateRequest();
-        bool    executeCgi(Config::serverParse& server, int index, int flag);
         void    postResponse(void);
         void    success();
         void    postType(std::string path);
@@ -59,6 +56,11 @@ class Response
         bool    cgiPython(Config::serverParse& server, int index);
         std::vector<std::string>    setEnv();
     public:
+        bool    executeCgi(Config::serverParse& server, int index, int flag);
+        bool    _executeCgi(const std::string _body);
+        bool        uploded;
+        int         _indexLocation;
+        int         _indexServer;
         long        _contentLength;
         int         _fd;
         bool        fdIsOpened;

@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/11 17:54:27 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/12 01:51:01 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ Response::~Response()
 
 Response::Response(): _contentLength(0), _fd(-1), fdIsOpened(false)
 {
+        uploded = false;
 }
 
 Response::Response(Config &config, requestParse &_request) : request(_request)
@@ -463,7 +464,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
         errorPages(server, index, 403);
         return false;
     }
-    std::string server_root_path = server.locations[index].data["root"][0];
+    std::string server_root_path = server.locations[index].data["root"][0];;
     if (line.find(server_root_path) == 0)
     {
         line.erase(0, server_root_path.length());
