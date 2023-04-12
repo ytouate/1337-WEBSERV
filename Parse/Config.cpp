@@ -7,6 +7,7 @@
 Config::Config(std::string s)
 {
     readFileIntoBuff(s);
+
     size_t end = 0;
     while (end < _fileBuff.size())
     {
@@ -14,6 +15,8 @@ Config::Config(std::string s)
         end = server.parseBlock();
         this->servers.push_back(server);
     }
+    if (_fileBuff.size() == 0)
+        error("Empty config file");
 }
 
 /*

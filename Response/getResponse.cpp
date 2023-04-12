@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/12 04:01:17 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/12 05:12:17 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ Response::~Response()
 
 Response::Response(): _contentLength(0), _fd(-1), fdIsOpened(false)
 {
-        uploded = false;
+    _flag = 0;
+    uploded = false;
 }
 
 Response::Response(Config &config, requestParse &_request) : request(_request)
@@ -113,8 +114,6 @@ bool Response::getMatchedLocation(Config &config)
     size_t sec_matchPath = 0;
     char *save;
     int indexServer = getIndexOfServerBlock(config);
-    if (noLocations(config, indexServer) == false)
-        return 1;
     std::string line = request.data["path"];
     for (size_t i = 0; i < config.servers[indexServer].locations.size(); i++)
     {
@@ -394,7 +393,6 @@ bool Response::validFile(Config::serverParse &server, int index, std::string pat
     _fd = open(path.c_str(), O_RDWR);
     if (_fd == -1)
     {
-        perror("open()");
         // if the path not found return an error
     }
     else
@@ -530,6 +528,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
             _contentType = "text/html";
             content = "<html><head><title>Index of " + path + "</title><style>body {background-color: #f2f2f2; font-family: Arial, sans-serif;} h1 {background-color: #4CAF50; color: white; padding: 10px;} table {border-collapse: collapse; width: 100%; margin-top: 20px;} th, td {text-align: left; padding: 8px;} th {background-color: #4CAF50; color: white;} tr:nth-child(even) {background-color: #f2f2f2;} a {text-decoration: none; color: #333;} a:hover {text-decoration: underline;}</style></head><body><h1>Index of " + path + "</h1>" + content + "</body></html>";
             _body += content;
+            puts("hana");
         }
         else
         {
@@ -557,6 +556,7 @@ void Response::getContentType()
 
     std::map<std::string, std::string> mimeTypes;
     mimeTypes.insert(std::make_pair(".css", "text/css"));
+    mimeTypes.insert(std::make_pair(".php", "text/html"));
     mimeTypes.insert(std::make_pair(".csv", "text/csv"));
     mimeTypes.insert(std::make_pair(".gif", "image/gif"));
     mimeTypes.insert(std::make_pair(".htm", "text/html"));
@@ -719,6 +719,7 @@ bool Response::noLocations(Config &config, int index)
                 _contentType = "text/html";
                 content = "<html><head><title>Index of " + path + "</title><style>body {background-color: #f2f2f2; font-family: Arial, sans-serif;} h1 {background-color: #4CAF50; color: white; padding: 10px;} table {border-collapse: collapse; width: 100%; margin-top: 20px;} th, td {text-align: left; padding: 8px;} th {background-color: #4CAF50; color: white;} tr:nth-child(even) {background-color: #f2f2f2;} a {text-decoration: none; color: #333;} a:hover {text-decoration: underline;}</style></head><body><h1>Index of " + path + "</h1>" + content + "</body></html>";
                 _body += content;
+                return false;
             }
             else
             {
@@ -794,6 +795,5 @@ int Response::getMethod(Config &config)
         }
         _response += _body;
     }
-    _requestPath = "";
     return 0;
 }

@@ -481,6 +481,7 @@ Server::Server(std::string file) : _configFile(file)
     std::vector<std::string> _ports;
     for (size_t i = 0; i < _configFile.servers.size(); ++i)
     {
+        std::cout << _configFile.servers[i].data["listen"].front() << std::endl;
         if (_configFile.servers[i].data["listen"].size() >= 1)
         {
             initServerSocket(_configFile.servers[i].data["listen"].front().c_str());
@@ -488,8 +489,11 @@ Server::Server(std::string file) : _configFile(file)
                       << "http://localhost:"
                       << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
         }
+        else
+        {
+            error("server block must contain listen directive");
+        }
     }
-
     while (1)
     {
         for (size_t i = 0; i < _serverSockets.size(); i++)
@@ -497,7 +501,6 @@ Server::Server(std::string file) : _configFile(file)
             waitForClients();
             acceptConnection(i);
             serveContent();
-            system("leaks webserv");
         }
     }
     for (size_t i = 0; i < _serverSockets.size(); i++)
