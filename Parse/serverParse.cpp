@@ -96,6 +96,8 @@ size_t Config::serverParse::parseBlock()
         if (key == "}" and _lastKey == "}")
             break;
     }
+    if (locationsCount == 0)
+        error("server block must contain at least one location");
     if (_serverIsOpened or _locationIsOpened)
         error("block not closed");
     insertDirectives();
@@ -114,6 +116,7 @@ void Config::serverParse::insertDirectives(void)
     data.insert(_allowedMethods);
     data.insert(_upload_path);
     data.insert(_bodySize);
+    data.insert(_host);
 }
 
 void Config::serverParse::fillEmptyRequiredDirectives(void)
@@ -152,6 +155,17 @@ void Config::serverParse::fillDirective(const std::string &key,
                 error("invalid arguments");
             _upload = std::make_pair(key, values);
         }
+    }
+    else if (key == "host")
+    {
+        if (!_locationIsOpened)
+        {
+            if (values.size() != 1)
+                error("Invalid arguments");
+            _host = std::make_pair(key, values);
+        }
+        else
+            error ("misplaced or invalid directive");
     }
     else if (key == "body_size")
     {

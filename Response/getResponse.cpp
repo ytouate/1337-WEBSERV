@@ -6,7 +6,7 @@
 /*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 15:34:07 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/12 05:12:17 by ytouate          ###   ########.fr       */
+/*   Updated: 2023/04/12 18:17:23 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -496,10 +496,7 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
             return false;
         _statusCode = 200;
         if (path[path.size() - 1] != '/')
-        {
             path += "/";
-            std::cout << "301 moved -> path = " << path << std::endl;
-        }
         if (server.locations[index].data["index"].size() > 0)
         {
             path += server.locations[index].data["index"][0];
@@ -528,7 +525,6 @@ bool Response::checkPathIfValid(Config::serverParse &server, int index, std::str
             _contentType = "text/html";
             content = "<html><head><title>Index of " + path + "</title><style>body {background-color: #f2f2f2; font-family: Arial, sans-serif;} h1 {background-color: #4CAF50; color: white; padding: 10px;} table {border-collapse: collapse; width: 100%; margin-top: 20px;} th, td {text-align: left; padding: 8px;} th {background-color: #4CAF50; color: white;} tr:nth-child(even) {background-color: #f2f2f2;} a {text-decoration: none; color: #333;} a:hover {text-decoration: underline;}</style></head><body><h1>Index of " + path + "</h1>" + content + "</body></html>";
             _body += content;
-            puts("hana");
         }
         else
         {
@@ -688,8 +684,6 @@ bool Response::noLocations(Config &config, int index)
             if (path[path.size() - 1] != '/')
             {
                 path += "/";
-                // 301 moved
-                // std::cout << "301 moved -> path = " << path << std::endl;
             }
             if (config.servers[index].data["index"].size() > 0)
             {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   deleteResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 01:28:20 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/12 04:01:06 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/12 17:53:37 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,6 @@ int     Response::checkPathOfDeletemethod(Config::serverParse& server, std::stri
     }
     if (path[path.size() - 1] != '/')
     {
-        // 301 moved
-        // std::cout << "301 moved -> path = " << path << std::endl;
         path += "/";
         _deletePath = path;
         _statusCode = 301;

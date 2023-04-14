@@ -14,14 +14,14 @@
     initializing the socket and binding it to local address
     and listening for new connections
 */
-void Server::initServerSocket(const char *port)
+void Server::initServerSocket(const char *host, const char *port)
 {
     struct addrinfo hints, *data;
     memset(&hints, 0, sizeof(hints));
     hints.ai_flags = AI_PASSIVE;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_family = AF_INET;
-    int statusCode = getaddrinfo(NULL, port, &hints, &data);
+    int statusCode = getaddrinfo(host, port, &hints, &data);
     if (statusCode)
     {
         std::cerr << gai_strerror(statusCode) << std::endl;
@@ -260,9 +260,14 @@ recvAgain:
     while (true)
     {
         int bytesRead;
-        if ((bytesRead = recv(_client.socket, c, BUFFER_SIZE, 0)) < 0)
+        if ((bytesRead = recv(_client.socket, c, BUFFER_SIZE, 0)) < 1)
         {
-            _client.socketSuccess = false;
+            if (bytesRead == 0)
+            {
+                _client.socketSuccess = false;
+                return ;
+            }
+            
             break;
         }
         if (bytesRead == 0)
@@ -298,7 +303,6 @@ void Server::readHeader(Client &_client)
 void Server::postWithoutCGI(Client &_client)
 {
     size_t contentLength = atoi(_client.request.data["content-length"].c_str());
-    std::cout << "Content length: " << contentLength << std::endl;
     while (contentLength > 0)
     {
         if (!_client.response.uploded)
@@ -334,6 +338,7 @@ void Server::postWithoutCGI(Client &_client)
         _client.response.fdIsOpened = false;
     }
 }
+
 /*
     sends the response to all the clients that have requests
     queued and able to write to their sockets the connection
@@ -387,13 +392,6 @@ void Server::serveContent()
             if (it->request.data["method"] == "POST")
             {
                 readRequestBody(*it);
-                // if (it->request.data["transfer-encoding"] == "Chunked")
-                // {
-                //     std::cout << "AM HERE\n";
-                //     postWithoutCGI(*it);
-                //     std::cout << it->request.body.content.size() << std::endl;
-                //     it->response.uploded = true;
-                // }
                 if (!it->socketSuccess)
                 {
                     close(it->socket);
@@ -404,10 +402,8 @@ void Server::serveContent()
                 }
             }
             it->response.setUp(_configFile, it->request);
-
             if (it->request.data["method"] == "POST")
             {
-                std::cout << "AM HERE\n";
                 postWithoutCGI(*it);
                 if (!it->socketSuccess)
                     it = _clients.erase(it);
@@ -478,21 +474,31 @@ void Server::serveContent()
 Server::Server(std::string file) : _configFile(file)
 {
     srand(time(NULL));
+    std::vector<std::string> usedPorts;
+
     std::vector<std::string> _ports;
     for (size_t i = 0; i < _configFile.servers.size(); ++i)
     {
-        std::cout << _configFile.servers[i].data["listen"].front() << std::endl;
         if (_configFile.servers[i].data["listen"].size() >= 1)
         {
-            initServerSocket(_configFile.servers[i].data["listen"].front().c_str());
-            std::cout << "Server: " << i << " is listening on "
-                      << "http://localhost:"
-                      << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
+            const char *host = _configFile.servers[i].data["host"].size() != 1
+                                   ? NULL
+                                   : _configFile.servers[i].data["host"].front().c_str();
+            if (std::find(usedPorts.begin(), usedPorts.end(), _configFile.servers[i].data["listen"].front()) == usedPorts.end())
+            {
+
+                initServerSocket(host,
+                                 _configFile.servers[i].data["listen"].front().c_str());
+                usedPorts.push_back(_configFile.servers[i].data["listen"].front());
+                if (host == NULL)
+                    host = "localhost";
+                std::cout << "Server: " << i << " is listening on http://"
+                          << host << ":"
+                          << _configFile.servers[i].data["listen"].front().c_str() << std::endl;
+            }
         }
         else
-        {
             error("server block must contain listen directive");
-        }
     }
     while (1)
     {

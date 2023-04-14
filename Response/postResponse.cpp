@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   postResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: otmallah <otmallah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ytouate <ytouate@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:57:39 by otmallah          #+#    #+#             */
-/*   Updated: 2023/04/12 04:01:29 by otmallah         ###   ########.fr       */
+/*   Updated: 2023/04/12 17:53:57 by ytouate          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,6 @@ int Response::checkPathOfPostmethod(Config::serverParse &server, std::string lin
         return false;
     if (path[path.size() - 1] != '/')
     {
-        // 301 moved
-        // std::cout << "301 moved -> path = " << path << std::endl;
         path += "/";
         _statusCode = 301;
         postResponse();

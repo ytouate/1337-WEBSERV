@@ -53,7 +53,7 @@ private:
     void            acceptConnection(int serverIndex);
     void            serveContent();
     void            readRestOfBody(Client &_client);
-    void            initServerSocket(const char *port);
+    void            initServerSocket(const char *host, const char *port);
     void            readRequestBody(Client &_client);
     void            postWithoutCGI(Client &_client);
 public:

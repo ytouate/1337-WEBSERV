@@ -34,4 +34,4 @@ fclean: clean
 re: fclean all
 
 run:
-	./webserv nginx.conf
+	./webserv server.conf

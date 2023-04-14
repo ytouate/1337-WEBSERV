@@ -63,6 +63,7 @@ public:
         directive _upload;
         directive _port;
         directive _bodySize;
+        directive _host;
         directive _serverName;
         std::vector<std::string> _fileBuff;
         std::vector<std::string> _locationBuff;
